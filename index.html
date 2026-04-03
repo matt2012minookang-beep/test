@@ -274,6 +274,7 @@
       overflow: hidden; border: 2px solid rgba(148,163,184,0.2);
       background: linear-gradient(90deg, rgba(29,78,216,0.18) 0%, rgba(15,23,42,1) 50%, rgba(220,38,38,0.18) 100%);
       touch-action: none;
+      cursor: crosshair;
     }
     .field-grid {
       position: absolute; inset: 0; opacity: 0.38;
@@ -309,6 +310,14 @@
     .hptext { font-size: 14px; margin-top: 6px; color: #e2e8f0; font-weight: 700; }
     .unit {
       position: absolute; transform: translate(-50%, -50%); pointer-events: none; text-align: center;
+    }
+    .order-arrow {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .delete-cursor {
+      cursor: not-allowed !important;
     }
     .unit-level {
       font-size: 14px; font-weight: 900; margin-bottom: -4px;
@@ -555,6 +564,14 @@
               <div id="enemySafeText" class="hptext">52000 / 52000</div>
             </div>
 
+            <svg id="orderArrow" class="order-arrow" viewBox="0 0 1200 620" preserveAspectRatio="none">
+              <defs>
+                <marker id="arrowHead" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                  <path d="M0,0 L12,6 L0,12 z" fill="#fde68a"></path>
+                </marker>
+              </defs>
+              <line id="orderLine" x1="0" y1="0" x2="0" y2="0" stroke="#fde68a" stroke-width="6" stroke-dasharray="14 10" marker-end="url(#arrowHead)" opacity="0"></line>
+            </svg>
             <div id="unitsLayer"></div>
           </div>
 
@@ -601,6 +618,17 @@
                 <div class="desc">누르면 아군 금고 앞에서 바로 소환됩니다.</div>
               </div>
               <div id="summonCostBadge" class="cost-badge"></div>
+            </div>
+          </button>
+
+          <button id="deleteModeBtn" class="game-card" style="width:100%; text-align:left; cursor:pointer;">
+            <div class="head">
+              <div>
+                <div class="name">4. 군사 삭제</div>
+                <div class="desc">버튼을 누른 뒤 군사를 클릭하면 삭제됩니다.</div>
+                <div class="desc">삭제 시 해당 등급 소환 가격의 절반을 돌려받습니다.</div>
+              </div>
+              <div class="cost-badge" style="background:rgba(239,68,68,0.14); border-color:rgba(248,113,113,0.45); color:#fecaca;">삭제 모드</div>
             </div>
           </button>
 
@@ -746,6 +774,25 @@
       '황혼 연합', '블러드문 제국', '강철성 왕국', '새벽수호국', '유성 연방', '적안 군국'
     ];
 
+    const ENEMY_PATTERNS = [
+      { name: '균형형', eco: 0.50, rank: 0.50, summon: 0.65, aggression: 0.55, reserve: 1.8 },
+      { name: '저축형', eco: 0.68, rank: 0.46, summon: 0.45, aggression: 0.42, reserve: 2.8 },
+      { name: '성장형', eco: 0.75, rank: 0.60, summon: 0.38, aggression: 0.50, reserve: 2.4 },
+      { name: '기사단형', eco: 0.40, rank: 0.82, summon: 0.52, aggression: 0.64, reserve: 2.2 },
+      { name: '물량형', eco: 0.34, rank: 0.40, summon: 0.90, aggression: 0.67, reserve: 1.4 },
+      { name: '압박형', eco: 0.42, rank: 0.52, summon: 0.72, aggression: 0.82, reserve: 1.6 },
+      { name: '수비형', eco: 0.62, rank: 0.44, summon: 0.50, aggression: 0.34, reserve: 2.6 },
+      { name: '반격형', eco: 0.48, rank: 0.58, summon: 0.60, aggression: 0.46, reserve: 2.0 },
+      { name: '거북형', eco: 0.84, rank: 0.40, summon: 0.28, aggression: 0.22, reserve: 3.2 },
+      { name: '돌파형', eco: 0.38, rank: 0.64, summon: 0.78, aggression: 0.88, reserve: 1.5 },
+      { name: '정예형', eco: 0.46, rank: 0.92, summon: 0.34, aggression: 0.58, reserve: 2.5 },
+      { name: '봉쇄형', eco: 0.55, rank: 0.50, summon: 0.58, aggression: 0.52, reserve: 2.1 },
+      { name: '기습형', eco: 0.36, rank: 0.54, summon: 0.66, aggression: 0.86, reserve: 1.7 },
+      { name: '탐욕형', eco: 0.90, rank: 0.55, summon: 0.25, aggression: 0.30, reserve: 3.8 },
+      { name: '혼합형', eco: 0.58, rank: 0.62, summon: 0.60, aggression: 0.60, reserve: 2.0 },
+      { name: '종결형', eco: 0.30, rank: 0.84, summon: 0.82, aggression: 0.92, reserve: 1.3 },
+    ];
+
     const els = {
       newCountryInput: document.getElementById('newCountryInput'),
       loadCountryInput: document.getElementById('loadCountryInput'),
@@ -778,6 +825,9 @@
       summonCostBadge: document.getElementById('summonCostBadge'),
       trophyOverlay: document.getElementById('trophyOverlay'),
       openTrophyBtn: document.getElementById('openTrophyBtn'),
+      deleteModeBtn: document.getElementById('deleteModeBtn'),
+      field: document.getElementById('field'),
+      orderLine: document.getElementById('orderLine'),
       trophySummaryLine: document.getElementById('trophySummaryLine'),
       trophyGaugeFill: document.getElementById('trophyGaugeFill'),
       trophyGaugeText: document.getElementById('trophyGaugeText'),
@@ -826,6 +876,10 @@
       claimedRankRewards: [],
       rankRewardQueue: [],
       resultApplied: false,
+      enemyPatternIndex: 0,
+      activeMoveOrder: null,
+      orderPreview: { active: false, x: 0, y: 0 },
+      deleteMode: false,
     };
 
     function showScreen(name) {
@@ -1075,7 +1129,11 @@
       state.prepRemaining = PREP_MS;
       state.prepActive = true;
       state.enemyCountryName = randomEnemyName();
+      state.enemyPatternIndex = Math.floor(Math.random() * ENEMY_PATTERNS.length);
       state.resultApplied = false;
+      state.activeMoveOrder = null;
+      state.orderPreview = { active: false, x: 0, y: 0 };
+      state.deleteMode = false;
       state.rankRewardQueue = [];
       els.resultOverlay.classList.remove('show');
       resetSafeVisuals();
@@ -1169,6 +1227,7 @@
     }
 
     function runEnemyAI() {
+      const pattern = ENEMY_PATTERNS[state.enemyPatternIndex];
       const enemyUnits = state.units.filter(u => u.team === 'enemy');
       const playerUnits = state.units.filter(u => u.team === 'player');
       const enemyIncome = currentIncome(state.enemySafeUpgradeLevel);
@@ -1179,13 +1238,13 @@
       const enemyCount = enemyUnits.length;
       const pressureOnEnemy = enemyUnits.some(u => u.x > FIELD_W * 0.64);
       const pressureOnPlayer = playerUnits.some(u => u.x < FIELD_W * 0.36);
-      const savingTarget = Math.max(enemySafeCost || 0, enemyRankCost || 0, eSummonCost * 2);
+      const savingTarget = Math.max(enemySafeCost || 0, enemyRankCost || 0, eSummonCost * pattern.reserve);
       const hasReserve = state.enemyCoins >= savingTarget;
 
       if (state.prepActive) {
-        if (!hasReserve && Math.random() < 0.35) return;
+        if (!hasReserve && Math.random() < (0.55 - pattern.eco * 0.25)) return;
 
-        if (enemySafeCost && state.enemyCoins >= enemySafeCost && (enemyIncome < playerIncome || state.enemySafeUpgradeLevel < state.safeUpgradeLevel || Math.random() < 0.48)) {
+        if (enemySafeCost && state.enemyCoins >= enemySafeCost && (enemyIncome < playerIncome || state.enemySafeUpgradeLevel < state.safeUpgradeLevel || Math.random() < pattern.eco)) {
           state.enemyCoins -= enemySafeCost;
           state.enemySafeUpgradeLevel += 1;
           const newMax = currentSafeMaxHp(state.enemySafeUpgradeLevel);
@@ -1194,12 +1253,12 @@
           state.enemySafeHp += delta;
           return;
         }
-        if (state.enemyRankIndex < RANKS.length - 1 && state.enemyCoins >= enemyRankCost && (state.enemyRankIndex <= state.playerRankIndex || Math.random() < 0.58)) {
+        if (state.enemyRankIndex < RANKS.length - 1 && state.enemyCoins >= enemyRankCost && (state.enemyRankIndex <= state.playerRankIndex || Math.random() < pattern.rank)) {
           state.enemyCoins -= enemyRankCost;
           state.enemyRankIndex += 1;
           return;
         }
-        if (enemyCount < MAX_UNITS_PER_TEAM && state.enemyCoins >= eSummonCost && (enemyCount < 4 || state.enemyCoins >= eSummonCost * 2.2)) {
+        if (enemyCount < MAX_UNITS_PER_TEAM && state.enemyCoins >= eSummonCost && (enemyCount < 4 || Math.random() < pattern.summon)) {
           state.enemyCoins -= eSummonCost;
           state.units.push(createUnit('enemy', state.enemyRankIndex, ENEMY_SAFE_X - 70 - Math.random() * 22, SAFE_Y + (Math.random() * 70 - 35)));
         }
@@ -1208,31 +1267,32 @@
 
       if (pressureOnPlayer || state.enemySafeHp < state.playerSafeHp * 0.9) state.ai.stance = 'aggressive';
       else if (pressureOnEnemy || enemyUnits.length + 1 < playerUnits.length) state.ai.stance = 'defend';
-      else state.ai.stance = Math.random() < 0.5 ? 'defend' : 'aggressive';
+      else state.ai.stance = Math.random() < pattern.aggression ? 'aggressive' : 'defend';
 
       const shouldEco = enemySafeCost && (state.enemySafeUpgradeLevel < state.safeUpgradeLevel || enemyIncome < playerIncome || state.enemySafeHp < state.enemySafeMaxHp * 0.72);
-      const shouldRank = state.enemyRankIndex < state.playerRankIndex || (enemyCount >= 3 && Math.random() < 0.45);
-      const wantArmy = Math.min(MAX_UNITS_PER_TEAM, Math.max(4, Math.ceil(playerUnits.length * (state.ai.stance === 'aggressive' ? 1.15 : 0.95))));
+      const shouldRank = state.enemyRankIndex < state.playerRankIndex || (enemyUnits.length >= 3 && Math.random() < pattern.rank);
+      const wantArmy = Math.min(MAX_UNITS_PER_TEAM, Math.max(4, Math.ceil(playerUnits.length * (state.ai.stance === 'aggressive' ? 1.12 : 0.92))));
 
-      if (!hasReserve && enemyCount >= Math.max(3, playerUnits.length) && Math.random() < 0.5) {
+      if (!hasReserve && enemyCount >= Math.max(3, playerUnits.length) && Math.random() < 0.45) {
         state.units.forEach(u => {
           if (u.team === 'enemy') u.engaged = false;
         });
         return;
       }
 
-      if (shouldEco && state.enemyCoins >= enemySafeCost && (state.enemyCoins >= enemySafeCost + eSummonCost || enemyCount >= 4)) {
+      const roll = Math.random();
+      if (shouldEco && state.enemyCoins >= enemySafeCost && roll < pattern.eco) {
         state.enemyCoins -= enemySafeCost;
         state.enemySafeUpgradeLevel += 1;
         const newMax = currentSafeMaxHp(state.enemySafeUpgradeLevel);
         const delta = newMax - state.enemySafeMaxHp;
         state.enemySafeMaxHp = newMax;
         state.enemySafeHp += delta;
-      } else if (shouldRank && state.enemyCoins >= enemyRankCost && (state.enemyCoins >= enemyRankCost + eSummonCost || enemyCount >= 3)) {
+      } else if (shouldRank && state.enemyCoins >= enemyRankCost && roll < Math.max(pattern.rank, 0.35)) {
         state.enemyCoins -= enemyRankCost;
         state.enemyRankIndex += 1;
-      } else if (enemyCount < wantArmy && state.enemyCoins >= eSummonCost && (state.enemyCoins >= eSummonCost * 1.4 || enemyCount <= 2)) {
-        const summonTimes = state.enemyCoins >= eSummonCost * 2.8 && enemyCount + 1 < wantArmy ? 2 : 1;
+      } else if (enemyCount < wantArmy && state.enemyCoins >= eSummonCost && roll < Math.max(pattern.summon, 0.4)) {
+        const summonTimes = state.enemyCoins >= eSummonCost * 2.8 && enemyCount + 1 < wantArmy && pattern.summon > 0.7 ? 2 : 1;
         for (let i = 0; i < summonTimes; i++) {
           if (teamCount('enemy') >= MAX_UNITS_PER_TEAM) break;
           if (state.enemyCoins < eSummonCost) break;
@@ -1241,11 +1301,12 @@
         }
       }
 
-      const powerGap = enemyUnits.length - playerUnits.length;
-      const canPush = state.enemyRankIndex >= state.playerRankIndex || powerGap >= 1 || state.enemyCoins > eSummonCost * 2.5;
+      const canPush = state.enemyRankIndex >= state.playerRankIndex || enemyUnits.length >= playerUnits.length || state.enemyCoins > eSummonCost * pattern.reserve;
+      const shouldRetreat = pressureOnEnemy && enemyUnits.length < playerUnits.length && state.ai.stance === 'defend';
       state.units.forEach(u => {
         if (u.team === 'enemy') {
-          u.engaged = state.ai.stance === 'aggressive' ? canPush : (pressureOnPlayer && canPush);
+          if (shouldRetreat) u.engaged = false;
+          else u.engaged = state.ai.stance === 'aggressive' ? canPush : (pressureOnPlayer && canPush && Math.random() < 0.45);
         }
       });
     }
@@ -1273,36 +1334,59 @@
           }
         }
 
-        const enemyInOwnTerritory = u.team === 'player'
+        const autoDefend = u.team === 'player'
           ? next.some(v => v.team === 'enemy' && v.hp > 0 && v.x < FIELD_W / 2)
           : next.some(v => v.team === 'player' && v.hp > 0 && v.x > FIELD_W / 2);
 
-        const autoDefend = enemyInOwnTerritory;
-        const shouldAdvance = state.prepActive ? false : (u.team === 'player' ? (state.assaultMode || autoDefend) : (u.engaged || autoDefend));
         const targetSafeX = u.team === 'player' ? ENEMY_SAFE_X : FRIENDLY_SAFE_X;
         const targetSafeY = SAFE_Y;
+        const order = state.activeMoveOrder && u.team === 'player' ? state.activeMoveOrder : null;
+        const orderedTargetX = order ? order.x : targetSafeX;
+        const orderedTargetY = order ? order.y : targetSafeY;
         const safeDistance = Math.hypot(u.x - targetSafeX, u.y - targetSafeY);
+        const orderedDistance = Math.hypot(u.x - orderedTargetX, u.y - orderedTargetY);
         const inSafeRange = safeDistance <= SAFE_RADIUS + 18;
         const inUnitRange = nearestEnemy ? nearestDist <= 28 : false;
+        const canFollowOrder = !state.prepActive && (u.team === 'player' ? (state.assaultMode || autoDefend || !!order) : (u.engaged || autoDefend));
 
-        if (nearestEnemy && inUnitRange) {
+        let priorityEnemy = null;
+        if (order) {
+          const nearby = enemies.filter(e => Math.hypot(e.x - order.x, e.y - order.y) <= 165);
+          if (nearby.length) {
+            priorityEnemy = nearby.reduce((best, cur) => {
+              const bd = Math.hypot(best.x - order.x, best.y - order.y);
+              const cd = Math.hypot(cur.x - order.x, cur.y - order.y);
+              return cd < bd ? cur : best;
+            }, nearby[0]);
+          }
+        }
+        const activeEnemy = priorityEnemy || nearestEnemy;
+        const activeEnemyDist = activeEnemy ? distance(u, activeEnemy) : Infinity;
+
+        if (activeEnemy && activeEnemyDist <= 28 && (!order || Math.hypot(u.x - order.x, u.y - order.y) > 110 || priorityEnemy)) {
           if (u.attackCooldown <= 0) {
-            nearestEnemy.hp -= u.atk;
+            activeEnemy.hp -= u.atk;
             u.attackCooldown = 780;
           }
-        } else if (shouldAdvance && inSafeRange) {
+        } else if (!order && canFollowOrder && inSafeRange) {
           if (u.attackCooldown <= 0) {
             if (u.team === 'player') enemySafeHp -= u.atk;
             else playerSafeHp -= u.atk;
             u.attackCooldown = 820;
           }
-        } else if (nearestEnemy && (autoDefend || shouldAdvance) && nearestDist < 210) {
-          const dx = nearestEnemy.x - u.x;
-          const dy = nearestEnemy.y - u.y;
+        } else if (activeEnemy && canFollowOrder && activeEnemyDist < 210 && (!order || priorityEnemy || orderedDistance > 110)) {
+          const dx = activeEnemy.x - u.x;
+          const dy = activeEnemy.y - u.y;
           const d = Math.max(1, Math.hypot(dx, dy));
           u.x += (dx / d) * u.speed * 3.7;
           u.y += (dy / d) * u.speed * 3.7;
-        } else if (shouldAdvance) {
+        } else if (order && canFollowOrder && orderedDistance > 20) {
+          const dx = orderedTargetX - u.x;
+          const dy = orderedTargetY - u.y;
+          const d = Math.max(1, Math.hypot(dx, dy));
+          u.x += (dx / d) * u.speed * 4.0;
+          u.y += (dy / d) * u.speed * 4.0;
+        } else if (!order && canFollowOrder) {
           const dx = targetSafeX - u.x;
           const dy = targetSafeY - u.y;
           const d = Math.max(1, Math.hypot(dx, dy));
@@ -1328,6 +1412,11 @@
       state.playerSafeHp = Math.max(0, playerSafeHp);
       state.enemySafeHp = Math.max(0, enemySafeHp);
 
+      if (state.activeMoveOrder) {
+        const allNear = state.units.filter(u => u.team === 'player').every(u => Math.hypot(u.x - state.activeMoveOrder.x, u.y - state.activeMoveOrder.y) < 24 || u.hp <= 0);
+        if (allNear) state.activeMoveOrder = null;
+      }
+
       if (state.enemySafeHp <= 0 && !state.winner && !state.enemySafeExploding) {
         state.enemySafeHp = 0;
         state.enemySafeExploding = true;
@@ -1343,8 +1432,9 @@
     function renderBattle() {
       const pIncome = currentIncome(state.safeUpgradeLevel);
       const eIncome = currentIncome(state.enemySafeUpgradeLevel);
+      const pattern = ENEMY_PATTERNS[state.enemyPatternIndex];
       els.playerBadge.textContent = `${state.countryName} · ${Math.floor(state.coins)} 코인 · ${pIncome}/s`;
-      els.enemyBadge.textContent = `${state.enemyCountryName || '적군'} · ${Math.floor(state.enemyCoins)} 코인 · ${eIncome}/s`;
+      els.enemyBadge.textContent = `${state.enemyCountryName || '적군'} · ${Math.floor(state.enemyCoins)} 코인 · ${eIncome}/s · ${pattern ? pattern.name : ''}`;
 
       const safeCost = nextSafeCost(state.safeUpgradeLevel);
       els.safeCurrent.textContent = `현재 생산량: ${pIncome}/s · 현재 체력: ${Math.floor(state.playerSafeMaxHp)}`;
@@ -1372,6 +1462,20 @@
       renderSafeBars();
       renderCounts();
       renderBattleUnits();
+      renderOrderArrow();
+    }
+
+    function renderOrderArrow() {
+      const line = els.orderLine;
+      if (!state.orderPreview.active) {
+        line.setAttribute('opacity', '0');
+        return;
+      }
+      line.setAttribute('opacity', '1');
+      line.setAttribute('x1', FRIENDLY_SAFE_X);
+      line.setAttribute('y1', SAFE_Y);
+      line.setAttribute('x2', state.orderPreview.x);
+      line.setAttribute('y2', state.orderPreview.y);
     }
 
     function renderSafeBars() {
@@ -1614,6 +1718,11 @@
     document.getElementById('safeUpgradeBtn').onclick = playerBuySafeUpgrade;
     document.getElementById('rankUpgradeBtn').onclick = playerBuyRankUpgrade;
     document.getElementById('summonBtn').onclick = playerSummon;
+    document.getElementById('deleteModeBtn').onclick = () => {
+      state.deleteMode = !state.deleteMode;
+      els.field.classList.toggle('delete-cursor', state.deleteMode);
+      setNotice(state.deleteMode ? '삭제 모드입니다. 삭제할 아군 군사를 클릭하세요.' : '삭제 모드를 종료했습니다.');
+    };
 
     document.getElementById('attackBtn').onclick = () => {
       if (state.winner) return;
@@ -1622,16 +1731,72 @@
         return;
       }
       state.assaultMode = true;
-      state.units.forEach(u => { if (u.team === 'player') u.engaged = true; });
-      setNotice('공격 개시! 아군 군사가 적 진영으로 진격합니다.');
+      state.activeMoveOrder = null;
+      setNotice('공격 명령 대기중. 전장에 마우스를 움직인 뒤 원하는 위치를 클릭하세요.');
     };
 
     document.getElementById('retreatBtn').onclick = () => {
       if (state.winner) return;
       state.assaultMode = false;
+      state.activeMoveOrder = null;
+      state.orderPreview = { active: false, x: 0, y: 0 };
       state.units.forEach(u => { if (u.team === 'player') u.engaged = false; });
+      renderOrderArrow();
       setNotice('철수! 아군 군사가 금고 쪽으로 복귀합니다.');
     };
+
+    els.field.addEventListener('mousemove', (e) => {
+      if (state.winner || state.prepActive || !state.assaultMode) return;
+      const rect = els.field.getBoundingClientRect();
+      state.orderPreview = {
+        active: true,
+        x: clamp(((e.clientX - rect.left) / rect.width) * FIELD_W, 30, FIELD_W - 30),
+        y: clamp(((e.clientY - rect.top) / rect.height) * FIELD_H, 30, FIELD_H - 30)
+      };
+      renderOrderArrow();
+    });
+
+    els.field.addEventListener('mouseleave', () => {
+      if (!state.activeMoveOrder) {
+        state.orderPreview = { active: false, x: 0, y: 0 };
+        renderOrderArrow();
+      }
+    });
+
+    els.field.addEventListener('click', (e) => {
+      const rect = els.field.getBoundingClientRect();
+      const x = clamp(((e.clientX - rect.left) / rect.width) * FIELD_W, 30, FIELD_W - 30);
+      const y = clamp(((e.clientY - rect.top) / rect.height) * FIELD_H, 30, FIELD_H - 30);
+
+      if (state.deleteMode) {
+        let target = null;
+        let bestDist = 999999;
+        state.units.forEach(u => {
+          if (u.team !== 'player') return;
+          const d = Math.hypot(u.x - x, u.y - y);
+          if (d < 28 && d < bestDist) {
+            bestDist = d;
+            target = u;
+          }
+        });
+        if (target) {
+          const refund = Math.floor(summonCost(target.rankIndex) / 2);
+          state.units = state.units.filter(u => u.id !== target.id);
+          state.coins += refund;
+          setNotice(`${formatRank(target.rankIndex)} 군사를 삭제했습니다. 코인 ${refund} 반환.`);
+          renderBattle();
+        }
+        state.deleteMode = false;
+        els.field.classList.remove('delete-cursor');
+        return;
+      }
+
+      if (state.winner || state.prepActive || !state.assaultMode) return;
+      state.activeMoveOrder = { x, y };
+      state.orderPreview = { active: true, x, y };
+      setNotice('이동 명령 완료! 해당 지점으로 이동 후 근처 적과 금고를 노립니다.');
+      renderOrderArrow();
+    });
 
     renderRecentCountries();
   </script>
