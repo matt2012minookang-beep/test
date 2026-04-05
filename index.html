@@ -12,13 +12,13 @@
       --line:#334155;
       --text:#e5eefc;
       --sub:#94a3b8;
-      --good:#22c55e;
-      --bad:#ef4444;
+      --up:#ef4444;    /* 상승 = 빨강 */
+      --down:#38bdf8;  /* 하락 = 파랑 */
       --gold:#fbbf24;
-      --blue:#38bdf8;
       --purple:#a78bfa;
     }
     *{box-sizing:border-box;}
+    html,body{width:100%;overflow-x:hidden;}
     body{
       margin:0;
       font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;
@@ -27,6 +27,7 @@
       min-height:100vh;
     }
     .wrap{
+      width:100%;
       max-width:1440px;
       margin:0 auto;
       padding:18px;
@@ -74,13 +75,21 @@
       gap:8px;
       box-shadow:0 8px 20px rgba(0,0,0,.18);
     }
-    .good{color:var(--good);} .bad{color:var(--bad);} .gold{color:var(--gold);} .sub{color:var(--sub);} .blue{color:var(--blue);}
+
+    .good{color:var(--up);}
+    .bad{color:var(--down);}
+    .gold{color:var(--gold);}
+    .sub{color:var(--sub);}
+    .blue{color:var(--down);}
+
     .grid{
       display:grid;
-      grid-template-columns:370px 1fr 360px;
+      grid-template-columns:320px minmax(0,1fr) 320px;
       gap:16px;
+      align-items:start;
     }
     .card{
+      min-width:0;
       background:linear-gradient(180deg,rgba(17,24,39,.98),rgba(15,23,42,.98));
       border:1px solid var(--line);
       border-radius:22px;
@@ -111,9 +120,19 @@
       border:1px solid var(--line);
       border-radius:16px;
       padding:12px;
+      min-width:0;
     }
-    .stat .label{font-size:12px;color:var(--sub);margin-bottom:8px;}
-    .stat .value{font-size:20px;font-weight:900;line-height:1.2;word-break:break-all;}
+    .stat .label{
+      font-size:12px;
+      color:var(--sub);
+      margin-bottom:8px;
+    }
+    .stat .value{
+      font-size:20px;
+      font-weight:900;
+      line-height:1.2;
+      word-break:break-all;
+    }
     .marketbox{
       display:flex;
       gap:8px;
@@ -132,7 +151,7 @@
       display:flex;
       flex-direction:column;
       gap:10px;
-      max-height:680px;
+      max-height:calc(100vh - 260px);
       overflow:auto;
       padding-right:4px;
     }
@@ -142,23 +161,47 @@
       background:rgba(15,23,42,.72);
       padding:12px;
       display:grid;
-      grid-template-columns:1fr auto;
+      grid-template-columns:minmax(0,1fr) auto;
       gap:10px;
       cursor:pointer;
       transition:transform .12s ease, border-color .12s ease, box-shadow .12s ease;
     }
-    .stock-item:hover{transform:translateY(-1px);border-color:#4b5563;box-shadow:0 10px 20px rgba(0,0,0,.18);}
-    .stock-item.selected{border-color:var(--blue); box-shadow:0 0 0 1px rgba(56,189,248,.2) inset;}
+    .stock-item:hover{
+      transform:translateY(-1px);
+      border-color:#4b5563;
+      box-shadow:0 10px 20px rgba(0,0,0,.18);
+    }
+    .stock-item.selected{
+      border-color:var(--down);
+      box-shadow:0 0 0 1px rgba(56,189,248,.2) inset;
+    }
     .stock-name{font-size:18px;font-weight:900;}
-    .stock-meta{font-size:12px;color:var(--sub);margin-top:4px;}
-    .stock-price{font-size:18px;font-weight:900;text-align:right;}
-    .stock-change{font-size:13px;text-align:right;font-weight:800;margin-top:4px;}
+    .stock-meta{
+      font-size:12px;
+      color:var(--sub);
+      margin-top:4px;
+      word-break:break-word;
+    }
+    .stock-price{
+      font-size:18px;
+      font-weight:900;
+      text-align:right;
+      white-space:nowrap;
+    }
+    .stock-change{
+      font-size:13px;
+      text-align:right;
+      font-weight:800;
+      margin-top:4px;
+      white-space:nowrap;
+    }
     .chart-wrap{
       border:1px solid var(--line);
       border-radius:18px;
       background:linear-gradient(180deg,#07101d,#0b1220);
       padding:12px;
       margin-bottom:14px;
+      overflow:hidden;
     }
     #chartCanvas{
       width:100%;
@@ -172,7 +215,7 @@
       grid-template-columns:1fr 1fr;
       gap:12px;
     }
-    .input, .select{
+    .input,.select{
       width:100%;
       background:#0b1220;
       border:1px solid var(--line);
@@ -181,6 +224,7 @@
       padding:12px 14px;
       outline:none;
       font-size:15px;
+      min-width:0;
     }
     .btnrow{
       display:flex;
@@ -198,18 +242,18 @@
       transition:transform .1s ease, filter .1s ease;
     }
     button:hover{transform:translateY(-1px);filter:brightness(1.04);}
-    .buy{background:linear-gradient(135deg,#16a34a,#22c55e);} 
-    .sell{background:linear-gradient(135deg,#dc2626,#ef4444);} 
-    .ghost{background:linear-gradient(135deg,#334155,#475569);} 
-    .bank{background:linear-gradient(135deg,#1d4ed8,#2563eb);} 
-    .warn{background:linear-gradient(135deg,#a16207,#ca8a04);} 
-    .purple{background:linear-gradient(135deg,#6d28d9,#8b5cf6);} 
+    .buy{background:linear-gradient(135deg,#16a34a,#22c55e);}
+    .sell{background:linear-gradient(135deg,#dc2626,#ef4444);}
+    .ghost{background:linear-gradient(135deg,#334155,#475569);}
+    .bank{background:linear-gradient(135deg,#1d4ed8,#2563eb);}
+    .warn{background:linear-gradient(135deg,#a16207,#ca8a04);}
+    .purple{background:linear-gradient(135deg,#6d28d9,#8b5cf6);}
     .full{width:100%;}
     .portfolio-list,.event-list,.loan-list{
       display:flex;
       flex-direction:column;
       gap:10px;
-      max-height:250px;
+      max-height:240px;
       overflow:auto;
       padding-right:4px;
     }
@@ -219,9 +263,20 @@
       padding:10px 12px;
       background:rgba(15,23,42,.7);
     }
-    .lineitem .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
+    .lineitem .top{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+    }
     .lineitem .name{font-weight:900;}
-    .lineitem .desc{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.45;}
+    .lineitem .desc{
+      font-size:12px;
+      color:var(--sub);
+      margin-top:6px;
+      line-height:1.45;
+      word-break:break-word;
+    }
     .section-gap{margin-top:16px;}
     .headline{
       display:flex;
@@ -229,6 +284,7 @@
       align-items:center;
       gap:10px;
       margin-bottom:10px;
+      min-width:0;
     }
     .overlay{
       position:fixed;
@@ -237,7 +293,7 @@
       align-items:center;
       justify-content:center;
       background:rgba(2,6,23,.72);
-      backdrop-filter: blur(8px);
+      backdrop-filter:blur(8px);
       z-index:100;
       padding:16px;
     }
@@ -274,12 +330,15 @@
       padding-top:10px;
       padding-bottom:10px;
     }
-    @keyframes ticker{0%{transform:translateX(0);}100%{transform:translateX(-100%);}}
-    .muted{
-      opacity:.75;
+    @keyframes ticker{
+      0%{transform:translateX(0);}
+      100%{transform:translateX(-100%);}
     }
+    .muted{opacity:.75;}
+
     @media (max-width:1200px){
       .grid{grid-template-columns:1fr;}
+      .stock-list{max-height:420px;}
     }
     @media (max-width:720px){
       .tradepanel{grid-template-columns:1fr;}
@@ -362,7 +421,7 @@
             <div id="detailPrice" class="value">-</div>
           </div>
           <div class="stat">
-            <div class="label">금일 등락</div>
+            <div class="label">직전 대비</div>
             <div id="detailChange" class="value">-</div>
           </div>
           <div class="stat">
@@ -482,7 +541,7 @@
   </div>
 
   <script>
-    const STORAGE_PREFIX = "stock_sim_kr_v1_";
+    const STORAGE_PREFIX = "stock_sim_kr_v2_";
     const UNIT_NAMES = ["", "만", "억", "조", "경", "해", "자", "양", "구", "간", "정", "재", "극"];
     const INITIAL_CASH = 100000;
     const CREDIT_MIN = -100;
@@ -501,15 +560,15 @@
 
     const defaultStocks = [
       { key:"samsung", name:"삼성전자", sector:"반도체", price:73500, baseVol:0.012, drift:0.0008, fundamentals:0.83 },
-      { key:"hynix", name:"SK 하이닉스", sector:"반도체", price:164000, baseVol:0.017, drift:0.0012, fundamentals:0.8 },
+      { key:"hynix", name:"SK 하이닉스", sector:"반도체", price:164000, baseVol:0.017, drift:0.0012, fundamentals:0.80 },
       { key:"lg", name:"LG 에너지", sector:"배터리", price:392000, baseVol:0.016, drift:0.0009, fundamentals:0.75 },
       { key:"gold", name:"금", sector:"원자재", price:312000, baseVol:0.008, drift:0.0005, fundamentals:0.92 },
-      { key:"silver", name:"은", sector:"원자재", price:4200, baseVol:0.014, drift:0.0004, fundamentals:0.7 },
+      { key:"silver", name:"은", sector:"원자재", price:4200, baseVol:0.014, drift:0.0004, fundamentals:0.70 },
       { key:"google", name:"구글", sector:"빅테크", price:228000, baseVol:0.014, drift:0.0010, fundamentals:0.86 },
       { key:"nova", name:"노바클라우드", sector:"AI 클라우드", price:18500, baseVol:0.028, drift:0.0014, fundamentals:0.63 },
-      { key:"orbix", name:"오빅스모빌리티", sector:"로봇/모빌리티", price:9200, baseVol:0.03, drift:0.0011, fundamentals:0.56 },
+      { key:"orbix", name:"오빅스모빌리티", sector:"로봇/모빌리티", price:9200, baseVol:0.030, drift:0.0011, fundamentals:0.56 },
       { key:"deepsea", name:"딥씨푸드테크", sector:"푸드테크", price:6800, baseVol:0.026, drift:0.0006, fundamentals:0.45 },
-      { key:"lumen", name:"루멘바이오", sector:"바이오", price:15400, baseVol:0.034, drift:0.0010, fundamentals:0.5 },
+      { key:"lumen", name:"루멘바이오", sector:"바이오", price:15400, baseVol:0.034, drift:0.0010, fundamentals:0.50 },
       { key:"quantix", name:"퀀틱스반도체", sector:"반도체", price:12600, baseVol:0.031, drift:0.0013, fundamentals:0.52 },
       { key:"greenmesh", name:"그린메쉬에너지", sector:"친환경", price:11200, baseVol:0.027, drift:0.0010, fundamentals:0.54 }
     ];
@@ -553,12 +612,12 @@
       {
         title:"로봇 자동화 계약 체결",
         text:"물류 자동화 대형 계약 체결 소식으로 모빌리티/로봇 종목이 급등했다.",
-        effects:{"로봇/모빌리티":0.1}
+        effects:{"로봇/모빌리티":0.10}
       },
       {
         title:"푸드테크 안전성 논란",
         text:"신제품 성분 논란으로 푸드테크 종목이 급락했다.",
-        effects:{"푸드테크":-0.1}
+        effects:{"푸드테크":-0.10}
       },
       {
         title:"세계 경기 둔화 우려",
@@ -649,6 +708,7 @@
         ...s,
         dayOpen:s.price,
         lastPrice:s.price,
+        lastTickChange:0,
         history:createSeedHistory(s.price),
         eventBias:0,
         trendMemory:0
@@ -656,8 +716,8 @@
     }
 
     function createSeedHistory(price){
-      const arr=[];
-      let p=price;
+      const arr = [];
+      let p = price;
       for(let i=0;i<60;i++){
         p = Math.max(100, Math.round(p * (1 + (Math.random()-0.5)*0.004)));
         arr.push(p);
@@ -690,9 +750,13 @@
       return sign + (v * 100).toFixed(2) + "%";
     }
 
-    function now(){ return Date.now(); }
+    function now(){
+      return Date.now();
+    }
 
-    function getStorageKey(name){ return STORAGE_PREFIX + name; }
+    function getStorageKey(name){
+      return STORAGE_PREFIX + name;
+    }
 
     function saveState(){
       if (!state.investorName) return;
@@ -703,8 +767,14 @@
         creditScore: state.creditScore,
         loans: state.loans,
         stocks: state.stocks.map(s => ({
-          key:s.key, price:s.price, lastPrice:s.lastPrice, dayOpen:s.dayOpen, history:s.history,
-          eventBias:s.eventBias, trendMemory:s.trendMemory
+          key:s.key,
+          price:s.price,
+          lastPrice:s.lastPrice,
+          lastTickChange:s.lastTickChange,
+          dayOpen:s.dayOpen,
+          history:s.history,
+          eventBias:s.eventBias,
+          trendMemory:s.trendMemory
         })),
         portfolio: state.portfolio,
         events: state.events,
@@ -743,6 +813,7 @@
           if(saved){
             stock.price = saved.price ?? stock.price;
             stock.lastPrice = saved.lastPrice ?? stock.lastPrice;
+            stock.lastTickChange = saved.lastTickChange ?? 0;
             stock.dayOpen = saved.dayOpen ?? stock.dayOpen;
             stock.history = Array.isArray(saved.history) && saved.history.length ? saved.history.slice(-GRAPH_MAX_POINTS) : stock.history;
             stock.eventBias = saved.eventBias ?? 0;
@@ -786,7 +857,7 @@
     }
 
     function gaussian(){
-      let u=0,v=0;
+      let u=0, v=0;
       while(u===0) u=Math.random();
       while(v===0) v=Math.random();
       return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
@@ -822,13 +893,13 @@
         stock.eventBias *= 0.88;
 
         let change =
-          (stock.drift * 0.18 * intensity)
-          + meanReversion
-          + clockWave
-          + moodEffect
-          + stock.eventBias
-          + stock.trendMemory * stock.baseVol * 0.08
-          + randomShock;
+          (stock.drift * 0.18 * intensity) +
+          meanReversion +
+          clockWave +
+          moodEffect +
+          stock.eventBias +
+          stock.trendMemory * stock.baseVol * 0.08 +
+          randomShock;
 
         const band = stock.baseVol * 2.8;
         change = Math.max(-band, Math.min(band, change));
@@ -837,6 +908,7 @@
         next = Math.max(100, next);
 
         stock.price = next;
+        stock.lastTickChange = (stock.price - stock.lastPrice) / Math.max(1, stock.lastPrice);
         stock.history.push(next);
         if(stock.history.length > GRAPH_MAX_POINTS) stock.history = stock.history.slice(-GRAPH_MAX_POINTS);
       });
@@ -847,6 +919,7 @@
     function maybeTriggerEvent(){
       const chance = 0.36;
       if(Math.random() > chance) return;
+
       const ev = structuredClone(eventTemplates[Math.floor(Math.random()*eventTemplates.length)]);
       ev.id = Math.random().toString(36).slice(2);
       ev.time = new Date().toLocaleString('ko-KR');
@@ -855,8 +928,10 @@
       for(const stock of state.stocks){
         const factor = ev.effects[stock.sector];
         if(typeof factor === 'number'){
+          stock.lastPrice = stock.price;
           const personal = factor * (0.88 + Math.random()*0.24);
           stock.price = Math.max(100, Math.round(stock.price * (1 + personal)));
+          stock.lastTickChange = (stock.price - stock.lastPrice) / Math.max(1, stock.lastPrice);
           stock.eventBias += personal * 0.11;
           stock.history.push(stock.price);
           if(stock.history.length > GRAPH_MAX_POINTS) stock.history = stock.history.slice(-GRAPH_MAX_POINTS);
@@ -878,23 +953,20 @@
       els.tickerInner.textContent = state.tickerMessages.join('   ◆   ') || '시장 뉴스 대기 중';
     }
 
-    function getStock(key){ return state.stocks.find(s => s.key === key); }
+    function getStock(key){
+      return state.stocks.find(s => s.key === key);
+    }
 
-    function getPosition(key){ return state.portfolio[key] || { qty:0, avgPrice:0 }; }
+    function getPosition(key){
+      return state.portfolio[key] || { qty:0, avgPrice:0 };
+    }
 
     function getHoldingValue(){
       return Object.entries(state.portfolio).reduce((sum,[key,pos]) => {
         const stock = getStock(key);
-        if(!stock) return sum;
+        if(!stock || !pos || pos.qty <= 0) return sum;
         return sum + stock.price * pos.qty;
       }, 0);
-    }
-
-    function getLoanOutstanding(loan){
-      const elapsed = now() - loan.lastInterestAt;
-      const intervals = Math.floor(elapsed / INTEREST_INTERVAL_MS);
-      if(intervals <= 0) return loan.amount;
-      return Math.round(loan.amount * Math.pow(1 + INTEREST_RATE_PER_2_DAYS, intervals));
     }
 
     function applyLoanInterest(){
@@ -902,11 +974,13 @@
       state.loans.forEach(loan => {
         const elapsed = now() - loan.lastInterestAt;
         const intervals = Math.floor(elapsed / INTEREST_INTERVAL_MS);
+
         if(intervals > 0){
           loan.amount = Math.round(loan.amount * Math.pow(1 + INTEREST_RATE_PER_2_DAYS, intervals));
           loan.lastInterestAt += intervals * INTEREST_INTERVAL_MS;
           changed = true;
         }
+
         const overdueElapsed = now() - loan.borrowedAt;
         if(!loan.forced && overdueElapsed >= OVERDUE_MS){
           state.cash -= loan.amount;
@@ -918,6 +992,7 @@
           pushTicker(`은행 강제 회수 발생 — ${formatKRW(loan.amount)} 차감, 신용점수 하락`);
         }
       });
+
       state.loans = state.loans.filter(loan => loan.amount > 0);
       if(changed) renderAll();
     }
@@ -927,15 +1002,14 @@
       return state.loans.reduce((sum,loan)=>sum+loan.amount,0);
     }
 
-    function getNetWorth(){
-      return state.cash + getHoldingValue() - getTotalLoan();
-    }
-
     function getCurrentEarning(){
+      const entries = Object.entries(state.portfolio).filter(([,pos]) => pos && pos.qty > 0);
+      if(entries.length === 0) return 0;
+
       let total = 0;
-      Object.entries(state.portfolio).forEach(([key,pos]) => {
+      entries.forEach(([key,pos]) => {
         const stock = getStock(key);
-        if(!stock || pos.qty <= 0) return;
+        if(!stock) return;
         total += (stock.price - pos.avgPrice) * pos.qty;
       });
       return total;
@@ -944,18 +1018,23 @@
     function buyStock(){
       const stock = getStock(state.selectedKey);
       if(!stock) return;
+
       let qty = Math.floor(Number(els.quantityInput.value));
       if(!Number.isFinite(qty) || qty < 1) qty = 1;
+
       const cost = stock.price * qty;
       if(cost > state.cash){
         flashNotice(els.tradeNotice, `현금 부족: 필요 ${formatKRW(cost)}`, 'bad');
         return;
       }
+
       const pos = getPosition(stock.key);
       const newQty = pos.qty + qty;
       const newAvg = Math.round(((pos.avgPrice * pos.qty) + (stock.price * qty)) / newQty);
+
       state.portfolio[stock.key] = { qty:newQty, avgPrice:newAvg };
       state.cash -= cost;
+
       flashNotice(els.tradeNotice, `${stock.name} ${qty.toLocaleString('ko-KR')}주 매수 완료`, 'good');
       pushTicker(`${state.investorName} 님이 ${stock.name} ${qty}주 매수`);
       renderAll();
@@ -964,17 +1043,22 @@
     function sellStock(qtyOverride){
       const stock = getStock(state.selectedKey);
       if(!stock) return;
+
       const pos = getPosition(stock.key);
       let qty = qtyOverride ?? Math.floor(Number(els.quantityInput.value));
       if(!Number.isFinite(qty) || qty < 1) qty = 1;
+
       if(pos.qty < qty){
         flashNotice(els.tradeNotice, `보유 수량 부족: 현재 ${pos.qty.toLocaleString('ko-KR')}주`, 'bad');
         return;
       }
+
       const revenue = stock.price * qty;
       pos.qty -= qty;
+
       if(pos.qty <= 0) delete state.portfolio[stock.key];
       else state.portfolio[stock.key] = pos;
+
       state.cash += revenue;
       flashNotice(els.tradeNotice, `${stock.name} ${qty.toLocaleString('ko-KR')}주 매도 완료`, 'good');
       pushTicker(`${state.investorName} 님이 ${stock.name} ${qty}주 매도`);
@@ -987,15 +1071,18 @@
 
     function borrowMoney(){
       applyLoanInterest();
+
       if(state.creditScore <= CREDIT_MIN){
         flashNotice(els.bankNotice, '신용점수 -100점 이하라 더 이상 대출 불가', 'bad');
         return;
       }
+
       let amount = Math.floor(Number(els.loanInput.value));
       if(!Number.isFinite(amount) || amount < 1000){
         flashNotice(els.bankNotice, '대출 금액은 최소 1,000원', 'bad');
         return;
       }
+
       state.cash += amount;
       state.creditScore -= Math.max(2, Math.floor(amount / 50000));
       state.loans.push({
@@ -1005,6 +1092,7 @@
         lastInterestAt: now(),
         forced:false
       });
+
       flashNotice(els.bankNotice, `${formatKRW(amount)} 대출 완료`, 'good');
       pushTicker(`은행 대출 실행 — ${formatKRW(amount)} / 신용점수 하락`);
       renderAll();
@@ -1012,6 +1100,7 @@
 
     function repayMoney(){
       applyLoanInterest();
+
       let amount = Math.floor(Number(els.repayInput.value));
       if(!Number.isFinite(amount) || amount < 1000){
         flashNotice(els.bankNotice, '상환 금액은 최소 1,000원', 'bad');
@@ -1025,8 +1114,10 @@
         flashNotice(els.bankNotice, '현금 부족으로 상환 불가', 'bad');
         return;
       }
+
       state.cash -= amount;
       state.loans.sort((a,b)=>a.borrowedAt-b.borrowedAt);
+
       let remain = amount;
       for(const loan of state.loans){
         if(remain <= 0) break;
@@ -1034,8 +1125,10 @@
         loan.amount -= used;
         remain -= used;
       }
+
       state.loans = state.loans.filter(loan => loan.amount > 0);
       state.creditScore = Math.min(100, state.creditScore + Math.max(3, Math.floor(amount / 40000)));
+
       flashNotice(els.bankNotice, `${formatKRW(amount - remain)} 상환 완료`, 'good');
       pushTicker(`은행 상환 처리 — ${formatKRW(amount - remain)}`);
       renderAll();
@@ -1048,10 +1141,12 @@
 
     function renderStockList(){
       els.stockList.innerHTML = '';
+
       state.stocks.forEach(stock => {
-        const ch = (stock.price - stock.dayOpen) / stock.dayOpen;
+        const ch = stock.lastTickChange || 0;
         const item = document.createElement('div');
         item.className = 'stock-item' + (stock.key === state.selectedKey ? ' selected' : '');
+
         item.innerHTML = `
           <div>
             <div class="stock-name">${stock.name}</div>
@@ -1062,10 +1157,12 @@
             <div class="stock-change ${ch >= 0 ? 'good' : 'bad'}">${formatPercent(ch)}</div>
           </div>
         `;
+
         item.onclick = () => {
           state.selectedKey = stock.key;
           renderAll();
         };
+
         els.stockList.appendChild(item);
       });
     }
@@ -1076,8 +1173,10 @@
         els.selectedStockTitle.textContent = '종목 선택';
         return;
       }
+
       const pos = getPosition(stock.key);
-      const ch = (stock.price - stock.dayOpen) / stock.dayOpen;
+      const ch = stock.lastTickChange || 0;
+
       els.selectedStockTitle.textContent = stock.name;
       els.selectedStockMeta.textContent = `${stock.sector} · 기본 변동성 ${(stock.baseVol*100).toFixed(1)}% · 펀더멘털 ${(stock.fundamentals*100).toFixed(0)}점`;
       els.selectedStockPrice.textContent = formatKRW(stock.price);
@@ -1085,6 +1184,7 @@
       els.detailChange.innerHTML = `<span class="${ch >= 0 ? 'good' : 'bad'}">${formatPercent(ch)}</span>`;
       els.detailOwned.textContent = `${pos.qty.toLocaleString('ko-KR')}주`;
       els.detailHoldingValue.textContent = formatKRW(pos.qty * stock.price);
+
       drawChart(stock);
     }
 
@@ -1092,6 +1192,7 @@
       const canvas = els.chartCanvas;
       const w = canvas.width;
       const h = canvas.height;
+
       ctx.clearRect(0,0,w,h);
       ctx.fillStyle = '#08111d';
       ctx.fillRect(0,0,w,h);
@@ -1123,17 +1224,18 @@
       }
 
       const change = data[data.length-1] - data[0];
-      const lineColor = change >= 0 ? '#22c55e' : '#ef4444';
+      const lineColor = change >= 0 ? '#ef4444' : '#38bdf8';
 
       const grad = ctx.createLinearGradient(0,pad.t,0,h-pad.b);
-      grad.addColorStop(0, change >= 0 ? 'rgba(34,197,94,.28)' : 'rgba(239,68,68,.28)');
+      grad.addColorStop(0, change >= 0 ? 'rgba(239,68,68,.28)' : 'rgba(56,189,248,.28)');
       grad.addColorStop(1, 'rgba(15,23,42,0)');
 
       ctx.beginPath();
       data.forEach((price, i) => {
         const x = pad.l + (w - pad.l - pad.r) * (i / (data.length - 1 || 1));
         const y = pad.t + (h - pad.t - pad.b) * (1 - (price - min) / range);
-        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        if(i===0) ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
       });
       const lastX = pad.l + (w - pad.l - pad.r);
       const firstX = pad.l;
@@ -1147,7 +1249,8 @@
       data.forEach((price, i) => {
         const x = pad.l + (w - pad.l - pad.r) * (i / (data.length - 1 || 1));
         const y = pad.t + (h - pad.t - pad.b) * (1 - (price - min) / range);
-        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        if(i===0) ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
       });
       ctx.strokeStyle = lineColor;
       ctx.lineWidth = 2.5;
@@ -1156,6 +1259,7 @@
       const lastPrice = data[data.length-1];
       const lx = pad.l + (w - pad.l - pad.r);
       const ly = pad.t + (h - pad.t - pad.b) * (1 - (lastPrice - min) / range);
+
       ctx.beginPath();
       ctx.arc(lx, ly, 4, 0, Math.PI*2);
       ctx.fillStyle = lineColor;
@@ -1165,21 +1269,25 @@
       ctx.font = '13px Malgun Gothic';
       const label = state.chartWindow === 'short' ? '짧게' : state.chartWindow === 'mid' ? '중간' : '길게';
       ctx.fillText(`최근 ${label} 구간`, pad.l, h - 8);
-      ctx.fillText(`시초가 ${formatKRW(stock.dayOpen)} / 현재가 ${formatKRW(stock.price)}`, w - 290, h - 8);
+      ctx.fillText(`기준가 ${formatKRW(stock.dayOpen)} / 현재가 ${formatKRW(stock.price)}`, Math.max(pad.l + 130, w - 290), h - 8);
     }
 
     function renderPortfolio(){
       els.portfolioList.innerHTML = '';
-      const entries = Object.entries(state.portfolio).filter(([,pos]) => pos.qty > 0);
+
+      const entries = Object.entries(state.portfolio).filter(([,pos]) => pos && pos.qty > 0);
       if(entries.length === 0){
         els.portfolioList.innerHTML = '<div class="lineitem"><div class="desc">아직 보유 중인 종목이 없어.</div></div>';
         return;
       }
+
       entries.forEach(([key,pos]) => {
         const stock = getStock(key);
         if(!stock) return;
+
         const value = stock.price * pos.qty;
         const pl = (stock.price - pos.avgPrice) * pos.qty;
+
         const item = document.createElement('div');
         item.className = 'lineitem';
         item.innerHTML = `
@@ -1191,22 +1299,28 @@
             <div class="${pl >= 0 ? 'good' : 'bad'}" style="font-weight:900;">${formatSignedKRW(pl)}</div>
           </div>
         `;
-        item.onclick = () => { state.selectedKey = key; renderAll(); };
+        item.onclick = () => {
+          state.selectedKey = key;
+          renderAll();
+        };
         els.portfolioList.appendChild(item);
       });
     }
 
     function renderLoans(){
       els.loanList.innerHTML = '';
+
       if(state.loans.length === 0){
         els.loanList.innerHTML = '<div class="lineitem"><div class="desc">현재 대출 없음</div></div>';
         return;
       }
+
       state.loans.forEach(loan => {
         const elapsed = now() - loan.borrowedAt;
         const overdueLeft = Math.max(0, OVERDUE_MS - elapsed);
         const d = Math.floor(overdueLeft / (24*60*60*1000));
         const h = Math.floor((overdueLeft % (24*60*60*1000)) / (60*60*1000));
+
         const item = document.createElement('div');
         item.className = 'lineitem';
         item.innerHTML = `
@@ -1224,10 +1338,12 @@
 
     function renderEvents(){
       els.eventList.innerHTML = '';
+
       if(state.events.length === 0){
         els.eventList.innerHTML = '<div class="lineitem"><div class="desc">아직 발생한 중대사건이 없어.</div></div>';
         return;
       }
+
       state.events.slice(0,8).forEach(ev => {
         const item = document.createElement('div');
         item.className = 'lineitem';
@@ -1249,7 +1365,9 @@
       const loanTotal = getTotalLoan();
       const netWorth = state.cash + holding - loanTotal;
       const profit = netWorth - state.initialCash;
+
       state.totalProfit = profit;
+
       els.investorName.textContent = state.investorName || '-';
       els.clockText.textContent = new Date().toLocaleString('ko-KR');
       els.cashText.textContent = formatKRW(state.cash);
@@ -1259,6 +1377,7 @@
       els.initialCapitalText.textContent = formatKRW(state.initialCash);
       els.creditText.innerHTML = `<span class="${state.creditScore <= -50 ? 'bad' : state.creditScore < 30 ? 'gold' : 'good'}">${state.creditScore}점</span>`;
       els.holdingTotalText.textContent = formatKRW(holding);
+
       const earning = getCurrentEarning();
       els.earningText.innerHTML = `<span class="${earning >= 0 ? 'good' : 'bad'}">${formatSignedKRW(earning)}</span>`;
 
@@ -1276,12 +1395,14 @@
       renderPortfolio();
       renderLoans();
       renderEvents();
+
       if(now() - state.lastSaveAt > SAVE_MS) saveState();
     }
 
     function handleQuickSelect(){
       const stock = getStock(state.selectedKey);
       if(!stock) return;
+
       const v = els.quickSelect.value;
       if(v === 'max') els.quantityInput.value = maxAffordableQty(stock) || 1;
       else els.quantityInput.value = v;
@@ -1295,36 +1416,56 @@
           els.nicknameNotice.className = 'notice bad';
           return;
         }
+
         const loaded = loadState(name);
         if(!loaded) startNew(name);
+
         els.nicknameOverlay.style.display = 'none';
         pushTicker(`투자자 ${name} 입장 — 초기 자본 ${formatKRW(state.initialCash)}`);
         renderAll();
       };
-      els.nicknameInput.addEventListener('keydown', e => { if(e.key === 'Enter') els.startBtn.click(); });
+
+      els.nicknameInput.addEventListener('keydown', e => {
+        if(e.key === 'Enter') els.startBtn.click();
+      });
+
       els.quickSelect.onchange = handleQuickSelect;
       els.buyBtn.onclick = buyStock;
       els.sellBtn.onclick = () => sellStock();
+
       els.buyHalfBtn.onclick = () => {
         const stock = getStock(state.selectedKey);
         if(!stock) return;
+
         const qty = Math.floor((state.cash * 0.5) / stock.price);
-        if(qty < 1){ flashNotice(els.tradeNotice,'가능금액 50%로는 1주도 못 삼','bad'); return; }
+        if(qty < 1){
+          flashNotice(els.tradeNotice, '가능금액 50%로는 1주도 못 삼', 'bad');
+          return;
+        }
+
         els.quantityInput.value = qty;
         buyStock();
       };
+
       els.sellAllBtn.onclick = () => {
         const stock = getStock(state.selectedKey);
         if(!stock) return;
+
         const pos = getPosition(stock.key);
-        if(pos.qty <= 0){ flashNotice(els.tradeNotice,'전량 매도할 보유 수량이 없음','bad'); return; }
+        if(pos.qty <= 0){
+          flashNotice(els.tradeNotice, '전량 매도할 보유 수량이 없음', 'bad');
+          return;
+        }
         sellStock(pos.qty);
       };
+
       els.loanBtn.onclick = borrowMoney;
       els.repayBtn.onclick = repayMoney;
+
       if(els.chartShortBtn) els.chartShortBtn.onclick = () => { state.chartWindow = 'short'; renderAll(); };
       if(els.chartMidBtn) els.chartMidBtn.onclick = () => { state.chartWindow = 'mid'; renderAll(); };
       if(els.chartLongBtn) els.chartLongBtn.onclick = () => { state.chartWindow = 'long'; renderAll(); };
+
       window.addEventListener('beforeunload', saveState);
     }
 
@@ -1333,11 +1474,13 @@
       state.stocks = cloneStocks();
       state.selectedKey = defaultStocks[0].key;
       renderAll();
+
       setInterval(() => {
         els.clockText.textContent = new Date().toLocaleString('ko-KR');
         applyLoanInterest();
         renderSummary();
       }, 1000);
+
       setInterval(updateStocks, PRICE_TICK_MS);
       setInterval(maybeTriggerEvent, EVENT_CHECK_MS);
       setInterval(saveState, SAVE_MS + 1000);
