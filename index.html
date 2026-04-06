@@ -26,7 +26,7 @@
     }
     .screen { min-height: 100vh; display: none; padding: 14px; }
     .screen.active { display: block; }
-    .container { max-width: 1600px; margin: 0 auto; }
+    .container { max-width: 1540px; margin: 0 auto; }
     .card {
       background: rgba(15, 23, 42, 0.92);
       border: 1px solid rgba(148, 163, 184, 0.18);
@@ -62,9 +62,7 @@
     .btn-gray { background: #1e293b; }
     .btn-gold { background: #f59e0b; color: #111827; }
     .btn-red { background: #dc2626; }
-    .btn-yellow { background: #ca8a04; }
     .full { width: 100%; }
-
     .hero-shell {
       max-width: 1180px;
       margin: 4vh auto 0;
@@ -187,7 +185,6 @@
       cursor: pointer;
       font-weight: 700;
     }
-
     .topbar {
       display: flex;
       justify-content: space-between;
@@ -207,17 +204,13 @@
     }
     .badge.blue { background: rgba(37,99,235,0.2); border-color: rgba(96,165,250,0.8); color: #bfdbfe; }
     .badge.red { background: rgba(239,68,68,0.16); border-color: rgba(252,165,165,0.8); color: #fecaca; }
-    .badge.green { background: rgba(16,185,129,0.16); border-color: rgba(74,222,128,0.8); color: #bbf7d0; }
-    .badge.yellow { background: rgba(234,179,8,0.16); border-color: rgba(250,204,21,0.8); color: #fde68a; }
     .badge.trophy { background: rgba(245,158,11,0.16); border-color: rgba(245,158,11,0.48); color: #fde68a; }
-
     .menu-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 18px;
     }
     .panel { padding: 20px; }
-
     .map-preview {
       position: relative;
       aspect-ratio: 16 / 8;
@@ -232,36 +225,12 @@
       transform: translateX(-50%); background: rgba(255,255,255,0.34);
     }
     .safe-icon {
-      position: absolute; top: 50%; width: 92px; height: 92px; border-radius: 24px;
+      position: absolute; top: 50%; width: 100px; height: 100px; border-radius: 24px;
       transform: translateY(-50%); border: 4px solid rgba(255,255,255,0.65);
       box-shadow: 0 0 28px rgba(255,255,255,0.12);
     }
     .safe-icon.left { left: 10%; background: rgba(59,130,246,0.85); }
     .safe-icon.right { right: 10%; background: rgba(239,68,68,0.85); }
-
-    .four-preview-grid {
-      position: absolute;
-      inset: 12px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    .four-quarter {
-      border-radius: 18px;
-      border: 2px solid rgba(255,255,255,0.18);
-      position: relative;
-      overflow: hidden;
-    }
-    .four-quarter .mini-safe {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      border: 3px solid rgba(255,255,255,0.7);
-      position: absolute;
-      inset: 50% auto auto 50%;
-      transform: translate(-50%, -50%);
-    }
-
     .loading-wrap { max-width: 760px; margin: 10vh auto 0; padding: 30px; }
     .bar-bg {
       height: 26px; border-radius: 999px; background: #0f172a;
@@ -271,15 +240,13 @@
       height: 100%; width: 0%; background: linear-gradient(90deg, #2563eb, #22d3ee, #34d399);
       transition: width 0.08s linear;
     }
-
     .battle-layout {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 368px;
+      grid-template-columns: minmax(0, 1fr) 352px;
       gap: 14px;
       align-items: start;
     }
     .battle-panel { padding: 14px; }
-
     .notice {
       background: rgba(30,41,59,0.9);
       border: 1px solid rgba(148,163,184,0.2);
@@ -302,11 +269,10 @@
       border: 1px solid rgba(245,158,11,0.45);
       vertical-align: middle;
     }
-
     .field-wrap {
-      position: relative; width: 100%; aspect-ratio: 1200 / 700; border-radius: 28px;
+      position: relative; width: 100%; aspect-ratio: 1200 / 620; border-radius: 28px;
       overflow: hidden; border: 2px solid rgba(148,163,184,0.2);
-      background: linear-gradient(135deg, rgba(29,78,216,0.18) 0%, rgba(15,23,42,1) 35%, rgba(15,23,42,1) 65%, rgba(220,38,38,0.18) 100%);
+      background: linear-gradient(90deg, rgba(29,78,216,0.18) 0%, rgba(15,23,42,1) 50%, rgba(220,38,38,0.18) 100%);
       touch-action: none;
       cursor: crosshair;
     }
@@ -316,56 +282,22 @@
         repeating-linear-gradient(0deg, transparent 0 52px, rgba(255,255,255,0.06) 52px 53px),
         repeating-linear-gradient(90deg, transparent 0 52px, rgba(255,255,255,0.06) 52px 53px);
     }
-    .field-mid-v {
-      position: absolute; left: 50%; top: 0; bottom: 0; width: 4px;
-      transform: translateX(-50%); background: rgba(255,255,255,0.24);
-      display: none;
-    }
-    .field-mid-h {
-      position: absolute; top: 50%; left: 0; right: 0; height: 4px;
-      transform: translateY(-50%); background: rgba(255,255,255,0.24);
-      display: none;
-    }
-    .field-wrap.mode-1v1 .field-mid-v { display: block; }
-    .field-wrap.mode-4p .field-mid-v,
-    .field-wrap.mode-4p .field-mid-h { display: block; }
-
+    .field-mid { position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; transform: translateX(-50%); background: rgba(255,255,255,0.34); }
     .zone {
-      position: absolute;
-      border: 6px solid rgba(255,255,255,0.24);
-      border-radius: 28px;
-      pointer-events: none;
-      transition: box-shadow .15s ease, border-color .15s ease, transform .15s ease;
+      position: absolute; top: 29%; width: 9%; height: 42%;
+      border: 6px solid rgba(255,255,255,0.32); border-radius: 28px;
     }
-    .zone.selected {
-      border-color: rgba(255,255,255,0.9);
-      box-shadow: 0 0 0 3px rgba(255,255,255,0.15), 0 0 28px rgba(255,255,255,0.28);
-      transform: scale(1.01);
-    }
-
-    .safe {
-      position: absolute;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      cursor: pointer;
-      z-index: 3;
-    }
+    .zone.left { left: 6%; }
+    .zone.right { right: 6%; }
+    .safe { position: absolute; transform: translate(-50%, -50%); text-align: center; }
     .safe-box {
-      width: 102px; height: 102px; border-radius: 24px; border: 4px solid rgba(255,255,255,0.8);
-      display: flex; align-items: center; justify-content: center; font-size: 42px;
+      width: 108px; height: 108px; border-radius: 24px; border: 4px solid rgba(255,255,255,0.8);
+      display: flex; align-items: center; justify-content: center; font-size: 46px;
       box-shadow: 0 0 36px rgba(255,255,255,0.14); margin: 0 auto;
       position: relative; overflow: hidden;
-      transition: transform .12s ease, box-shadow .12s ease;
-    }
-    .safe.selected .safe-box {
-      transform: scale(1.05);
-      box-shadow: 0 0 0 4px rgba(255,255,255,0.15), 0 0 32px rgba(255,255,255,0.30);
     }
     .safe-box.blue { background: #3b82f6; box-shadow: 0 0 36px rgba(59,130,246,0.65); }
     .safe-box.red { background: #ef4444; box-shadow: 0 0 36px rgba(239,68,68,0.65); }
-    .safe-box.yellow { background: #eab308; box-shadow: 0 0 36px rgba(234,179,8,0.65); }
-    .safe-box.green { background: #10b981; box-shadow: 0 0 36px rgba(16,185,129,0.65); }
-
     .safe-label { margin-top: 10px; font-weight: 900; font-size: 18px; }
     .hpbar {
       width: 170px; height: 14px; border-radius: 999px; background: #0f172a;
@@ -374,22 +306,12 @@
     .hpfill { height: 100%; }
     .hpfill.blue { background: #3b82f6; }
     .hpfill.red { background: #ef4444; }
-    .hpfill.yellow { background: #eab308; }
-    .hpfill.green { background: #10b981; }
-    .hptext { font-size: 13px; margin-top: 6px; color: #e2e8f0; font-weight: 700; }
-
+    .hptext { font-size: 14px; margin-top: 6px; color: #e2e8f0; font-weight: 700; }
     .unit {
-      position: absolute;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-      text-align: center;
-      z-index: 4;
+      position: absolute; transform: translate(-50%, -50%); pointer-events: none; text-align: center;
     }
     .order-arrow {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 2;
+      position: absolute; inset: 0; pointer-events: none;
     }
     .delete-cursor { cursor: not-allowed !important; }
     .unit-level {
@@ -406,7 +328,6 @@
       border: 1px solid rgba(0,0,0,0.4); overflow: hidden; margin-top: 4px;
     }
     .unit-hp-fill { height: 100%; background: #4ade80; }
-
     .under-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
     .mini-badge { padding: 12px 15px; border-radius: 18px; background: #1e293b; font-weight: 900; }
     .side-title { font-size: 28px; font-weight: 900; margin: 2px 0 12px; }
@@ -427,27 +348,25 @@
       border: 1px solid rgba(148,163,184,0.2); background: rgba(2,6,23,0.62);
       border-radius: 24px; padding: 16px; color: #cbd5e1; line-height: 1.5;
     }
-
     .overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.68); display: none;
       align-items: center; justify-content: center; padding: 16px; z-index: 80;
     }
     .overlay.show { display: flex; }
     .overlay-box {
-      width: min(620px, 100%); background: rgba(15,23,42,0.96); border: 1px solid rgba(148,163,184,0.22);
+      width: min(500px, 100%); background: rgba(15,23,42,0.96); border: 1px solid rgba(148,163,184,0.22);
       border-radius: 28px; padding: 24px; text-align: center; box-shadow: 0 24px 50px rgba(0,0,0,0.45);
     }
     .overlay-title { font-size: 44px; font-weight: 900; margin-bottom: 10px; }
     .overlay-text { color: #cbd5e1; margin-bottom: 18px; }
     .map-modal-grid { display: grid; gap: 14px; }
-
     .vs-overlay {
       position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
       background: rgba(2,6,23,0.72); z-index: 90; backdrop-filter: blur(4px);
     }
     .vs-overlay.show { display: flex; }
     .vs-box {
-      width: min(1040px, 100%); border-radius: 34px; padding: 28px;
+      width: min(860px, 100%); border-radius: 34px; padding: 28px;
       background: linear-gradient(135deg, rgba(30,41,59,0.98), rgba(15,23,42,0.98));
       border: 1px solid rgba(148,163,184,0.2); box-shadow: 0 30px 80px rgba(0,0,0,0.45);
     }
@@ -460,8 +379,6 @@
     }
     .vs-team.blue { background: rgba(37,99,235,0.2); color: #bfdbfe; border: 1px solid rgba(96,165,250,0.45); }
     .vs-team.red { background: rgba(239,68,68,0.16); color: #fecaca; border: 1px solid rgba(248,113,113,0.45); }
-    .vs-team.yellow { background: rgba(234,179,8,0.16); color: #fde68a; border: 1px solid rgba(250,204,21,0.45); }
-    .vs-team.green { background: rgba(16,185,129,0.16); color: #bbf7d0; border: 1px solid rgba(74,222,128,0.45); }
     .vs-center {
       font-size: clamp(42px, 8vw, 76px); font-weight: 900; color: white;
       text-shadow: 0 0 28px rgba(255,255,255,0.22);
@@ -504,16 +421,17 @@
           <h1 class="title" style="text-align:left;">금고 지키기</h1>
           <div class="subtitle" style="text-align:left; max-width:640px;">
             금고를 성장시키고, 군사 등급을 올리고, 적 금고를 먼저 파괴하세요.
-            4인전에서는 마지막 한 진영만 남을 때까지 싸웁니다.
+            시작 1분은 준비시간이며, 그 뒤 본격적인 진격이 시작됩니다.
           </div>
           <div class="hero-desc">
-            숫자 표기는 만, 억, 조, 경, 해, 자, 양, 구, 간, 정, 재, 극, 항아사, 아승기, 나유타, 불가사의, 무량대수, 겁, 업, 가가, 가나, 가다... 순서로 표시됩니다.
+            나라 이름을 만들어 저장하고, 다시 불러와 이어서 플레이할 수 있습니다.
+            트로피를 모아 등급을 올리고 보상 코인도 받아보세요.
           </div>
           <div class="hero-pills">
             <div class="pill">1분 준비시간</div>
-            <div class="pill">지점 클릭 이동</div>
-            <div class="pill">금고 점령</div>
-            <div class="pill">4인전 추가</div>
+            <div class="pill">클릭 지점 공격</div>
+            <div class="pill">VS 연출</div>
+            <div class="pill">트로피 등급</div>
           </div>
         </div>
 
@@ -561,7 +479,7 @@
         <div class="card panel">
           <div class="section-head">전투 시작</div>
           <div style="color:#cbd5e1; line-height:1.55;">현재 선택된 맵으로 전투를 시작합니다.</div>
-          <div id="selectedMapText" style="margin-top:16px; font-size:20px; font-weight:900; color:#bfdbfe;">선택 맵: 1 vs 1 경기장 A</div>
+          <div id="selectedMapText" style="margin-top:16px; font-size:20px; font-weight:900; color:#bfdbfe;">선택 맵: 1 vs 1 경기장</div>
           <button id="playBtn" class="btn btn-green full" style="margin-top:18px; font-size:22px;">Play!</button>
         </div>
       </div>
@@ -584,22 +502,38 @@
           <div class="topbar" style="margin-bottom:12px;">
             <div>
               <div style="font-size:13px; color:#94a3b8;">맵</div>
-              <div id="battleMapName" style="font-size:28px; font-weight:900;">1 vs 1 경기장 A</div>
+              <div style="font-size:28px; font-weight:900;">1 vs 1 경기장</div>
             </div>
             <div class="badge-row">
               <div id="playerBadge" class="badge blue"></div>
-              <div id="activeSafeBadge" class="badge"></div>
+              <div id="enemyBadge" class="badge red"></div>
               <button id="exitBattleBtn" class="btn btn-gray" style="padding:10px 14px;">나가기</button>
             </div>
           </div>
 
           <div id="notice" class="notice">아군 금고에서 군사를 소환하세요.</div>
 
-          <div id="field" class="field-wrap mode-1v1">
+          <div id="field" class="field-wrap">
             <div class="field-grid"></div>
-            <div class="field-mid-v"></div>
-            <div class="field-mid-h"></div>
-            <svg id="orderArrow" class="order-arrow" viewBox="0 0 1200 700" preserveAspectRatio="none">
+            <div class="field-mid"></div>
+            <div class="zone left"></div>
+            <div class="zone right"></div>
+
+            <div id="playerSafe" class="safe" style="left:10%; top:50%;">
+              <div class="safe-box blue">🏦</div>
+              <div class="safe-label">아군 금고</div>
+              <div class="hpbar"><div id="playerSafeFill" class="hpfill blue" style="width:100%;"></div></div>
+              <div id="playerSafeText" class="hptext">52000 / 52000</div>
+            </div>
+
+            <div id="enemySafe" class="safe" style="left:90%; top:50%;">
+              <div class="safe-box red">🏦</div>
+              <div class="safe-label">적 금고</div>
+              <div class="hpbar"><div id="enemySafeFill" class="hpfill red" style="width:100%;"></div></div>
+              <div id="enemySafeText" class="hptext">52000 / 52000</div>
+            </div>
+
+            <svg id="orderArrow" class="order-arrow" viewBox="0 0 1200 620" preserveAspectRatio="none">
               <defs>
                 <marker id="arrowHead" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
                   <path d="M0,0 L12,6 L0,12 z" fill="#fde68a"></path>
@@ -607,8 +541,6 @@
               </defs>
               <line id="orderLine" x1="0" y1="0" x2="0" y2="0" stroke="#fde68a" stroke-width="6" stroke-dasharray="14 10" marker-end="url(#arrowHead)" opacity="0"></line>
             </svg>
-            <div id="zonesLayer"></div>
-            <div id="safesLayer"></div>
             <div id="unitsLayer"></div>
           </div>
 
@@ -616,7 +548,7 @@
             <button id="attackBtn" class="btn btn-gold" style="font-size:20px;">공격!</button>
             <button id="retreatBtn" class="btn btn-red" style="font-size:20px;">철수</button>
             <div id="playerCount" class="mini-badge">아군: 0명</div>
-            <div id="aliveTeamsCount" class="mini-badge">생존 진영: 0</div>
+            <div id="enemyCount" class="mini-badge">적군: 0명</div>
             <div id="prepTimerBadge" class="mini-badge">준비시간: 60초</div>
           </div>
         </div>
@@ -652,7 +584,7 @@
                 <div class="name">3. 군사 소환</div>
                 <div id="summonNow" class="desc"></div>
                 <div id="summonCostText" class="desc"></div>
-                <div class="desc">선택된 진영 금고 앞에서 바로 소환됩니다.</div>
+                <div class="desc">누르면 아군 금고 앞에서 바로 소환됩니다.</div>
               </div>
               <div id="summonCostBadge" class="cost-badge"></div>
             </div>
@@ -670,9 +602,8 @@
           </button>
 
           <div class="tip">
-            <div style="font-weight:900; color:white; margin-bottom:6px;">맵별 트로피</div>
-            1vs1: 승리 +10, 패배 -4<br />
-            4인전: 1등 +20, 2등 +10, 3등 -10, 4등 -20
+            <div style="font-weight:900; color:white; margin-bottom:6px;">트로피 규칙</div>
+            승리 시 +10 트로피, 패배 시 -4 트로피. 트로피는 0 아래로 내려가지 않습니다.
           </div>
         </div>
       </div>
@@ -702,54 +633,21 @@
   </div>
 
   <div id="mapOverlay" class="overlay">
-    <div class="overlay-box" style="text-align:left; max-width:840px;">
+    <div class="overlay-box" style="text-align:left;">
       <div class="section-head" style="font-size:30px; margin-bottom:14px;">맵 선택</div>
       <div class="map-modal-grid">
         <div class="game-card" style="margin-bottom:0;">
           <div class="head">
             <div>
-              <div class="name">1 vs 1 경기장 A</div>
-              <div class="desc">기본 좌우 대치 맵입니다.</div>
+              <div class="name">1 vs 1 경기장</div>
+              <div class="desc">현재 선택 가능한 기본 맵입니다.</div>
             </div>
-            <button class="btn btn-blue map-select-btn" data-map="duelA" style="padding:11px 14px;">선택</button>
+            <button id="selectMapBtn" class="btn btn-blue" style="padding:11px 14px;">선택</button>
           </div>
           <div class="map-preview">
             <div class="midline"></div>
             <div class="safe-icon left"></div>
             <div class="safe-icon right"></div>
-          </div>
-        </div>
-
-        <div class="game-card" style="margin-bottom:0;">
-          <div class="head">
-            <div>
-              <div class="name">1 vs 1 경기장 B</div>
-              <div class="desc">세로 여유가 더 큰 좌우 대치 맵입니다.</div>
-            </div>
-            <button class="btn btn-blue map-select-btn" data-map="duelB" style="padding:11px 14px;">선택</button>
-          </div>
-          <div class="map-preview" style="background: radial-gradient(circle at center, #0f766e 0%, #0f172a 46%, #111827 100%);">
-            <div class="midline"></div>
-            <div class="safe-icon left" style="top:42%;"></div>
-            <div class="safe-icon right" style="top:58%;"></div>
-          </div>
-        </div>
-
-        <div class="game-card" style="margin-bottom:0;">
-          <div class="head">
-            <div>
-              <div class="name">4인 대난전</div>
-              <div class="desc">4명이 서로 싸우며 금고를 점령합니다.</div>
-            </div>
-            <button class="btn btn-blue map-select-btn" data-map="fourway" style="padding:11px 14px;">선택</button>
-          </div>
-          <div class="map-preview">
-            <div class="four-preview-grid">
-              <div class="four-quarter" style="background:rgba(59,130,246,0.12);"><div class="mini-safe" style="background:#3b82f6;"></div></div>
-              <div class="four-quarter" style="background:rgba(239,68,68,0.12);"><div class="mini-safe" style="background:#ef4444;"></div></div>
-              <div class="four-quarter" style="background:rgba(234,179,8,0.12);"><div class="mini-safe" style="background:#eab308;"></div></div>
-              <div class="four-quarter" style="background:rgba(16,185,129,0.12);"><div class="mini-safe" style="background:#10b981;"></div></div>
-            </div>
           </div>
         </div>
       </div>
@@ -760,61 +658,15 @@
   <div id="vsOverlay" class="vs-overlay">
     <div class="vs-box">
       <div style="text-align:center; color:#cbd5e1; margin-bottom:16px; font-weight:700;">전장 진입</div>
-      <div id="vsTeamsWrap"></div>
+      <div class="vs-row">
+        <div id="vsPlayerName" class="vs-team blue"></div>
+        <div class="vs-center">VS</div>
+        <div id="vsEnemyName" class="vs-team red"></div>
+      </div>
     </div>
   </div>
 
   <script>
-    const LARGE_UNITS = [
-      "", "만", "억", "조", "경", "해", "자", "양", "구", "간", "정", "재", "극",
-      "항아사", "아승기", "나유타", "불가사의", "무량대수", "겁", "업", "가가", "가나", "가다", "가라", "가마"
-    ];
-
-    const TEAM_META = {
-      blue:   { id: "blue",   label: "아군",  countryDefault: "아군",      colorClass: "blue",   color: "#3b82f6", unitBorder: "#60a5fa" },
-      red:    { id: "red",    label: "적군",  countryDefault: "적군",      colorClass: "red",    color: "#ef4444", unitBorder: "#f87171" },
-      yellow: { id: "yellow", label: "황군",  countryDefault: "황색 제국", colorClass: "yellow", color: "#eab308", unitBorder: "#fde047" },
-      green:  { id: "green",  label: "녹군",  countryDefault: "녹색 연합", colorClass: "green",  color: "#10b981", unitBorder: "#4ade80" },
-    };
-
-    const MAPS = {
-      duelA: {
-        key: "duelA",
-        name: "1 vs 1 경기장 A",
-        type: "1v1",
-        size: { w: 1200, h: 700 },
-        teams: ["blue", "red"],
-        safeLayout: {
-          blue: { x: 120, y: 350, zone: { x: 70, y: 215, w: 110, h: 270 } },
-          red:  { x: 1080, y: 350, zone: { x: 1020, y: 215, w: 110, h: 270 } },
-        }
-      },
-      duelB: {
-        key: "duelB",
-        name: "1 vs 1 경기장 B",
-        type: "1v1",
-        size: { w: 1200, h: 700 },
-        teams: ["blue", "red"],
-        safeLayout: {
-          blue: { x: 120, y: 250, zone: { x: 70, y: 110, w: 110, h: 280 } },
-          red:  { x: 1080, y: 450, zone: { x: 1020, y: 310, w: 110, h: 280 } },
-        }
-      },
-      fourway: {
-        key: "fourway",
-        name: "4인 대난전",
-        type: "4p",
-        size: { w: 1200, h: 700 },
-        teams: ["blue", "red", "yellow", "green"],
-        safeLayout: {
-          blue:   { x: 140,  y: 140, zone: { x: 40,  y: 40,  w: 230, h: 230 } },
-          red:    { x: 1060, y: 140, zone: { x: 930, y: 40,  w: 230, h: 230 } },
-          yellow: { x: 140,  y: 560, zone: { x: 40,  y: 430, w: 230, h: 230 } },
-          green:  { x: 1060, y: 560, zone: { x: 930, y: 430, w: 230, h: 230 } },
-        }
-      }
-    };
-
     const screens = {
       setup: document.getElementById('setupScreen'),
       lobby: document.getElementById('lobbyScreen'),
@@ -822,51 +674,12 @@
       battle: document.getElementById('battleScreen'),
     };
 
-    const els = {
-      newCountryInput: document.getElementById('newCountryInput'),
-      loadCountryInput: document.getElementById('loadCountryInput'),
-      recentCountries: document.getElementById('recentCountries'),
-      countryNameLobby: document.getElementById('countryNameLobby'),
-      selectedMapText: document.getElementById('selectedMapText'),
-      loadingFill: document.getElementById('loadingFill'),
-      loadingText: document.getElementById('loadingText'),
-      playerBadge: document.getElementById('playerBadge'),
-      activeSafeBadge: document.getElementById('activeSafeBadge'),
-      notice: document.getElementById('notice'),
-      field: document.getElementById('field'),
-      zonesLayer: document.getElementById('zonesLayer'),
-      safesLayer: document.getElementById('safesLayer'),
-      unitsLayer: document.getElementById('unitsLayer'),
-      playerCount: document.getElementById('playerCount'),
-      aliveTeamsCount: document.getElementById('aliveTeamsCount'),
-      prepTimerBadge: document.getElementById('prepTimerBadge'),
-      safeCurrent: document.getElementById('safeCurrent'),
-      safeNext: document.getElementById('safeNext'),
-      safeCost: document.getElementById('safeCost'),
-      rankCurrent: document.getElementById('rankCurrent'),
-      rankNext: document.getElementById('rankNext'),
-      rankCost: document.getElementById('rankCost'),
-      summonNow: document.getElementById('summonNow'),
-      summonCostText: document.getElementById('summonCostText'),
-      summonCostBadge: document.getElementById('summonCostBadge'),
-      trophyOverlay: document.getElementById('trophyOverlay'),
-      openTrophyBtn: document.getElementById('openTrophyBtn'),
-      deleteModeBtn: document.getElementById('deleteModeBtn'),
-      orderLine: document.getElementById('orderLine'),
-      trophySummaryLine: document.getElementById('trophySummaryLine'),
-      trophyGaugeFill: document.getElementById('trophyGaugeFill'),
-      trophyGaugeText: document.getElementById('trophyGaugeText'),
-      trophyRankList: document.getElementById('trophyRankList'),
-      resultOverlay: document.getElementById('resultOverlay'),
-      resultTitle: document.getElementById('resultTitle'),
-      resultText: document.getElementById('resultText'),
-      resultRewardText: document.getElementById('resultRewardText'),
-      mapOverlay: document.getElementById('mapOverlay'),
-      vsOverlay: document.getElementById('vsOverlay'),
-      vsTeamsWrap: document.getElementById('vsTeamsWrap'),
-      battleMapName: document.getElementById('battleMapName'),
-    };
-
+    const FIELD_W = 1200;
+    const FIELD_H = 620;
+    const FRIENDLY_SAFE_X = 120;
+    const ENEMY_SAFE_X = 1080;
+    const SAFE_Y = FIELD_H / 2;
+    const SAFE_RADIUS = 54;
     const BASE_SAFE_HP = 52000;
     const PREP_MS = 60000;
     const TICK = 100;
@@ -936,33 +749,80 @@
     const ENEMY_NAME_POOL = [
       '흑운 제국', '붉은 사막 연합', '철늑대 공화국', '백야 왕국', '폭풍 동맹', '회색 산맥국',
       '청동 기사단', '라그나 연방', '붉은 혜성군', '검은 파도 제국', '크로노 왕국', '서리장막국',
-      '황혼 연합', '블러드문 제국', '강철성 왕국', '새벽수호국', '유성 연방', '적안 군국',
-      '황금 매 연맹', '녹광 왕국', '자홍 성채국', '은하 기사국'
+      '황혼 연합', '블러드문 제국', '강철성 왕국', '새벽수호국', '유성 연방', '적안 군국'
     ];
 
     const ENEMY_PATTERNS = [
-      { eco: 0.50, rank: 0.50, summon: 0.65, aggression: 0.55, reserve: 1.8, claimBias: 0.52 },
-      { eco: 0.68, rank: 0.46, summon: 0.45, aggression: 0.42, reserve: 2.8, claimBias: 0.44 },
-      { eco: 0.75, rank: 0.60, summon: 0.38, aggression: 0.50, reserve: 2.4, claimBias: 0.40 },
-      { eco: 0.40, rank: 0.82, summon: 0.52, aggression: 0.64, reserve: 2.2, claimBias: 0.50 },
-      { eco: 0.34, rank: 0.40, summon: 0.90, aggression: 0.67, reserve: 1.4, claimBias: 0.36 },
-      { eco: 0.42, rank: 0.52, summon: 0.72, aggression: 0.82, reserve: 1.6, claimBias: 0.60 },
-      { eco: 0.62, rank: 0.44, summon: 0.50, aggression: 0.34, reserve: 2.6, claimBias: 0.48 },
-      { eco: 0.48, rank: 0.58, summon: 0.60, aggression: 0.46, reserve: 2.0, claimBias: 0.58 },
-      { eco: 0.84, rank: 0.40, summon: 0.28, aggression: 0.22, reserve: 3.2, claimBias: 0.30 },
-      { eco: 0.38, rank: 0.64, summon: 0.78, aggression: 0.88, reserve: 1.5, claimBias: 0.70 },
-      { eco: 0.46, rank: 0.92, summon: 0.34, aggression: 0.58, reserve: 2.5, claimBias: 0.46 },
-      { eco: 0.55, rank: 0.50, summon: 0.58, aggression: 0.52, reserve: 2.1, claimBias: 0.66 },
-      { eco: 0.36, rank: 0.54, summon: 0.66, aggression: 0.86, reserve: 1.7, claimBias: 0.72 },
-      { eco: 0.90, rank: 0.55, summon: 0.25, aggression: 0.30, reserve: 3.8, claimBias: 0.28 },
-      { eco: 0.58, rank: 0.62, summon: 0.60, aggression: 0.60, reserve: 2.0, claimBias: 0.60 },
-      { eco: 0.30, rank: 0.84, summon: 0.82, aggression: 0.92, reserve: 1.3, claimBias: 0.74 },
+      { eco: 0.50, rank: 0.50, summon: 0.65, aggression: 0.55, reserve: 1.8 },
+      { eco: 0.68, rank: 0.46, summon: 0.45, aggression: 0.42, reserve: 2.8 },
+      { eco: 0.75, rank: 0.60, summon: 0.38, aggression: 0.50, reserve: 2.4 },
+      { eco: 0.40, rank: 0.82, summon: 0.52, aggression: 0.64, reserve: 2.2 },
+      { eco: 0.34, rank: 0.40, summon: 0.90, aggression: 0.67, reserve: 1.4 },
+      { eco: 0.42, rank: 0.52, summon: 0.72, aggression: 0.82, reserve: 1.6 },
+      { eco: 0.62, rank: 0.44, summon: 0.50, aggression: 0.34, reserve: 2.6 },
+      { eco: 0.48, rank: 0.58, summon: 0.60, aggression: 0.46, reserve: 2.0 },
+      { eco: 0.84, rank: 0.40, summon: 0.28, aggression: 0.22, reserve: 3.2 },
+      { eco: 0.38, rank: 0.64, summon: 0.78, aggression: 0.88, reserve: 1.5 },
+      { eco: 0.46, rank: 0.92, summon: 0.34, aggression: 0.58, reserve: 2.5 },
+      { eco: 0.55, rank: 0.50, summon: 0.58, aggression: 0.52, reserve: 2.1 },
+      { eco: 0.36, rank: 0.54, summon: 0.66, aggression: 0.86, reserve: 1.7 },
+      { eco: 0.90, rank: 0.55, summon: 0.25, aggression: 0.30, reserve: 3.8 },
+      { eco: 0.58, rank: 0.62, summon: 0.60, aggression: 0.60, reserve: 2.0 },
+      { eco: 0.30, rank: 0.84, summon: 0.82, aggression: 0.92, reserve: 1.3 },
     ];
+
+    const els = {
+      newCountryInput: document.getElementById('newCountryInput'),
+      loadCountryInput: document.getElementById('loadCountryInput'),
+      recentCountries: document.getElementById('recentCountries'),
+      countryNameLobby: document.getElementById('countryNameLobby'),
+      selectedMapText: document.getElementById('selectedMapText'),
+      loadingFill: document.getElementById('loadingFill'),
+      loadingText: document.getElementById('loadingText'),
+      playerBadge: document.getElementById('playerBadge'),
+      enemyBadge: document.getElementById('enemyBadge'),
+      notice: document.getElementById('notice'),
+      unitsLayer: document.getElementById('unitsLayer'),
+      playerSafeFill: document.getElementById('playerSafeFill'),
+      enemySafeFill: document.getElementById('enemySafeFill'),
+      playerSafeText: document.getElementById('playerSafeText'),
+      enemySafeText: document.getElementById('enemySafeText'),
+      playerCount: document.getElementById('playerCount'),
+      enemyCount: document.getElementById('enemyCount'),
+      prepTimerBadge: document.getElementById('prepTimerBadge'),
+      safeCurrent: document.getElementById('safeCurrent'),
+      safeNext: document.getElementById('safeNext'),
+      safeCost: document.getElementById('safeCost'),
+      rankCurrent: document.getElementById('rankCurrent'),
+      rankNext: document.getElementById('rankNext'),
+      rankCost: document.getElementById('rankCost'),
+      summonNow: document.getElementById('summonNow'),
+      summonCostText: document.getElementById('summonCostText'),
+      summonCostBadge: document.getElementById('summonCostBadge'),
+      trophyOverlay: document.getElementById('trophyOverlay'),
+      openTrophyBtn: document.getElementById('openTrophyBtn'),
+      deleteModeBtn: document.getElementById('deleteModeBtn'),
+      field: document.getElementById('field'),
+      orderLine: document.getElementById('orderLine'),
+      trophySummaryLine: document.getElementById('trophySummaryLine'),
+      trophyGaugeFill: document.getElementById('trophyGaugeFill'),
+      trophyGaugeText: document.getElementById('trophyGaugeText'),
+      trophyRankList: document.getElementById('trophyRankList'),
+      resultOverlay: document.getElementById('resultOverlay'),
+      resultTitle: document.getElementById('resultTitle'),
+      resultText: document.getElementById('resultText'),
+      resultRewardText: document.getElementById('resultRewardText'),
+      mapOverlay: document.getElementById('mapOverlay'),
+      vsOverlay: document.getElementById('vsOverlay'),
+      vsPlayerName: document.getElementById('vsPlayerName'),
+      vsEnemyName: document.getElementById('vsEnemyName'),
+    };
 
     const state = {
       screen: 'setup',
       countryName: '',
-      selectedMapKey: 'duelA',
+      selectedMap: '1 vs 1 경기장',
+      enemyCountryName: '',
       loadingProgress: 0,
       loadingTimer: null,
       gameLoop: null,
@@ -971,24 +831,31 @@
       prepLoop: null,
       assaultMode: false,
       winner: null,
+      coins: 1000,
+      enemyCoins: 1000,
+      safeUpgradeLevel: 0,
+      enemySafeUpgradeLevel: 0,
+      playerRankIndex: 0,
+      enemyRankIndex: 0,
+      playerSafeHp: BASE_SAFE_HP,
+      enemySafeHp: BASE_SAFE_HP,
+      playerSafeMaxHp: BASE_SAFE_HP,
+      enemySafeMaxHp: BASE_SAFE_HP,
+      playerSafeExploding: false,
+      enemySafeExploding: false,
+      units: [],
+      ai: { timer: 0, nextActionAt: 1200, stance: 'defend', lockedMs: 0 },
+      prepRemaining: PREP_MS,
+      prepActive: true,
       trophies: 0,
       bestRankName: 'F',
       claimedRankRewards: [],
+      rankRewardQueue: [],
       resultApplied: false,
-      orderPreview: { active: false, x: 0, y: 0 },
+      enemyPatternIndex: 0,
       activeMoveOrder: null,
+      orderPreview: { active: false, x: 0, y: 0 },
       deleteMode: false,
-      prepRemaining: PREP_MS,
-      prepActive: true,
-      matchRankings: [],
-      fieldW: 1200,
-      fieldH: 700,
-      selectedSafeId: null,
-      units: [],
-      safeStates: {},
-      teamStates: {},
-      aiStates: {},
-      teamsInMatch: [],
     };
 
     function showScreen(name) {
@@ -999,10 +866,7 @@
 
     function storageKey(name) { return `vault-defense-profile-${name}`; }
 
-    function saveCountryList(list) {
-      localStorage.setItem('vault-defense-country-list', JSON.stringify(list));
-    }
-
+    function saveCountryList(list) { localStorage.setItem('vault-defense-country-list', JSON.stringify(list)); }
     function getCountryList() {
       try {
         const arr = JSON.parse(localStorage.getItem('vault-defense-country-list') || '[]');
@@ -1082,25 +946,46 @@
       return null;
     }
 
-    function formatKoreanBig(value) {
-      const n = Math.floor(Number(value) || 0);
-      if (n === 0) return "0";
-      if (n < 0) return "-" + formatKoreanBig(-n);
+    function updateLobbyProfileUI() {
+      const rank = getCurrentRankInfo(state.trophies);
+      els.openTrophyBtn.textContent = `🏆 ${state.trophies} · ${rank.name}`;
+      renderTrophyOverlay();
+    }
 
-      let num = BigInt(n);
-      const parts = [];
-      let unitIndex = 0;
-
-      while (num > 0n) {
-        const chunk = Number(num % 10000n);
-        if (chunk > 0) {
-          const unit = LARGE_UNITS[unitIndex] ?? `(${unitIndex})`;
-          parts.unshift(`${chunk}${unit}`);
-        }
-        num = num / 10000n;
-        unitIndex += 1;
+    function renderTrophyOverlay() {
+      const rank = getCurrentRankInfo(state.trophies);
+      const next = getNextRankInfo(state.trophies);
+      els.trophySummaryLine.textContent = `현재 트로피 ${state.trophies} · 현재 등급 ${rank.name}`;
+      let gaugePercent = 100;
+      let gaugeText = '최고 등급 구간입니다.';
+      if (next) {
+        const prevMin = rank.min;
+        const span = Math.max(1, next.min - prevMin);
+        gaugePercent = Math.max(0, Math.min(100, ((state.trophies - prevMin) / span) * 100));
+        gaugeText = `${next.name}까지 ${next.min - state.trophies} 트로피 남음`;
       }
-      return parts.join(" ");
+      els.trophyGaugeFill.style.width = gaugePercent + '%';
+      els.trophyGaugeText.textContent = gaugeText;
+
+      els.trophyRankList.innerHTML = '';
+      RANK_SYSTEM.forEach((r, idx) => {
+        const reached = state.trophies >= r.min;
+        const isCurrent = r.name === rank.name;
+        const nextRank = RANK_SYSTEM[idx + 1];
+        const row = document.createElement('div');
+        row.style.border = `1px solid ${r.color}55`;
+        row.style.background = isCurrent ? `${r.color}22` : (reached ? 'rgba(30,41,59,0.92)' : 'rgba(2,6,23,0.7)');
+        row.style.borderRadius = '18px';
+        row.style.padding = '12px 14px';
+        row.innerHTML = `
+          <div style="display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap;">
+            <div style="font-weight:900; color:${r.color};">${r.name}${isCurrent ? ' · 현재 등급' : reached ? ' · 달성' : ''}</div>
+            <div style="color:#cbd5e1; font-size:14px;">목표 ${r.min} 트로피 · 보상 ${r.reward} 코인</div>
+          </div>
+          <div style="color:#94a3b8; margin-top:4px; font-size:14px;">${nextRank ? `${nextRank.name} 전 단계` : '최종 등급'}</div>
+        `;
+        els.trophyRankList.appendChild(row);
+      });
     }
 
     function formatRank(index) {
@@ -1151,105 +1036,31 @@
       return BASE_SAFE_HP + currentSafeHpBonus(level);
     }
 
-    function clamp(v, min, max) {
-      return Math.max(min, Math.min(max, v));
-    }
-
+    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
     function distance(a, b) {
       const dx = a.x - b.x;
       const dy = a.y - b.y;
       return Math.hypot(dx, dy);
     }
+    function uid() { return Date.now() + '-' + Math.random().toString(36).slice(2, 9); }
 
-    function uid() {
-      return Date.now() + '-' + Math.random().toString(36).slice(2, 9);
+    function randomEnemyName() {
+      let name = ENEMY_NAME_POOL[Math.floor(Math.random() * ENEMY_NAME_POOL.length)];
+      if (name === state.countryName) name += ' II';
+      return name;
     }
 
-    function randomEnemyName(excludeNames = []) {
-      const pool = ENEMY_NAME_POOL.filter(name => !excludeNames.includes(name));
-      return pool[Math.floor(Math.random() * pool.length)] || `적국 ${Math.floor(Math.random() * 999)}`;
-    }
-
-    function getSelectedMap() {
-      return MAPS[state.selectedMapKey];
-    }
-
-    function getSafeState(safeId) {
-      return state.safeStates[safeId];
-    }
-
-    function getSelectedSafeState() {
-      return state.safeStates[state.selectedSafeId] || null;
-    }
-
-    function teamSafeIds(teamId) {
-      return Object.keys(state.safeStates).filter(id => state.safeStates[id].ownerTeamId === teamId);
-    }
-
-    function teamUnitCount(teamId) {
-      return state.units.filter(u => u.teamId === teamId).length;
-    }
-
-    function teamAlive(teamId) {
-      const hasSafe = teamSafeIds(teamId).length > 0;
-      const hasUnits = state.units.some(u => u.teamId === teamId);
-      return hasSafe || hasUnits;
-    }
-
-    function storageCountryNameForTeam(teamId) {
-      if (teamId === "blue") return state.countryName;
-      return state.teamStates[teamId]?.countryName || TEAM_META[teamId].countryDefault;
-    }
-
-    function createUnit(teamId, rankIndex, safeId, x, y) {
+    function createUnit(team, rankIndex, x, y) {
       const r = RANKS[rankIndex];
       return {
-        id: uid(),
-        teamId,
-        rankIndex,
-        safeId,
-        x,
-        y,
-        hp: r.hp,
-        maxHp: r.hp,
-        atk: r.atk,
-        speed: r.speed,
-        attackCooldown: 0,
-        engaged: false,
+        id: uid(), team, rankIndex, x, y,
+        hp: r.hp, maxHp: r.hp, atk: r.atk, speed: r.speed,
+        attackCooldown: 0, engaged: false,
       };
     }
 
-    function buildInitialTeamState(teamId, name, isPlayer = false) {
-      return {
-        teamId,
-        countryName: name,
-        isPlayer,
-        aiPattern: isPlayer ? null : ENEMY_PATTERNS[Math.floor(Math.random() * ENEMY_PATTERNS.length)],
-        ai: {
-          timer: 0,
-          nextActionAt: 900 + Math.random() * 500,
-          stance: "defend",
-          lockedMs: 0,
-          targetSafeId: null,
-        }
-      };
-    }
-
-    function buildInitialSafeState(safeId, teamId, ownerTeamId, x, y, zone) {
-      return {
-        id: safeId,
-        teamId,
-        ownerTeamId,
-        x,
-        y,
-        zone,
-        upgradeLevel: 0,
-        rankIndex: 0,
-        hp: BASE_SAFE_HP,
-        maxHp: BASE_SAFE_HP,
-        exploding: false,
-        destroyed: false,
-      };
+    function teamCount(team) {
+      return state.units.filter(u => u.team === team).length;
     }
 
     function setNotice(text) {
@@ -1268,118 +1079,48 @@
       clearInterval(state.prepLoop);
     }
 
-    function updateLobbyProfileUI() {
-      const rank = getCurrentRankInfo(state.trophies);
-      els.openTrophyBtn.textContent = `🏆 ${state.trophies} · ${rank.name}`;
-      renderTrophyOverlay();
-      els.selectedMapText.textContent = `선택 맵: ${getSelectedMap().name}`;
-    }
-
-    function renderTrophyOverlay() {
-      const rank = getCurrentRankInfo(state.trophies);
-      const next = getNextRankInfo(state.trophies);
-      els.trophySummaryLine.textContent = `현재 트로피 ${state.trophies} · 현재 등급 ${rank.name}`;
-      let gaugePercent = 100;
-      let gaugeText = '최고 등급 구간입니다.';
-      if (next) {
-        const prevMin = rank.min;
-        const span = Math.max(1, next.min - prevMin);
-        gaugePercent = Math.max(0, Math.min(100, ((state.trophies - prevMin) / span) * 100));
-        gaugeText = `${next.name}까지 ${next.min - state.trophies} 트로피 남음`;
-      }
-      els.trophyGaugeFill.style.width = gaugePercent + '%';
-      els.trophyGaugeText.textContent = gaugeText;
-
-      els.trophyRankList.innerHTML = '';
-      RANK_SYSTEM.forEach((r, idx) => {
-        const reached = state.trophies >= r.min;
-        const isCurrent = r.name === rank.name;
-        const nextRank = RANK_SYSTEM[idx + 1];
-        const row = document.createElement('div');
-        row.style.border = `1px solid ${r.color}55`;
-        row.style.background = isCurrent ? `${r.color}22` : (reached ? 'rgba(30,41,59,0.92)' : 'rgba(2,6,23,0.7)');
-        row.style.borderRadius = '18px';
-        row.style.padding = '12px 14px';
-        row.innerHTML = `
-          <div style="display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap;">
-            <div style="font-weight:900; color:${r.color};">${r.name}${isCurrent ? ' · 현재 등급' : reached ? ' · 달성' : ''}</div>
-            <div style="color:#cbd5e1; font-size:14px;">목표 ${r.min} 트로피 · 보상 ${formatKoreanBig(r.reward)} 코인</div>
-          </div>
-          <div style="color:#94a3b8; margin-top:4px; font-size:14px;">${nextRank ? `${nextRank.name} 전 단계` : '최종 등급'}</div>
-        `;
-        els.trophyRankList.appendChild(row);
-      });
-    }
-
-    function openLobby(name) {
-      state.countryName = name;
-      const profile = getProfile(name) || defaultProfile(name);
-      state.trophies = profile.trophies || 0;
-      state.bestRankName = profile.bestRankName || 'F';
-      state.claimedRankRewards = Array.isArray(profile.claimedRankRewards) ? profile.claimedRankRewards : [];
-      els.countryNameLobby.textContent = name;
-      updateLobbyProfileUI();
-      showScreen('lobby');
-    }
-
-    function resetVisualLayers() {
-      els.zonesLayer.innerHTML = '';
-      els.safesLayer.innerHTML = '';
-      els.unitsLayer.innerHTML = '';
-      els.orderLine.setAttribute('opacity', '0');
-    }
-
-    function setupFieldMode() {
-      const map = getSelectedMap();
-      state.fieldW = map.size.w;
-      state.fieldH = map.size.h;
-      els.field.classList.remove('mode-1v1', 'mode-4p');
-      els.field.classList.add(map.type === '4p' ? 'mode-4p' : 'mode-1v1');
-      document.getElementById('orderArrow').setAttribute('viewBox', `0 0 ${state.fieldW} ${state.fieldH}`);
-      els.battleMapName.textContent = map.name;
-    }
-
-    function initMatchState() {
+    function resetGameStateForMatch() {
       clearIntervals();
       state.assaultMode = false;
       state.winner = null;
+      state.coins = 1000;
+      state.enemyCoins = 1000;
+      state.safeUpgradeLevel = 0;
+      state.enemySafeUpgradeLevel = 0;
+      state.playerRankIndex = 0;
+      state.enemyRankIndex = 0;
+      state.playerSafeHp = BASE_SAFE_HP;
+      state.enemySafeHp = BASE_SAFE_HP;
+      state.playerSafeMaxHp = BASE_SAFE_HP;
+      state.enemySafeMaxHp = BASE_SAFE_HP;
+      state.playerSafeExploding = false;
+      state.enemySafeExploding = false;
       state.units = [];
-      state.safeStates = {};
-      state.teamStates = {};
-      state.aiStates = {};
-      state.matchRankings = [];
+      state.ai = { timer: 0, nextActionAt: 1200, stance: 'defend' };
+      state.prepRemaining = PREP_MS;
+      state.prepActive = true;
+      state.enemyCountryName = randomEnemyName();
+      state.enemyPatternIndex = Math.floor(Math.random() * ENEMY_PATTERNS.length);
       state.resultApplied = false;
       state.activeMoveOrder = null;
       state.orderPreview = { active: false, x: 0, y: 0 };
       state.deleteMode = false;
-      state.prepRemaining = PREP_MS;
-      state.prepActive = true;
-
-      const map = getSelectedMap();
-      setupFieldMode();
-      state.teamsInMatch = [...map.teams];
-
-      const usedNames = [state.countryName];
-      map.teams.forEach(teamId => {
-        if (teamId === "blue") {
-          state.teamStates[teamId] = buildInitialTeamState(teamId, state.countryName, true);
-        } else {
-          const enemyName = randomEnemyName(usedNames);
-          usedNames.push(enemyName);
-          state.teamStates[teamId] = buildInitialTeamState(teamId, enemyName, false);
-        }
-      });
-
-      for (const teamId of map.teams) {
-        const safeInfo = map.safeLayout[teamId];
-        const safeId = `${teamId}_safe_1`;
-        state.safeStates[safeId] = buildInitialSafeState(safeId, teamId, teamId, safeInfo.x, safeInfo.y, safeInfo.zone);
-      }
-
-      state.selectedSafeId = Object.keys(state.safeStates).find(id => state.safeStates[id].ownerTeamId === "blue") || Object.keys(state.safeStates)[0];
-      resetVisualLayers();
-      setNotice('준비시간입니다. 선택된 아군 진영을 강화하고 군사를 준비하세요.');
+      state.rankRewardQueue = [];
+      els.field.classList.remove('delete-cursor');
+      els.resultOverlay.classList.remove('show');
+      resetSafeVisuals();
+      setNotice('준비시간입니다. 금고 강화와 군사 준비를 진행하세요.');
       renderBattle();
+    }
+
+    function resetSafeVisuals() {
+      const playerBox = document.querySelector('#playerSafe .safe-box');
+      const enemyBox = document.querySelector('#enemySafe .safe-box');
+      [playerBox, enemyBox].forEach(box => {
+        box.style.opacity = '1';
+        box.style.transform = 'scale(1)';
+        box.innerHTML = '🏦';
+      });
     }
 
     function startLoading() {
@@ -1400,7 +1141,7 @@
         if (p >= 100) {
           clearInterval(state.loadingTimer);
           setTimeout(() => {
-            initMatchState();
+            resetGameStateForMatch();
             showVSOverlay();
           }, 220);
         }
@@ -1408,27 +1149,8 @@
     }
 
     function showVSOverlay() {
-      const map = getSelectedMap();
-      if (map.type === "1v1") {
-        const left = storageCountryNameForTeam("blue");
-        const right = storageCountryNameForTeam("red");
-        els.vsTeamsWrap.innerHTML = `
-          <div class="vs-row">
-            <div class="vs-team blue">${left}</div>
-            <div class="vs-center">VS</div>
-            <div class="vs-team red">${right}</div>
-          </div>
-        `;
-      } else {
-        els.vsTeamsWrap.innerHTML = `
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
-            <div class="vs-team blue">${storageCountryNameForTeam("blue")}</div>
-            <div class="vs-team red">${storageCountryNameForTeam("red")}</div>
-            <div class="vs-team yellow">${storageCountryNameForTeam("yellow")}</div>
-            <div class="vs-team green">${storageCountryNameForTeam("green")}</div>
-          </div>
-        `;
-      }
+      els.vsPlayerName.textContent = state.countryName;
+      els.vsEnemyName.textContent = state.enemyCountryName;
       els.vsOverlay.classList.add('show');
       setTimeout(() => {
         els.vsOverlay.classList.remove('show');
@@ -1440,15 +1162,8 @@
     function startGameLoops() {
       state.incomeLoop = setInterval(() => {
         if (state.winner) return;
-        Object.values(state.safeStates).forEach(safe => {
-          if (safe.destroyed) return;
-          const owner = safe.ownerTeamId;
-          safe.incomeTick = (safe.incomeTick || 0) + currentIncome(safe.upgradeLevel) * (TICK / 1000);
-          safe.incomeCarry = (safe.incomeCarry || 0) + safe.incomeTick;
-          state.teamStates[owner].coins = (state.teamStates[owner].coins || 1000);
-          state.teamStates[owner].coins += currentIncome(safe.upgradeLevel) * (TICK / 1000);
-          safe.incomeTick = 0;
-        });
+        state.coins += currentIncome(state.safeUpgradeLevel) * (TICK / 1000);
+        state.enemyCoins += currentIncome(state.enemySafeUpgradeLevel) * (TICK / 1000);
         renderBattle();
       }, TICK);
 
@@ -1457,457 +1172,274 @@
         state.prepRemaining = Math.max(0, state.prepRemaining - TICK);
         if (state.prepRemaining <= 0) {
           state.prepActive = false;
-          setNotice('준비시간 종료! 이제 선택된 진영으로 이동 명령과 공격을 할 수 있습니다.');
+          setNotice('준비시간 종료! 이제 공격하거나 철수시켜 방어할 수 있습니다.');
         } else {
-          setNotice('준비시간입니다. 선택된 진영을 강화하고 군사를 준비하세요.');
+          setNotice('준비시간입니다. 금고 강화와 군사 준비를 진행하세요.');
         }
         renderBattle();
       }, TICK);
 
       state.aiLoop = setInterval(() => {
         if (state.winner) return;
-        Object.values(state.teamStates).forEach(teamState => {
-          if (teamState.isPlayer) return;
-          teamState.ai.timer += TICK;
-          teamState.ai.lockedMs = Math.max(0, teamState.ai.lockedMs - TICK);
-        });
-        if (!state.prepActive || true) {
-          // 2/2에서 AI 본체 구현
-        }
+        state.ai.timer += TICK;
+        state.ai.lockedMs = Math.max(0, state.ai.lockedMs - TICK);
+        if (state.ai.timer < state.ai.nextActionAt) return;
+        runEnemyAI();
+        state.ai.timer = 0;
+        state.ai.nextActionAt = 800 + Math.random() * 900;
+        renderBattle();
       }, TICK);
 
       state.gameLoop = setInterval(() => {
         if (state.winner) return;
-        // 2/2에서 전투/점령/렌더 루프 구현
+        updateUnits();
+        renderBattleUnits();
+        renderSafeBars();
+        renderCounts();
       }, TICK);
     }
-  </script>
-    function runTeamAI(teamId) {
-      const teamState = state.teamStates[teamId];
-      if (!teamState || teamState.isPlayer || !teamAlive(teamId)) return;
 
-      const ai = teamState.ai;
-      const pattern = teamState.aiPattern;
-      const ownedSafeIds = teamSafeIds(teamId);
-      if (ownedSafeIds.length === 0) return;
-
-      const ownedSafes = ownedSafeIds.map(id => getSafeState(id)).filter(Boolean);
-      const activeSafe = ownedSafes.sort((a, b) => currentIncome(b.upgradeLevel) - currentIncome(a.upgradeLevel))[0];
-      if (!activeSafe) return;
-
-      const coins = teamState.coins || 0;
-      const teamUnits = state.units.filter(u => u.teamId === teamId);
-      const enemyUnits = state.units.filter(u => u.teamId !== teamId);
-      const aliveEnemyTeams = state.teamsInMatch.filter(tid => tid !== teamId && teamAlive(tid));
-      if (aliveEnemyTeams.length === 0) return;
-
-      const nearbyThreat = enemyUnits.some(u => distance(u, activeSafe) < 230);
-      const weakEnemySafe = Object.values(state.safeStates)
-        .filter(s => s.ownerTeamId !== teamId && !s.destroyed)
-        .sort((a, b) => a.hp - b.hp)[0];
+    function runEnemyAI() {
+      const pattern = ENEMY_PATTERNS[state.enemyPatternIndex];
+      const enemyUnits = state.units.filter(u => u.team === 'enemy');
+      const playerUnits = state.units.filter(u => u.team === 'player');
+      const enemyIncome = currentIncome(state.enemySafeUpgradeLevel);
+      const playerIncome = currentIncome(state.safeUpgradeLevel);
+      const enemySafeCost = nextSafeCost(state.enemySafeUpgradeLevel);
+      const enemyRankCost = nextRankCost(state.enemyRankIndex);
+      const eSummonCost = summonCost(state.enemyRankIndex);
+      const enemyCount = enemyUnits.length;
+      const pressureOnEnemy = enemyUnits.some(u => u.x > FIELD_W * 0.64);
+      const pressureOnPlayer = playerUnits.some(u => u.x < FIELD_W * 0.36);
+      const savingTarget = Math.max(enemySafeCost || 0, enemyRankCost || 0, eSummonCost * pattern.reserve);
+      const hasReserve = state.enemyCoins >= savingTarget;
 
       if (state.prepActive) {
-        const safeCost = nextSafeCost(activeSafe.upgradeLevel);
-        const rankCost = nextRankCost(activeSafe.rankIndex);
-        const summonCostNow = summonCost(activeSafe.rankIndex);
-
-        if (coins >= safeCost && (Math.random() < pattern.eco || activeSafe.upgradeLevel < 2)) {
-          teamState.coins -= safeCost;
-          activeSafe.upgradeLevel += 1;
-          const newMax = currentSafeMaxHp(activeSafe.upgradeLevel);
-          const delta = newMax - activeSafe.maxHp;
-          activeSafe.maxHp = newMax;
-          activeSafe.hp += delta;
+        if (!hasReserve && Math.random() < (0.55 - pattern.eco * 0.25)) return;
+        if (enemySafeCost && state.enemyCoins >= enemySafeCost && (enemyIncome < playerIncome || state.enemySafeUpgradeLevel < state.safeUpgradeLevel || Math.random() < pattern.eco)) {
+          state.enemyCoins -= enemySafeCost;
+          state.enemySafeUpgradeLevel += 1;
+          const newMax = currentSafeMaxHp(state.enemySafeUpgradeLevel);
+          const delta = newMax - state.enemySafeMaxHp;
+          state.enemySafeMaxHp = newMax;
+          state.enemySafeHp += delta;
           return;
         }
-
-        if (activeSafe.rankIndex < RANKS.length - 1 && coins >= rankCost && (Math.random() < pattern.rank || activeSafe.rankIndex <= 2)) {
-          teamState.coins -= rankCost;
-          activeSafe.rankIndex += 1;
+        if (state.enemyRankIndex < RANKS.length - 1 && state.enemyCoins >= enemyRankCost && (state.enemyRankIndex <= state.playerRankIndex || Math.random() < pattern.rank)) {
+          state.enemyCoins -= enemyRankCost;
+          state.enemyRankIndex += 1;
           return;
         }
-
-        if (teamUnits.length < MAX_UNITS_PER_TEAM && coins >= summonCostNow) {
-          teamState.coins -= summonCostNow;
-          spawnUnitFromSafe(activeSafe.id, teamId);
+        if (enemyCount < MAX_UNITS_PER_TEAM && state.enemyCoins >= eSummonCost && (enemyCount < 4 || Math.random() < pattern.summon)) {
+          state.enemyCoins -= eSummonCost;
+          state.units.push(createUnit('enemy', state.enemyRankIndex, ENEMY_SAFE_X - 70 - Math.random() * 22, SAFE_Y + (Math.random() * 70 - 35)));
         }
         return;
       }
 
-      if (ai.lockedMs <= 0) {
-        if (nearbyThreat) {
-          ai.stance = 'defend';
-          ai.lockedMs = 7000;
-        } else if (weakEnemySafe && (teamUnits.length >= 4 || Math.random() < pattern.aggression)) {
-          ai.stance = 'aggressive';
-          ai.lockedMs = 9000;
-          ai.targetSafeId = weakEnemySafe.id;
+      if (state.ai.lockedMs <= 0) {
+        if (pressureOnPlayer || state.enemySafeHp < state.playerSafeHp * 0.9) {
+          state.ai.stance = 'aggressive';
+          state.ai.lockedMs = 9000;
+        } else if (pressureOnEnemy || enemyUnits.length + 1 < playerUnits.length) {
+          state.ai.stance = 'defend';
+          state.ai.lockedMs = 7000;
         } else {
-          ai.stance = Math.random() < 0.5 ? 'defend' : 'aggressive';
-          ai.lockedMs = 7000;
+          state.ai.stance = Math.random() < pattern.aggression ? 'aggressive' : 'defend';
+          state.ai.lockedMs = state.ai.stance === 'aggressive' ? 8000 : 6500;
         }
       }
 
-      const safeCost = nextSafeCost(activeSafe.upgradeLevel);
-      const rankCost = nextRankCost(activeSafe.rankIndex);
-      const summonCostNow = summonCost(activeSafe.rankIndex);
+      const shouldEco = enemySafeCost && (state.enemySafeUpgradeLevel < state.safeUpgradeLevel || enemyIncome < playerIncome || state.enemySafeHp < state.enemySafeMaxHp * 0.72);
+      const shouldRank = state.enemyRankIndex < state.playerRankIndex || (enemyUnits.length >= 3 && Math.random() < pattern.rank);
+      const wantArmy = Math.min(MAX_UNITS_PER_TEAM, Math.max(4, Math.ceil(playerUnits.length * (state.ai.stance === 'aggressive' ? 1.12 : 0.92))));
 
-      if (coins >= safeCost && (activeSafe.hp < activeSafe.maxHp * 0.75 || Math.random() < pattern.eco * 0.45)) {
-        teamState.coins -= safeCost;
-        activeSafe.upgradeLevel += 1;
-        const newMax = currentSafeMaxHp(activeSafe.upgradeLevel);
-        const delta = newMax - activeSafe.maxHp;
-        activeSafe.maxHp = newMax;
-        activeSafe.hp += delta;
-        return;
-      }
-
-      if (activeSafe.rankIndex < RANKS.length - 1 && coins >= rankCost && (Math.random() < pattern.rank * 0.5)) {
-        teamState.coins -= rankCost;
-        activeSafe.rankIndex += 1;
-        return;
-      }
-
-      if (teamUnits.length < MAX_UNITS_PER_TEAM && coins >= summonCostNow) {
-        const summonTimes = coins >= summonCostNow * 2.5 && teamUnits.length <= MAX_UNITS_PER_TEAM - 2 ? 2 : 1;
-        for (let i = 0; i < summonTimes; i++) {
-          if (teamState.coins < summonCostNow) break;
-          if (teamUnitCount(teamId) >= MAX_UNITS_PER_TEAM) break;
-          teamState.coins -= summonCostNow;
-          spawnUnitFromSafe(activeSafe.id, teamId);
-        }
-      }
-
-      if (ai.stance === 'aggressive') {
-        const targetSafe = getSafeState(ai.targetSafeId) && getSafeState(ai.targetSafeId).ownerTeamId !== teamId
-          ? getSafeState(ai.targetSafeId)
-          : weakEnemySafe;
-
-        if (targetSafe) {
-          const targetPoint = { x: targetSafe.x, y: targetSafe.y };
-          state.units.forEach(u => {
-            if (u.teamId === teamId) {
-              u.engaged = true;
-              u.aiTarget = { ...targetPoint, safeId: targetSafe.id };
-            }
-          });
-        }
-      } else {
+      if (!hasReserve && enemyCount >= Math.max(3, playerUnits.length) && Math.random() < 0.45) {
         state.units.forEach(u => {
-          if (u.teamId === teamId) {
-            u.engaged = false;
-            u.aiTarget = null;
-          }
+          if (u.team === 'enemy') u.engaged = false;
         });
+        return;
       }
-    }
 
-    function spawnUnitFromSafe(safeId, teamId) {
-      const safe = getSafeState(safeId);
-      if (!safe || safe.ownerTeamId !== teamId || safe.destroyed) return;
-      const angle = Math.random() * Math.PI * 2;
-      const radius = 62 + Math.random() * 18;
-      const x = clamp(safe.x + Math.cos(angle) * radius, 20, state.fieldW - 20);
-      const y = clamp(safe.y + Math.sin(angle) * radius, 24, state.fieldH - 24);
-      state.units.push(createUnit(teamId, safe.rankIndex, safeId, x, y));
-    }
-
-    function getClosestEnemyUnit(unit, candidates) {
-      let nearest = null;
-      let nearestDist = Infinity;
-      for (const enemy of candidates) {
-        const d = distance(unit, enemy);
-        if (d < nearestDist) {
-          nearest = enemy;
-          nearestDist = d;
+      const roll = Math.random();
+      if (shouldEco && state.enemyCoins >= enemySafeCost && roll < pattern.eco) {
+        state.enemyCoins -= enemySafeCost;
+        state.enemySafeUpgradeLevel += 1;
+        const newMax = currentSafeMaxHp(state.enemySafeUpgradeLevel);
+        const delta = newMax - state.enemySafeMaxHp;
+        state.enemySafeMaxHp = newMax;
+        state.enemySafeHp += delta;
+      } else if (shouldRank && state.enemyCoins >= enemyRankCost && roll < Math.max(pattern.rank, 0.35)) {
+        state.enemyCoins -= enemyRankCost;
+        state.enemyRankIndex += 1;
+      } else if (enemyCount < wantArmy && state.enemyCoins >= eSummonCost && roll < Math.max(pattern.summon, 0.4)) {
+        const summonTimes = state.enemyCoins >= eSummonCost * 2.8 && enemyCount + 1 < wantArmy && pattern.summon > 0.7 ? 2 : 1;
+        for (let i = 0; i < summonTimes; i++) {
+          if (teamCount('enemy') >= MAX_UNITS_PER_TEAM) break;
+          if (state.enemyCoins < eSummonCost) break;
+          state.enemyCoins -= eSummonCost;
+          state.units.push(createUnit('enemy', state.enemyRankIndex, ENEMY_SAFE_X - 70 - Math.random() * 22, SAFE_Y + (Math.random() * 70 - 35)));
         }
       }
-      return { nearest, nearestDist };
-    }
 
-    function captureSafe(defeatedSafe, newOwnerTeamId) {
-      defeatedSafe.ownerTeamId = newOwnerTeamId;
-      defeatedSafe.destroyed = false;
-      defeatedSafe.exploding = false;
-      defeatedSafe.hp = Math.max(1, Math.floor(defeatedSafe.maxHp * 0.45));
-      defeatedSafe.teamId = newOwnerTeamId;
-
-      const box = document.querySelector(`[data-safe-id="${defeatedSafe.id}"] .safe-box`);
-      if (box) {
-        box.style.opacity = '1';
-        box.style.transform = 'scale(1)';
-        box.innerHTML = '🏦';
-      }
-
-      const ownerUnits = state.units.filter(u => u.teamId === newOwnerTeamId);
-      ownerUnits.forEach(u => {
-        if (u.safeId === defeatedSafe.id) return;
-        if (Math.hypot(u.x - defeatedSafe.x, u.y - defeatedSafe.y) < 80) {
-          u.safeId = defeatedSafe.id;
+      const canPush = state.enemyRankIndex >= state.playerRankIndex || enemyUnits.length >= playerUnits.length || state.enemyCoins > eSummonCost * pattern.reserve;
+      const shouldRetreat = pressureOnEnemy && enemyUnits.length + 1 < playerUnits.length && state.ai.stance === 'defend';
+      state.units.forEach(u => {
+        if (u.team === 'enemy') {
+          if (state.ai.stance === 'aggressive') u.engaged = true;
+          else if (shouldRetreat) u.engaged = false;
+          else if (state.ai.stance === 'defend') u.engaged = false;
+          else u.engaged = pressureOnPlayer && canPush;
         }
       });
-
-      if (newOwnerTeamId === 'blue') {
-        state.selectedSafeId = defeatedSafe.id;
-      }
-    }
-
-    function handleTeamElimination() {
-      const aliveList = state.teamsInMatch.filter(teamAlive);
-      const defeatedList = state.teamsInMatch.filter(tid => !teamAlive(tid) && !state.matchRankings.includes(tid));
-
-      defeatedList.forEach(tid => {
-        state.matchRankings.unshift(tid);
-      });
-
-      if (aliveList.length === 1 && !state.winner) {
-        state.matchRankings.push(aliveList[0]);
-        state.winner = aliveList[0];
-        let rewardText = '';
-
-        if (getSelectedMap().type === '4p') {
-          const ranking = [...state.matchRankings].reverse();
-          const playerRank = ranking.indexOf('blue') + 1;
-          let delta = 0;
-          if (playerRank === 1) delta = 20;
-          else if (playerRank === 2) delta = 10;
-          else if (playerRank === 3) delta = -10;
-          else delta = -20;
-
-          state.trophies = Math.max(0, state.trophies + delta);
-          const newRank = getCurrentRankInfo(state.trophies);
-          let rewardCoins = 0;
-          for (const rank of RANK_SYSTEM) {
-            if (state.trophies >= rank.min && !state.claimedRankRewards.includes(rank.name)) {
-              state.claimedRankRewards.push(rank.name);
-              rewardCoins += rank.reward;
-            }
-          }
-          state.bestRankName = newRank.name;
-          saveProfile();
-          updateLobbyProfileUI();
-          rewardText = `${playerRank}등 · ${delta >= 0 ? '+' : ''}${delta} 트로피${rewardCoins > 0 ? ` · 승급 보상 +${formatKoreanBig(rewardCoins)} 코인` : ''}`;
-
-          if (playerRank === 1) showResult('우승!', '모든 진영을 제압했습니다.', rewardText);
-          else showResult('게임 종료', `${playerRank}등으로 마쳤습니다.`, rewardText);
-        } else {
-          rewardText = applyMatchResult(state.winner === 'blue' ? 'win' : 'lose');
-          if (state.winner === 'blue') showResult('승리!', '적 금고를 먼저 파괴했습니다.', rewardText);
-          else showResult('패배', '아군 금고가 모두 파괴되었습니다.', rewardText);
-        }
-      }
     }
 
     function updateUnits() {
       const next = state.units.map(u => ({ ...u }));
+      let playerSafeHp = state.playerSafeHp;
+      let enemySafeHp = state.enemySafeHp;
 
       next.forEach(u => {
         u.attackCooldown = Math.max(0, u.attackCooldown - TICK);
       });
 
-      for (const unit of next) {
-        if (unit.hp <= 0) continue;
-        if (!teamAlive(unit.teamId)) continue;
+      for (const u of next) {
+        if (u.hp <= 0) continue;
 
-        const enemyUnits = next.filter(v => v.teamId !== unit.teamId && v.hp > 0);
-        const { nearest: nearestEnemy, nearestDist } = getClosestEnemyUnit(unit, enemyUnits);
-
-        const enemySafes = Object.values(state.safeStates).filter(s => s.ownerTeamId !== unit.teamId && !s.destroyed);
-        let targetSafe = null;
-        let safeDist = Infinity;
-        for (const safe of enemySafes) {
-          const d = Math.hypot(unit.x - safe.x, unit.y - safe.y);
-          if (d < safeDist) {
-            safeDist = d;
-            targetSafe = safe;
+        const enemies = next.filter(v => v.team !== u.team && v.hp > 0);
+        let nearestEnemy = null;
+        let nearestDist = Infinity;
+        for (const e of enemies) {
+          const d = distance(u, e);
+          if (d < nearestDist) {
+            nearestDist = d;
+            nearestEnemy = e;
           }
         }
 
-        const autoDefend = enemyUnits.some(v => {
-          const ownSafe = getSafeState(unit.safeId);
-          return ownSafe && Math.hypot(v.x - ownSafe.x, v.y - ownSafe.y) < 180;
-        });
+        const autoDefend = u.team === 'player'
+          ? next.some(v => v.team === 'enemy' && v.hp > 0 && v.x < FIELD_W / 2)
+          : next.some(v => v.team === 'player' && v.hp > 0 && v.x > FIELD_W / 2);
 
-        const playerControlled = unit.teamId === 'blue';
-        const moveOrder = playerControlled && state.activeMoveOrder ? state.activeMoveOrder : null;
-        const aiTarget = !playerControlled && unit.aiTarget ? unit.aiTarget : null;
-        const targetPoint = moveOrder || aiTarget;
+        const targetSafeX = u.team === 'player' ? ENEMY_SAFE_X : FRIENDLY_SAFE_X;
+        const targetSafeY = SAFE_Y;
+        const order = state.activeMoveOrder && u.team === 'player' ? state.activeMoveOrder : null;
+        const orderedTargetX = order ? order.x : targetSafeX;
+        const orderedTargetY = order ? order.y : targetSafeY;
+        const safeDistance = Math.hypot(u.x - targetSafeX, u.y - targetSafeY);
+        const orderedDistance = Math.hypot(u.x - orderedTargetX, u.y - orderedTargetY);
+        const canFollowOrder = !state.prepActive && (u.team === 'player' ? (!!order || autoDefend) : (u.engaged || autoDefend));
 
         let priorityEnemy = null;
-        if (targetPoint) {
-          const nearby = enemyUnits.filter(e => Math.hypot(e.x - targetPoint.x, e.y - targetPoint.y) <= 165);
+        if (order) {
+          const nearby = enemies.filter(e => Math.hypot(e.x - order.x, e.y - order.y) <= 165);
           if (nearby.length) {
             priorityEnemy = nearby.reduce((best, cur) => {
-              const bd = Math.hypot(best.x - targetPoint.x, best.y - targetPoint.y);
-              const cd = Math.hypot(cur.x - targetPoint.x, cur.y - targetPoint.y);
+              const bd = Math.hypot(best.x - order.x, best.y - order.y);
+              const cd = Math.hypot(cur.x - order.x, cur.y - order.y);
               return cd < bd ? cur : best;
             }, nearby[0]);
           }
         }
-
         const activeEnemy = priorityEnemy || nearestEnemy;
-        const activeEnemyDist = activeEnemy ? distance(unit, activeEnemy) : Infinity;
+        const activeEnemyDist = activeEnemy ? distance(u, activeEnemy) : Infinity;
+        const inSafeRange = safeDistance <= SAFE_RADIUS + 18;
 
-        const canAdvance = !state.prepActive && (playerControlled ? (!!moveOrder || autoDefend) : (unit.engaged || autoDefend));
-
-        if (activeEnemy && activeEnemyDist <= 28) {
-          if (unit.attackCooldown <= 0) {
-            activeEnemy.hp -= unit.atk;
-            unit.attackCooldown = 780;
+        if (activeEnemy && activeEnemyDist <= 28 && (!order || Math.hypot(u.x - order.x, u.y - order.y) > 110 || priorityEnemy)) {
+          if (u.attackCooldown <= 0) {
+            activeEnemy.hp -= u.atk;
+            u.attackCooldown = 780;
           }
-          continue;
-        }
-
-        const preferredSafe = targetPoint && targetPoint.safeId
-          ? getSafeState(targetPoint.safeId)
-          : targetSafe;
-
-        if (preferredSafe) {
-          const distToPreferredSafe = Math.hypot(unit.x - preferredSafe.x, unit.y - preferredSafe.y);
-          if (canAdvance && distToPreferredSafe <= 62) {
-            if (unit.attackCooldown <= 0) {
-              preferredSafe.hp -= unit.atk;
-              unit.attackCooldown = 820;
-              if (preferredSafe.hp <= 0 && !preferredSafe.exploding) {
-                preferredSafe.exploding = true;
-                if (getSelectedMap().type === '4p') {
-                  captureSafe(preferredSafe, unit.teamId);
-                } else {
-                  preferredSafe.hp = 0;
-                  if (preferredSafe.ownerTeamId === 'blue') triggerSafeExplosion('player');
-                  else triggerSafeExplosion('enemy');
-                }
-              }
-            }
-            continue;
+        } else if (!order && u.team === 'enemy' && canFollowOrder && inSafeRange) {
+          if (u.attackCooldown <= 0) {
+            playerSafeHp -= u.atk;
+            u.attackCooldown = 820;
           }
-        }
-
-        if (activeEnemy && canAdvance && activeEnemyDist < 210 && (!targetPoint || priorityEnemy)) {
-          const dx = activeEnemy.x - unit.x;
-          const dy = activeEnemy.y - unit.y;
+        } else if (activeEnemy && canFollowOrder && activeEnemyDist < 210 && (!order || priorityEnemy || orderedDistance > 110)) {
+          const dx = activeEnemy.x - u.x;
+          const dy = activeEnemy.y - u.y;
           const d = Math.max(1, Math.hypot(dx, dy));
-          unit.x += (dx / d) * unit.speed * 3.7;
-          unit.y += (dy / d) * unit.speed * 3.7;
-        } else if (targetPoint && canAdvance) {
-          const dx = targetPoint.x - unit.x;
-          const dy = targetPoint.y - unit.y;
+          u.x += (dx / d) * u.speed * 3.7;
+          u.y += (dy / d) * u.speed * 3.7;
+        } else if (order && canFollowOrder && orderedDistance > 20) {
+          const dx = orderedTargetX - u.x;
+          const dy = orderedTargetY - u.y;
           const d = Math.max(1, Math.hypot(dx, dy));
-          if (d > 20) {
-            unit.x += (dx / d) * unit.speed * 4.0;
-            unit.y += (dy / d) * unit.speed * 4.0;
-          }
-        } else if (preferredSafe && canAdvance) {
-          const dx = preferredSafe.x - unit.x;
-          const dy = preferredSafe.y - unit.y;
+          u.x += (dx / d) * u.speed * 4.0;
+          u.y += (dy / d) * u.speed * 4.0;
+        } else if (!order && u.team === 'enemy' && canFollowOrder) {
+          const dx = targetSafeX - u.x;
+          const dy = targetSafeY - u.y;
           const d = Math.max(1, Math.hypot(dx, dy));
-          unit.x += (dx / d) * unit.speed * 3.5;
-          unit.y += (dy / d) * unit.speed * 3.5;
+          u.x += (dx / d) * u.speed * 3.8;
+          u.y += (dy / d) * u.speed * 3.8;
         } else {
-          const ownSafe = getSafeState(unit.safeId);
-          const homeX = ownSafe ? ownSafe.x : unit.x;
-          const homeY = ownSafe ? ownSafe.y : unit.y;
-          const dx = homeX - unit.x;
-          const dy = homeY - unit.y;
+          const homeX = u.team === 'player' ? FRIENDLY_SAFE_X + 88 : ENEMY_SAFE_X - 88;
+          const homeY = SAFE_Y;
+          const dx = homeX - u.x;
+          const dy = homeY - u.y;
           const d = Math.max(1, Math.hypot(dx, dy));
           if (d > 24) {
-            unit.x += (dx / d) * unit.speed * 2.6;
-            unit.y += (dy / d) * unit.speed * 2.6;
+            u.x += (dx / d) * u.speed * 2.8;
+            u.y += (dy / d) * u.speed * 2.8;
           }
         }
 
-        unit.x = clamp(unit.x, 18, state.fieldW - 18);
-        unit.y = clamp(unit.y, 24, state.fieldH - 24);
+        u.x = clamp(u.x, 18, FIELD_W - 18);
+        u.y = clamp(u.y, 34, FIELD_H - 34);
       }
 
       state.units = next.filter(u => u.hp > 0);
+      state.playerSafeHp = Math.max(0, playerSafeHp);
+      state.enemySafeHp = Math.max(0, enemySafeHp);
 
       if (state.activeMoveOrder) {
-        const selectedOwner = getSelectedSafeState()?.ownerTeamId;
-        const movingUnits = state.units.filter(u => u.teamId === selectedOwner);
-        const allNear = movingUnits.every(u => Math.hypot(u.x - state.activeMoveOrder.x, u.y - state.activeMoveOrder.y) < 26);
+        const allNear = state.units.filter(u => u.team === 'player').every(u => Math.hypot(u.x - state.activeMoveOrder.x, u.y - state.activeMoveOrder.y) < 24 || u.hp <= 0);
         if (allNear) state.activeMoveOrder = null;
       }
 
-      handleTeamElimination();
-    }
-
-    function renderZonesAndSafes() {
-      els.zonesLayer.innerHTML = '';
-      els.safesLayer.innerHTML = '';
-
-      Object.values(state.safeStates).forEach(safe => {
-        const meta = TEAM_META[safe.ownerTeamId];
-        const isSelected = safe.id === state.selectedSafeId;
-
-        const zone = document.createElement('div');
-        zone.className = `zone ${isSelected ? 'selected' : ''}`;
-        zone.style.left = `${(safe.zone.x / state.fieldW) * 100}%`;
-        zone.style.top = `${(safe.zone.y / state.fieldH) * 100}%`;
-        zone.style.width = `${(safe.zone.w / state.fieldW) * 100}%`;
-        zone.style.height = `${(safe.zone.h / state.fieldH) * 100}%`;
-        zone.style.borderColor = isSelected ? `${meta.color}` : 'rgba(255,255,255,0.24)';
-        els.zonesLayer.appendChild(zone);
-
-        const safeWrap = document.createElement('div');
-        safeWrap.className = `safe ${isSelected ? 'selected' : ''}`;
-        safeWrap.dataset.safeId = safe.id;
-        safeWrap.style.left = `${(safe.x / state.fieldW) * 100}%`;
-        safeWrap.style.top = `${(safe.y / state.fieldH) * 100}%`;
-        safeWrap.innerHTML = `
-          <div class="safe-box ${meta.colorClass}">🏦</div>
-          <div class="safe-label">${storageCountryNameForTeam(safe.ownerTeamId)}</div>
-          <div class="hpbar"><div class="hpfill ${meta.colorClass}" style="width:${(safe.hp / safe.maxHp) * 100}%;"></div></div>
-          <div class="hptext">${formatKoreanBig(safe.hp)} / ${formatKoreanBig(safe.maxHp)}</div>
-        `;
-        safeWrap.onclick = () => {
-          if (safe.ownerTeamId === 'blue') {
-            state.selectedSafeId = safe.id;
-            renderBattle();
-          }
-        };
-        els.safesLayer.appendChild(safeWrap);
-      });
+      if (state.enemySafeHp <= 0 && !state.winner && !state.enemySafeExploding) {
+        state.enemySafeHp = 0;
+        state.enemySafeExploding = true;
+        triggerSafeExplosion('enemy');
+      }
+      if (state.playerSafeHp <= 0 && !state.winner && !state.playerSafeExploding) {
+        state.playerSafeHp = 0;
+        state.playerSafeExploding = true;
+        triggerSafeExplosion('player');
+      }
     }
 
     function renderBattle() {
-      const playerCoins = state.teamStates.blue?.coins || 0;
-      const selectedSafe = getSelectedSafeState();
-      const selectedOwner = selectedSafe?.ownerTeamId || 'blue';
-      const selectedMeta = TEAM_META[selectedOwner];
+      const pIncome = currentIncome(state.safeUpgradeLevel);
+      const eIncome = currentIncome(state.enemySafeUpgradeLevel);
+      els.playerBadge.textContent = `${state.countryName} · ${Math.floor(state.coins)} 코인 · ${pIncome}/s`;
+      els.enemyBadge.textContent = `${state.enemyCountryName || '적군'} · ${Math.floor(state.enemyCoins)} 코인 · ${eIncome}/s`;
 
-      els.playerBadge.textContent = `${state.countryName} · ${formatKoreanBig(playerCoins)} 코인`;
-      els.activeSafeBadge.className = `badge ${selectedMeta.colorClass}`;
-      els.activeSafeBadge.textContent = selectedSafe ? `선택 진영: ${storageCountryNameForTeam(selectedOwner)}` : '선택 진영 없음';
+      const safeCost = nextSafeCost(state.safeUpgradeLevel);
+      els.safeCurrent.textContent = `현재 생산량: ${pIncome}/s · 현재 체력: ${Math.floor(state.playerSafeMaxHp)}`;
+      els.safeNext.textContent = `다음 생산량: ${currentIncome(state.safeUpgradeLevel + 1)}/s · 다음 체력: ${Math.floor(currentSafeMaxHp(state.safeUpgradeLevel + 1))}`;
+      els.safeCost.textContent = safeCost;
 
-      if (selectedSafe) {
-        const income = currentIncome(selectedSafe.upgradeLevel);
-        const cost = nextSafeCost(selectedSafe.upgradeLevel);
-        const rank = RANKS[selectedSafe.rankIndex];
-        const nextR = RANKS[Math.min(RANKS.length - 1, selectedSafe.rankIndex + 1)];
-        const summon = summonCost(selectedSafe.rankIndex);
+      const rank = RANKS[state.playerRankIndex];
+      const nextR = RANKS[Math.min(RANKS.length - 1, state.playerRankIndex + 1)];
+      els.rankCurrent.innerHTML = `현재 등급: <span style="color:${rank.color}; font-weight:900;">${formatRank(state.playerRankIndex)}</span>`;
+      els.rankNext.innerHTML = `다음 등급: ${state.playerRankIndex < RANKS.length - 1 ? `<span style="color:${nextR.color}; font-weight:900;">${formatRank(state.playerRankIndex + 1)}</span>` : '최대'}`;
+      els.rankCost.textContent = state.playerRankIndex < RANKS.length - 1 ? nextRankCost(state.playerRankIndex) : 'MAX';
+      els.rankCost.style.color = rank.color;
+      els.rankCost.style.borderColor = rank.color;
+      els.rankCost.style.background = rank.color + '22';
 
-        els.safeCurrent.textContent = `현재 생산량: ${formatKoreanBig(income)}/s · 현재 체력: ${formatKoreanBig(selectedSafe.maxHp)}`;
-        els.safeNext.textContent = `다음 생산량: ${formatKoreanBig(currentIncome(selectedSafe.upgradeLevel + 1))}/s · 다음 체력: ${formatKoreanBig(currentSafeMaxHp(selectedSafe.upgradeLevel + 1))}`;
-        els.safeCost.textContent = formatKoreanBig(cost);
-
-        els.rankCurrent.innerHTML = `현재 등급: <span style="color:${rank.color}; font-weight:900;">${formatRank(selectedSafe.rankIndex)}</span>`;
-        els.rankNext.innerHTML = `다음 등급: ${selectedSafe.rankIndex < RANKS.length - 1 ? `<span style="color:${nextR.color}; font-weight:900;">${formatRank(selectedSafe.rankIndex + 1)}</span>` : '최대'}`;
-        els.rankCost.textContent = selectedSafe.rankIndex < RANKS.length - 1 ? formatKoreanBig(nextRankCost(selectedSafe.rankIndex)) : 'MAX';
-        els.rankCost.style.color = rank.color;
-        els.rankCost.style.borderColor = rank.color;
-        els.rankCost.style.background = rank.color + '22';
-
-        els.summonNow.innerHTML = `현재 소환 군사: <span style="color:${rank.color}; font-weight:900;">${formatRank(selectedSafe.rankIndex)}</span>`;
-        els.summonCostText.textContent = `소환 비용: ${formatKoreanBig(summon)} · 최대 10명`;
-        els.summonCostBadge.textContent = formatKoreanBig(summon);
-        els.summonCostBadge.style.color = rank.color;
-        els.summonCostBadge.style.borderColor = rank.color;
-        els.summonCostBadge.style.background = rank.color + '22';
-      }
+      const summon = summonCost(state.playerRankIndex);
+      els.summonNow.innerHTML = `현재 소환 군사: <span style="color:${rank.color}; font-weight:900;">${formatRank(state.playerRankIndex)}</span>`;
+      els.summonCostText.textContent = `소환 비용: ${summon} · 최대 10명`;
+      els.summonCostBadge.textContent = summon;
+      els.summonCostBadge.style.color = rank.color;
+      els.summonCostBadge.style.borderColor = rank.color;
+      els.summonCostBadge.style.background = rank.color + '22';
 
       els.prepTimerBadge.textContent = state.prepActive ? `준비시간: ${Math.ceil(state.prepRemaining / 1000)}초` : '준비시간 종료';
-      renderZonesAndSafes();
+      renderSafeBars();
       renderCounts();
       renderBattleUnits();
       renderOrderArrow();
@@ -1915,40 +1447,52 @@
 
     function renderOrderArrow() {
       const line = els.orderLine;
-      if (!state.orderPreview.active || !getSelectedSafeState()) {
+      if (!state.orderPreview.active) {
         line.setAttribute('opacity', '0');
         return;
       }
-      const selectedSafe = getSelectedSafeState();
       line.setAttribute('opacity', '1');
-      line.setAttribute('x1', selectedSafe.x);
-      line.setAttribute('y1', selectedSafe.y);
+      line.setAttribute('x1', FRIENDLY_SAFE_X);
+      line.setAttribute('y1', SAFE_Y);
       line.setAttribute('x2', state.orderPreview.x);
       line.setAttribute('y2', state.orderPreview.y);
+    }
+
+    function renderSafeBars() {
+      els.playerSafeFill.style.width = (state.playerSafeHp / state.playerSafeMaxHp) * 100 + '%';
+      els.enemySafeFill.style.width = (state.enemySafeHp / state.enemySafeMaxHp) * 100 + '%';
+      els.playerSafeText.textContent = `${Math.ceil(state.playerSafeHp)} / ${Math.floor(state.playerSafeMaxHp)}`;
+      els.enemySafeText.textContent = `${Math.ceil(state.enemySafeHp)} / ${Math.floor(state.enemySafeMaxHp)}`;
+    }
+
+    function renderCounts() {
+      els.playerCount.textContent = `아군: ${teamCount('player')}명`;
+      els.enemyCount.textContent = `적군: ${teamCount('enemy')}명`;
     }
 
     function renderBattleUnits() {
       els.unitsLayer.innerHTML = '';
       state.units.forEach(u => {
         const rank = RANKS[u.rankIndex];
-        const meta = TEAM_META[u.teamId];
         const div = document.createElement('div');
         div.className = 'unit';
-        div.style.left = (u.x / state.fieldW) * 100 + '%';
-        div.style.top = (u.y / state.fieldH) * 100 + '%';
+        div.style.left = (u.x / FIELD_W) * 100 + '%';
+        div.style.top = (u.y / FIELD_H) * 100 + '%';
+        const borderColor = u.team === 'player' ? '#60a5fa' : '#f87171';
         div.innerHTML = `
           <div class="unit-level">${rank.level}</div>
-          <div class="unit-body" style="background:${rank.color}; border-color:${meta.unitBorder}; box-shadow:0 0 14px ${rank.color};"></div>
+          <div class="unit-body" style="background:${rank.color}; border-color:${borderColor}; box-shadow:0 0 14px ${rank.color};"></div>
           <div class="unit-hp"><div class="unit-hp-fill" style="width:${(u.hp / u.maxHp) * 100}%;"></div></div>
         `;
         els.unitsLayer.appendChild(div);
       });
     }
 
-    function renderCounts() {
-      const playerOwner = getSelectedSafeState()?.ownerTeamId || 'blue';
-      els.playerCount.textContent = `${storageCountryNameForTeam(playerOwner)} 군사: ${teamUnitCount(playerOwner)}명`;
-      els.aliveTeamsCount.textContent = `생존 진영: ${state.teamsInMatch.filter(teamAlive).length}`;
+    function showResult(title, text, rewardText) {
+      els.resultTitle.textContent = title;
+      els.resultText.textContent = text;
+      els.resultRewardText.textContent = rewardText || '';
+      els.resultOverlay.classList.add('show');
     }
 
     function applyMatchResult(result) {
@@ -1967,98 +1511,126 @@
       saveProfile();
       updateLobbyProfileUI();
       const deltaText = result === 'win' ? '+10 트로피' : '-4 트로피';
-      return rewardCoins > 0 ? `${deltaText} · 승급 보상 +${formatKoreanBig(rewardCoins)} 코인` : deltaText;
-    }
-
-    function showResult(title, text, rewardText) {
-      els.resultTitle.textContent = title;
-      els.resultText.textContent = text;
-      els.resultRewardText.textContent = rewardText || '';
-      els.resultOverlay.classList.add('show');
+      return rewardCoins > 0 ? `${deltaText} · 승급 보상 +${rewardCoins} 코인` : deltaText;
     }
 
     function playerBuySafeUpgrade() {
-      const safe = getSelectedSafeState();
-      if (!safe || safe.ownerTeamId !== 'blue' || state.winner) return;
-      const cost = nextSafeCost(safe.upgradeLevel);
-      if ((state.teamStates.blue.coins || 0) < cost) {
+      if (state.winner) return;
+      const cost = nextSafeCost(state.safeUpgradeLevel);
+      if (state.coins < cost) {
         setNotice('코인이 부족합니다.');
         return;
       }
-      state.teamStates.blue.coins -= cost;
-      safe.upgradeLevel += 1;
-      const newMax = currentSafeMaxHp(safe.upgradeLevel);
-      const delta = newMax - safe.maxHp;
-      safe.maxHp = newMax;
-      safe.hp += delta;
-      setNotice(`선택 금고 생산량이 ${formatKoreanBig(currentIncome(safe.upgradeLevel))}/s 로 강화되고 체력도 크게 증가했습니다!`);
+      state.coins -= cost;
+      state.safeUpgradeLevel += 1;
+      const newMax = currentSafeMaxHp(state.safeUpgradeLevel);
+      const delta = newMax - state.playerSafeMaxHp;
+      state.playerSafeMaxHp = newMax;
+      state.playerSafeHp += delta;
+      setNotice(`금고 생산량이 ${currentIncome(state.safeUpgradeLevel)}/s 로 강화되고 체력도 크게 증가했습니다!`);
       renderBattle();
     }
 
     function playerBuyRankUpgrade() {
-      const safe = getSelectedSafeState();
-      if (!safe || safe.ownerTeamId !== 'blue' || state.winner) return;
-      if (safe.rankIndex >= RANKS.length - 1) {
+      if (state.winner) return;
+      if (state.playerRankIndex >= RANKS.length - 1) {
         setNotice('군사 강화가 최대 단계입니다.');
         return;
       }
-      const cost = nextRankCost(safe.rankIndex);
-      if ((state.teamStates.blue.coins || 0) < cost) {
+      const cost = nextRankCost(state.playerRankIndex);
+      if (state.coins < cost) {
         setNotice('코인이 부족합니다.');
         return;
       }
-      state.teamStates.blue.coins -= cost;
-      safe.rankIndex += 1;
-      setNotice(`선택 진영 군사 등급이 ${formatRank(safe.rankIndex)}(으)로 상승!`);
+      state.coins -= cost;
+      state.playerRankIndex += 1;
+      setNotice(`군사 등급이 ${formatRank(state.playerRankIndex)}(으)로 상승!`);
       renderBattle();
     }
 
     function playerSummon() {
-      const safe = getSelectedSafeState();
-      if (!safe || safe.ownerTeamId !== 'blue' || state.winner) return;
-      if (teamUnitCount('blue') >= MAX_UNITS_PER_TEAM) {
+      if (state.winner) return;
+      if (teamCount('player') >= MAX_UNITS_PER_TEAM) {
         setNotice('아군 군사는 최대 10명까지 소환할 수 있습니다.');
         return;
       }
-      const cost = summonCost(safe.rankIndex);
-      if ((state.teamStates.blue.coins || 0) < cost) {
+      const cost = summonCost(state.playerRankIndex);
+      if (state.coins < cost) {
         setNotice('군사 소환 코인이 부족합니다.');
         return;
       }
-      state.teamStates.blue.coins -= cost;
-      spawnUnitFromSafe(safe.id, 'blue');
-      setNotice(`${formatRank(safe.rankIndex)} 군사를 소환했습니다.`);
+      state.coins -= cost;
+      state.units.push(createUnit('player', state.playerRankIndex, FRIENDLY_SAFE_X + 70 + Math.random() * 20, SAFE_Y + (Math.random() * 70 - 35)));
+      setNotice(`${formatRank(state.playerRankIndex)} 군사를 소환했습니다.`);
       renderBattle();
     }
 
-    function startLoading() {
-      state.loadingProgress = 0;
-      els.loadingFill.style.width = '0%';
-      els.loadingText.textContent = '0%';
-      showScreen('loading');
-      clearInterval(state.loadingTimer);
-      state.loadingTimer = setInterval(() => {
-        let p = state.loadingProgress;
-        if (p < 70) p += 7;
-        else if (p < 92) p += 3;
-        else p += 2;
-        p = Math.min(100, p);
-        state.loadingProgress = p;
-        els.loadingFill.style.width = p + '%';
-        els.loadingText.textContent = p + '%';
-        if (p >= 100) {
-          clearInterval(state.loadingTimer);
-          setTimeout(() => {
-            initMatchState();
-            showVSOverlay();
-          }, 220);
+    function triggerSafeExplosion(team) {
+      const safeEl = document.getElementById(team === 'player' ? 'playerSafe' : 'enemySafe');
+      const box = safeEl.querySelector('.safe-box');
+      box.animate([
+        { transform: 'scale(1) rotate(0deg)', filter: 'brightness(1)' },
+        { transform: 'scale(1.18) rotate(-6deg)', filter: 'brightness(1.8)' },
+        { transform: 'scale(0.82) rotate(7deg)', filter: 'brightness(0.9)' },
+        { transform: 'scale(1.45) rotate(-10deg)', filter: 'brightness(2.2)', opacity: 1 },
+        { transform: 'scale(0.2) rotate(20deg)', filter: 'brightness(2.8)', opacity: 0 }
+      ], { duration: 900, easing: 'ease-out' });
+
+      for (let i = 0; i < 10; i++) {
+        const spark = document.createElement('div');
+        spark.style.position = 'absolute';
+        spark.style.left = '50%';
+        spark.style.top = '50%';
+        spark.style.width = '14px';
+        spark.style.height = '14px';
+        spark.style.borderRadius = '999px';
+        spark.style.background = team === 'player' ? '#60a5fa' : '#f87171';
+        spark.style.pointerEvents = 'none';
+        safeEl.appendChild(spark);
+        const angle = (Math.PI * 2 * i) / 10;
+        const dx = Math.cos(angle) * (70 + Math.random() * 40);
+        const dy = Math.sin(angle) * (70 + Math.random() * 40);
+        spark.animate([
+          { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+          { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.2)`, opacity: 0 }
+        ], { duration: 850, easing: 'ease-out' }).onfinish = () => spark.remove();
+      }
+
+      setTimeout(() => {
+        if (state.winner) return;
+        let rewardText = '';
+        if (team === 'enemy') {
+          state.winner = 'player';
+          rewardText = applyMatchResult('win');
+          showResult('승리!', '적 금고를 먼저 파괴했습니다.', rewardText);
+          setNotice('승리! 적 금고가 폭발했습니다.');
+        } else {
+          state.winner = 'enemy';
+          rewardText = applyMatchResult('lose');
+          showResult('패배', '아군 금고가 파괴되었습니다.', rewardText);
+          setNotice('패배... 아군 금고가 폭발했습니다.');
         }
-      }, 80);
+      }, 920);
+    }
+
+    function openLobby(name) {
+      state.countryName = name;
+      const profile = getProfile(name) || defaultProfile(name);
+      state.trophies = profile.trophies || 0;
+      state.bestRankName = profile.bestRankName || 'F';
+      state.claimedRankRewards = Array.isArray(profile.claimedRankRewards) ? profile.claimedRankRewards : [];
+      els.countryNameLobby.textContent = name;
+      els.selectedMapText.textContent = `선택 맵: ${state.selectedMap}`;
+      updateLobbyProfileUI();
+      showScreen('lobby');
     }
 
     document.getElementById('startNewBtn').onclick = () => {
       const name = els.newCountryInput.value.trim();
-      if (!name) return alert('나라 이름을 입력하세요.');
+      if (!name) {
+        alert('나라 이름을 입력하세요.');
+        return;
+      }
       registerCountry(name);
       renderRecentCountries();
       openLobby(name);
@@ -2066,9 +1638,15 @@
 
     document.getElementById('loadBtn').onclick = () => {
       const name = els.loadCountryInput.value.trim();
-      if (!name) return alert('나라 이름을 입력하세요.');
+      if (!name) {
+        alert('나라 이름을 입력하세요.');
+        return;
+      }
       const list = getCountryList();
-      if (!list.includes(name) && !getProfile(name)) return alert('저장된 나라 이름이 없습니다.');
+      if (!list.includes(name) && !getProfile(name)) {
+        alert('저장된 나라 이름이 없습니다.');
+        return;
+      }
       localStorage.setItem('vault-defense-last-country', name);
       openLobby(name);
     };
@@ -2084,14 +1662,11 @@
     };
     document.getElementById('openMapBtn').onclick = () => { els.mapOverlay.classList.add('show'); };
     document.getElementById('closeMapBtn').onclick = () => { els.mapOverlay.classList.remove('show'); };
-
-    document.querySelectorAll('.map-select-btn').forEach(btn => {
-      btn.onclick = () => {
-        state.selectedMapKey = btn.dataset.map;
-        els.selectedMapText.textContent = `선택 맵: ${MAPS[state.selectedMapKey].name}`;
-        els.mapOverlay.classList.remove('show');
-      };
-    });
+    document.getElementById('selectMapBtn').onclick = () => {
+      state.selectedMap = '1 vs 1 경기장';
+      els.selectedMapText.textContent = `선택 맵: ${state.selectedMap}`;
+      els.mapOverlay.classList.remove('show');
+    };
 
     document.getElementById('playBtn').onclick = () => { startLoading(); };
     document.getElementById('exitBattleBtn').onclick = () => { clearIntervals(); showScreen('lobby'); };
@@ -2108,7 +1683,7 @@
     document.getElementById('deleteModeBtn').onclick = () => {
       state.deleteMode = !state.deleteMode;
       els.field.classList.toggle('delete-cursor', state.deleteMode);
-      setNotice(state.deleteMode ? '삭제 모드입니다. 삭제할 선택 진영 군사를 클릭하세요.' : '삭제 모드를 종료했습니다.');
+      setNotice(state.deleteMode ? '삭제 모드입니다. 삭제할 아군 군사를 클릭하세요.' : '삭제 모드를 종료했습니다.');
     };
 
     document.getElementById('attackBtn').onclick = () => {
@@ -2117,34 +1692,20 @@
         setNotice('아직 준비시간입니다. 준비시간이 끝나면 공격할 수 있습니다.');
         return;
       }
-      const safe = getSelectedSafeState();
-      if (!safe || safe.ownerTeamId !== 'blue') {
-        setNotice('아군 진영을 선택해야 합니다.');
-        return;
-      }
       state.assaultMode = true;
       state.activeMoveOrder = null;
-      state.orderPreview = { active: true, x: safe.x + 120, y: safe.y };
+      state.orderPreview = { active: true, x: FRIENDLY_SAFE_X + 140, y: SAFE_Y };
       renderOrderArrow();
-      setNotice('공격 명령 대기중. 화살표가 보이는 상태에서 원하는 위치를 클릭해야 이동합니다.');
-    };
+      setNotice('
 
     document.getElementById('retreatBtn').onclick = () => {
       if (state.winner) return;
-      const safe = getSelectedSafeState();
-      if (!safe) return;
-      const owner = safe.ownerTeamId;
       state.assaultMode = false;
       state.activeMoveOrder = null;
       state.orderPreview = { active: false, x: 0, y: 0 };
-      state.units.forEach(u => {
-        if (u.teamId === owner) {
-          u.engaged = false;
-          u.aiTarget = null;
-        }
-      });
+      state.units.forEach(u => { if (u.team === 'player') u.engaged = false; });
       renderOrderArrow();
-      setNotice('철수! 선택 진영 군사가 금고 쪽으로 복귀합니다.');
+      setNotice('철수! 아군 군사가 금고 쪽으로 복귀합니다.');
     };
 
     els.field.addEventListener('mousemove', (e) => {
@@ -2152,18 +1713,17 @@
       const rect = els.field.getBoundingClientRect();
       state.orderPreview = {
         active: true,
-        x: clamp(((e.clientX - rect.left) / rect.width) * state.fieldW, 30, state.fieldW - 30),
-        y: clamp(((e.clientY - rect.top) / rect.height) * state.fieldH, 30, state.fieldH - 30)
+        x: clamp(((e.clientX - rect.left) / rect.width) * FIELD_W, 30, FIELD_W - 30),
+        y: clamp(((e.clientY - rect.top) / rect.height) * FIELD_H, 30, FIELD_H - 30)
       };
       renderOrderArrow();
     });
 
     els.field.addEventListener('mouseleave', () => {
-      const safe = getSelectedSafeState();
       if (state.activeMoveOrder) {
         state.orderPreview = { active: false, x: 0, y: 0 };
-      } else if (state.assaultMode && safe) {
-        state.orderPreview = { active: true, x: safe.x + 120, y: safe.y };
+      } else if (state.assaultMode) {
+        state.orderPreview = { active: true, x: FRIENDLY_SAFE_X + 140, y: SAFE_Y };
       } else {
         state.orderPreview = { active: false, x: 0, y: 0 };
       }
@@ -2172,28 +1732,25 @@
 
     els.field.addEventListener('click', (e) => {
       const rect = els.field.getBoundingClientRect();
-      const x = clamp(((e.clientX - rect.left) / rect.width) * state.fieldW, 30, state.fieldW - 30);
-      const y = clamp(((e.clientY - rect.top) / rect.height) * state.fieldH, 30, state.fieldH - 30);
-
-      const selectedSafe = getSelectedSafeState();
-      if (!selectedSafe) return;
+      const x = clamp(((e.clientX - rect.left) / rect.width) * FIELD_W, 30, FIELD_W - 30);
+      const y = clamp(((e.clientY - rect.top) / rect.height) * FIELD_H, 30, FIELD_H - 30);
 
       if (state.deleteMode) {
         let target = null;
         let bestDist = 999999;
         state.units.forEach(u => {
-          if (u.teamId !== selectedSafe.ownerTeamId) return;
+          if (u.team !== 'player') return;
           const d = Math.hypot(u.x - x, u.y - y);
           if (d < 28 && d < bestDist) {
             bestDist = d;
             target = u;
           }
         });
-        if (target && selectedSafe.ownerTeamId === 'blue') {
+        if (target) {
           const refund = Math.floor(summonCost(target.rankIndex) / 2);
           state.units = state.units.filter(u => u.id !== target.id);
-          state.teamStates.blue.coins += refund;
-          setNotice(`${formatRank(target.rankIndex)} 군사를 삭제했습니다. 코인 ${formatKoreanBig(refund)} 반환.`);
+          state.coins += refund;
+          setNotice(`${formatRank(target.rankIndex)} 군사를 삭제했습니다. 코인 ${refund} 반환.`);
           renderBattle();
         }
         state.deleteMode = false;
@@ -2205,16 +1762,8 @@
       state.activeMoveOrder = { x, y };
       state.orderPreview = { active: false, x: 0, y: 0 };
       state.assaultMode = false;
-
-      state.units.forEach(u => {
-        if (u.teamId === selectedSafe.ownerTeamId) {
-          u.engaged = true;
-          u.aiTarget = { x, y, safeId: null };
-        }
-      });
-
       renderOrderArrow();
-      setNotice('이동 명령 완료! 선택 진영 군사가 해당 지점으로 이동합니다.');
+      setNotice('이동 명령 완료! 해당 지점으로 이동 후 근처 적과 금고를 노립니다.');
     });
 
     renderRecentCountries();
