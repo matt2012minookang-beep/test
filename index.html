@@ -151,10 +151,17 @@
       cursor:pointer;
       transition:transform .12s ease, border-color .12s ease, box-shadow .12s ease;
     }
-    .stock-item:hover{transform:translateY(-1px);border-color:#4b5563;box-shadow:0 10px 20px rgba(0,0,0,.18);}
-    .stock-item.selected{border-color:var(--blue); box-shadow:0 0 0 1px rgba(56,189,248,.2) inset;}
+    .stock-item:hover{
+      transform:translateY(-1px);
+      border-color:#4b5563;
+      box-shadow:0 10px 20px rgba(0,0,0,.18);
+    }
+    .stock-item.selected{
+      border-color:var(--blue);
+      box-shadow:0 0 0 1px rgba(56,189,248,.2) inset;
+    }
     .stock-name{font-size:18px;font-weight:900;}
-    .stock-meta{font-size:12px;color:var(--sub);margin-top:4px;}
+    .stock-meta{font-size:12px;color:var(--sub);margin-top:4px;line-height:1.45;}
     .stock-price{font-size:18px;font-weight:900;text-align:right;}
     .stock-change{font-size:13px;text-align:right;font-weight:800;margin-top:4px;}
     .chart-wrap{
@@ -202,12 +209,12 @@
       transition:transform .1s ease, filter .1s ease;
     }
     button:hover{transform:translateY(-1px);filter:brightness(1.04);}
-    .buy{background:linear-gradient(135deg,#16a34a,#22c55e);} 
-    .sell{background:linear-gradient(135deg,#dc2626,#ef4444);} 
-    .ghost{background:linear-gradient(135deg,#334155,#475569);} 
-    .bank{background:linear-gradient(135deg,#1d4ed8,#2563eb);} 
-    .warn{background:linear-gradient(135deg,#a16207,#ca8a04);} 
-    .purple{background:linear-gradient(135deg,#6d28d9,#8b5cf6);} 
+    .buy{background:linear-gradient(135deg,#16a34a,#22c55e);}
+    .sell{background:linear-gradient(135deg,#dc2626,#ef4444);}
+    .ghost{background:linear-gradient(135deg,#334155,#475569);}
+    .bank{background:linear-gradient(135deg,#1d4ed8,#2563eb);}
+    .warn{background:linear-gradient(135deg,#a16207,#ca8a04);}
+    .purple{background:linear-gradient(135deg,#6d28d9,#8b5cf6);}
     .full{width:100%;}
     .portfolio-list,.event-list,.loan-list{
       display:flex;
@@ -223,7 +230,12 @@
       padding:10px 12px;
       background:rgba(15,23,42,.7);
     }
-    .lineitem .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
+    .lineitem .top{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+    }
     .lineitem .name{font-weight:900;}
     .lineitem .desc{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.45;}
     .section-gap{margin-top:16px;}
@@ -260,6 +272,7 @@
       min-height:20px;
       font-size:13px;
       font-weight:800;
+      line-height:1.45;
     }
     .ticker{
       margin-top:10px;
@@ -278,8 +291,10 @@
       padding-top:10px;
       padding-bottom:10px;
     }
-    @keyframes ticker{0%{transform:translateX(0);}100%{transform:translateX(-100%);}}
-    .muted{opacity:.75;}
+    @keyframes ticker{
+      0%{transform:translateX(0);}
+      100%{transform:translateX(-100%);}
+    }
     @media (max-width:1200px){
       .grid{grid-template-columns:1fr;}
     }
@@ -484,7 +499,7 @@
   </div>
 
   <script>
-    const STORAGE_PREFIX = "stock_sim_kr_v6_";
+    const STORAGE_PREFIX = "stock_sim_kr_v7_";
     const UNIT_NAMES = ["", "만", "억", "조", "경", "해", "자", "양", "구", "간", "정", "재", "극"];
     const INITIAL_CASH = 100000;
     const CREDIT_MIN = -100;
@@ -510,12 +525,24 @@
       { key:"gold", name:"금", sector:"원자재", price:312000, baseVol:0.008, drift:0.0005, fundamentals:0.92 },
       { key:"silver", name:"은", sector:"원자재", price:4200, baseVol:0.014, drift:0.0004, fundamentals:0.70 },
       { key:"google", name:"구글", sector:"빅테크", price:228000, baseVol:0.014, drift:0.0010, fundamentals:0.86 },
+
       { key:"nova", name:"노바클라우드", sector:"AI 클라우드", price:18500, baseVol:0.028, drift:0.0014, fundamentals:0.63 },
       { key:"orbix", name:"오빅스모빌리티", sector:"로봇/모빌리티", price:9200, baseVol:0.030, drift:0.0011, fundamentals:0.56 },
       { key:"deepsea", name:"딥씨푸드테크", sector:"푸드테크", price:6800, baseVol:0.026, drift:0.0006, fundamentals:0.45 },
       { key:"lumen", name:"루멘바이오", sector:"바이오", price:15400, baseVol:0.034, drift:0.0010, fundamentals:0.50 },
       { key:"quantix", name:"퀀틱스반도체", sector:"반도체", price:12600, baseVol:0.031, drift:0.0013, fundamentals:0.52 },
-      { key:"greenmesh", name:"그린메쉬에너지", sector:"친환경", price:11200, baseVol:0.027, drift:0.0010, fundamentals:0.54 }
+      { key:"greenmesh", name:"그린메쉬에너지", sector:"친환경", price:11200, baseVol:0.027, drift:0.0010, fundamentals:0.54 },
+
+      { key:"skychip", name:"스카이칩시스템즈", sector:"반도체", price:24800, baseVol:0.029, drift:0.0013, fundamentals:0.61 },
+      { key:"blueorbit", name:"블루오빗위성", sector:"우주항공", price:13800, baseVol:0.033, drift:0.0011, fundamentals:0.55 },
+      { key:"medisphere", name:"메디스피어헬스", sector:"의료기기", price:22100, baseVol:0.024, drift:0.0010, fundamentals:0.67 },
+      { key:"oceanbattery", name:"오션배터리소재", sector:"배터리소재", price:17600, baseVol:0.027, drift:0.0010, fundamentals:0.60 },
+      { key:"urbanai", name:"어반AI솔루션", sector:"AI 클라우드", price:9600, baseVol:0.032, drift:0.0015, fundamentals:0.57 },
+      { key:"solarflex", name:"솔라플렉스", sector:"친환경", price:14300, baseVol:0.026, drift:0.0011, fundamentals:0.59 },
+      { key:"nanofab", name:"나노팩토리", sector:"소부장", price:11800, baseVol:0.028, drift:0.0010, fundamentals:0.58 },
+      { key:"kfoodlab", name:"케이푸드랩", sector:"푸드테크", price:7900, baseVol:0.029, drift:0.0009, fundamentals:0.51 },
+      { key:"visionrobot", name:"비전로보틱스", sector:"로봇/모빌리티", price:16800, baseVol:0.031, drift:0.0012, fundamentals:0.62 },
+      { key:"biocore", name:"바이오코어테라퓨틱스", sector:"바이오", price:19400, baseVol:0.035, drift:0.0012, fundamentals:0.54 }
     ];
 
     const eventTemplates = [
@@ -532,12 +559,12 @@
       {
         title:"친환경 보조금 확대",
         text:"정부의 신재생 투자 확대 정책 기대감으로 배터리·친환경 종목이 동반 강세를 보였다.",
-        effects:{"배터리":0.06,"친환경":0.07}
+        effects:{"배터리":0.06,"친환경":0.07,"배터리소재":0.05}
       },
       {
         title:"배터리 화재 이슈",
         text:"대형 리콜 가능성이 거론되며 배터리 관련 종목의 변동성이 커졌다.",
-        effects:{"배터리":-0.08}
+        effects:{"배터리":-0.08,"배터리소재":-0.06}
       },
       {
         title:"달러 약세와 안전자산 선호",
@@ -552,7 +579,7 @@
       {
         title:"제약 임상 기대감",
         text:"바이오 섹터에서 긍정적 임상 결과 루머가 돌며 매수세가 몰렸다.",
-        effects:{"바이오":0.09}
+        effects:{"바이오":0.09,"의료기기":0.05}
       },
       {
         title:"로봇 자동화 계약 체결",
@@ -567,12 +594,12 @@
       {
         title:"세계 경기 둔화 우려",
         text:"전반적인 경기 둔화 전망이 나오며 위험자산에 매도 압력이 들어왔다.",
-        effects:{"반도체":-0.04,"빅테크":-0.04,"배터리":-0.05,"로봇/모빌리티":-0.05,"바이오":-0.03,"친환경":-0.03}
+        effects:{"반도체":-0.04,"빅테크":-0.04,"배터리":-0.05,"로봇/모빌리티":-0.05,"바이오":-0.03,"친환경":-0.03,"우주항공":-0.04,"소부장":-0.03}
       },
       {
         title:"시장 반등 랠리",
         text:"과매도 인식이 확산되며 성장주 중심으로 반등이 나타났다.",
-        effects:{"AI 클라우드":0.05,"빅테크":0.05,"바이오":0.04,"로봇/모빌리티":0.04}
+        effects:{"AI 클라우드":0.05,"빅테크":0.05,"바이오":0.04,"로봇/모빌리티":0.04,"우주항공":0.03}
       },
       {
         title:"귀금속 채굴 공급 차질",
@@ -587,17 +614,92 @@
       {
         title:"미국 대통령 관세 강화 발언",
         text:"관세 관련 강경 발언으로 기술주 변동성이 확대됐다.",
-        effects:{"빅테크":-0.05,"반도체":-0.04,"원자재":0.03}
+        effects:{"빅테크":-0.05,"반도체":-0.04,"소부장":-0.05,"원자재":0.03}
       },
       {
         title:"일본 총리 경기부양 연설",
         text:"일본 총리의 부양 발언으로 아시아 공급망 기대감이 높아졌다.",
-        effects:{"반도체":0.03,"배터리":0.03,"친환경":0.02}
+        effects:{"반도체":0.03,"배터리":0.03,"친환경":0.02,"소부장":0.03}
       },
       {
         title:"일본 총리 엔화 안정 발언",
         text:"환율 안정 발언으로 수출주와 원자재 심리가 일부 조정됐다.",
-        effects:{"반도체":-0.02,"원자재":-0.02,"빅테크":0.01}
+        effects:{"반도체":-0.02,"원자재":-0.02,"빅테크":0.01,"소부장":-0.01}
+      },
+      {
+        title:"위성 발사 성공",
+        text:"민간 위성 발사체 테스트가 성공하며 우주항공 테마가 급등했다.",
+        effects:{"우주항공":0.11}
+      },
+      {
+        title:"발사 일정 연기",
+        text:"기상 문제와 장비 점검으로 발사 일정이 미뤄지며 우주항공주가 약세를 보였다.",
+        effects:{"우주항공":-0.09}
+      },
+      {
+        title:"의료기기 수출 호조",
+        text:"해외 병원 납품 확대 기대감으로 의료기기 종목이 상승했다.",
+        effects:{"의료기기":0.08}
+      },
+      {
+        title:"의료기기 인증 지연",
+        text:"주요 제품 인증 심사가 늦어질 수 있다는 우려가 나왔다.",
+        effects:{"의료기기":-0.07}
+      },
+      {
+        title:"배터리 원재료 공급 계약",
+        text:"핵심 광물 장기 공급 계약 체결로 배터리소재주가 강세를 보였다.",
+        effects:{"배터리소재":0.09,"배터리":0.03}
+      },
+      {
+        title:"양극재 가격 하락",
+        text:"소재 단가 하락 전망으로 배터리소재 기업들이 약세를 보였다.",
+        effects:{"배터리소재":-0.08}
+      },
+      {
+        title:"AI 도시 인프라 수주",
+        text:"공공 AI 관제 사업 수주 기대감으로 AI 솔루션 기업이 상승했다.",
+        effects:{"AI 클라우드":0.07}
+      },
+      {
+        title:"태양광 단지 확대",
+        text:"대규모 태양광 단지 조성 발표로 친환경 기업 전반이 강세를 보였다.",
+        effects:{"친환경":0.08}
+      },
+      {
+        title:"태양광 패널 가격 경쟁 심화",
+        text:"가격 경쟁 우려로 친환경 업종 수익성 부담이 커졌다.",
+        effects:{"친환경":-0.06}
+      },
+      {
+        title:"반도체 장비 국산화 진전",
+        text:"핵심 장비 국산화 기대감으로 소부장 관련주가 올랐다.",
+        effects:{"소부장":0.09,"반도체":0.02}
+      },
+      {
+        title:"소부장 공급 차질",
+        text:"정밀 부품 수급이 꼬이며 생산 차질 우려가 커졌다.",
+        effects:{"소부장":-0.08,"반도체":-0.03}
+      },
+      {
+        title:"대체식품 인기 급등",
+        text:"신제품 흥행 기대감으로 푸드테크 섹터에 매수세가 몰렸다.",
+        effects:{"푸드테크":0.08}
+      },
+      {
+        title:"로봇 시연회 대성공",
+        text:"비전 인식과 자율제어 시연이 호평을 받으며 로봇주가 강세를 보였다.",
+        effects:{"로봇/모빌리티":0.09}
+      },
+      {
+        title:"신약 기술이전 기대",
+        text:"대형 제약사와의 기술이전 가능성이 거론되며 바이오주가 상승했다.",
+        effects:{"바이오":0.10}
+      },
+      {
+        title:"임상 중단 루머",
+        text:"임상 중단 소문이 퍼지며 바이오 투자심리가 급격히 냉각됐다.",
+        effects:{"바이오":-0.09}
       }
     ];
 
