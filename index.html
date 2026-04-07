@@ -2,1358 +2,950 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>주식 시뮬레이터</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>금고 지키기</title>
   <style>
-    :root{
-      --bg:#0f172a;
-      --panel:#111827;
-      --panel2:#1f2937;
-      --line:#334155;
-      --text:#e5eefc;
-      --sub:#94a3b8;
-      --good:#22c55e;
-      --bad:#ef4444;
-      --gold:#fbbf24;
-      --blue:#38bdf8;
-      --purple:#a78bfa;
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #020617;
+      color: #fff;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+      touch-action: manipulation;
+      user-select: none;
     }
-    *{box-sizing:border-box;}
-    body{
-      margin:0;
-      font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;
-      background:linear-gradient(180deg,#020617 0%, #0f172a 40%, #111827 100%);
-      color:var(--text);
-      min-height:100vh;
+    button, input { font-family: inherit; }
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top, rgba(59,130,246,0.18), transparent 32%),
+        radial-gradient(circle at right bottom, rgba(16,185,129,0.08), transparent 28%),
+        radial-gradient(circle at left bottom, rgba(239,68,68,0.12), transparent 32%),
+        #020617;
     }
-    .wrap{
-      max-width:1440px;
-      margin:0 auto;
-      padding:18px;
+
+    .screen { min-height: 100vh; display: none; padding: 14px; }
+    .screen.active { display: block; }
+    .container { max-width: 1600px; margin: 0 auto; }
+
+    .card {
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 28px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.38);
     }
-    .topbar{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom:16px;
+
+    .title {
+      font-size: clamp(34px, 6vw, 62px);
+      font-weight: 900;
+      text-align: center;
+      letter-spacing: -0.04em;
+      margin: 0;
     }
-    .titlebox{
-      background:linear-gradient(135deg,#1e293b,#0f172a);
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:16px 20px;
-      box-shadow:0 14px 30px rgba(0,0,0,.25);
+
+    .subtitle {
+      color: #cbd5e1;
+      text-align: center;
+      margin-top: 8px;
+      line-height: 1.5;
     }
-    .title{
-      font-size:30px;
-      font-weight:900;
-      letter-spacing:-0.5px;
-      margin:0 0 4px;
+
+    .btn {
+      border: none;
+      border-radius: 18px;
+      padding: 14px 18px;
+      font-weight: 900;
+      cursor: pointer;
+      color: white;
+      transition: transform .08s ease, filter .12s ease, background .12s ease;
     }
-    .subtitle{
-      color:var(--sub);
-      font-size:14px;
+    .btn:active { transform: scale(.99); }
+    .btn:hover { filter: brightness(1.08); }
+
+    .btn-blue { background: #2563eb; }
+    .btn-green { background: #059669; }
+    .btn-gray { background: #1e293b; }
+    .btn-gold { background: #f59e0b; color: #111827; }
+    .btn-red { background: #dc2626; }
+    .btn-purple { background: #7c3aed; }
+    .full { width: 100%; }
+
+    .hero-shell {
+      max-width: 1180px;
+      margin: 4vh auto 0;
+      padding: 22px;
+      overflow: hidden;
+      position: relative;
     }
-    .chiprow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:flex-end;
+    .hero-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(96,165,250,0.25), transparent 18%),
+        radial-gradient(circle at 82% 20%, rgba(52,211,153,0.16), transparent 18%),
+        radial-gradient(circle at 50% 100%, rgba(59,130,246,0.14), transparent 28%);
+      pointer-events: none;
     }
-    .chip{
-      background:rgba(15,23,42,.92);
-      border:1px solid var(--line);
-      border-radius:999px;
-      padding:10px 14px;
-      font-weight:700;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      box-shadow:0 8px 20px rgba(0,0,0,.18);
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 20px;
+      align-items: stretch;
+      position: relative;
+      z-index: 1;
     }
-    .good{color:var(--good);}
-    .bad{color:var(--bad);}
-    .gold{color:var(--gold);}
-    .sub{color:var(--sub);}
-    .blue{color:var(--blue);}
-    .grid{
-      display:grid;
-      grid-template-columns:370px 1fr 360px;
-      gap:16px;
+
+    .hero-left {
+      padding: 30px;
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background:
+        linear-gradient(140deg, rgba(30,41,59,0.86), rgba(15,23,42,0.95)),
+        #0f172a;
+      border-radius: 26px;
+      border: 1px solid rgba(148,163,184,0.18);
     }
-    .card{
-      background:linear-gradient(180deg,rgba(17,24,39,.98),rgba(15,23,42,.98));
-      border:1px solid var(--line);
-      border-radius:22px;
-      padding:16px;
-      box-shadow:0 16px 32px rgba(0,0,0,.24);
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: rgba(37,99,235,0.16);
+      border: 1px solid rgba(96,165,250,0.55);
+      color: #bfdbfe;
+      font-weight: 900;
+      margin-bottom: 18px;
+      width: fit-content;
     }
-    .card h2,.card h3{
-      margin:0 0 12px;
-      letter-spacing:-0.3px;
+
+    .hero-desc {
+      margin-top: 18px;
+      color: #cbd5e1;
+      line-height: 1.65;
+      max-width: 620px;
+      font-size: 17px;
     }
-    .small{
-      font-size:13px;
-      color:var(--sub);
+
+    .hero-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
     }
-    .stats{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-bottom:8px;
+
+    .pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(30,41,59,0.92);
+      border: 1px solid rgba(148,163,184,0.16);
+      color: #e2e8f0;
+      font-weight: 800;
+      font-size: 14px;
     }
-    .splitbar{
-      height:1px;
-      background:linear-gradient(90deg,transparent,rgba(148,163,184,.35),transparent);
-      margin:14px 0;
+
+    .hero-right {
+      padding: 22px;
+      background: rgba(15,23,42,0.9);
+      border-radius: 26px;
+      border: 1px solid rgba(148,163,184,0.18);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
-    .stat{
-      background:rgba(30,41,59,.52);
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:12px;
+
+    .section-head {
+      font-size: 22px;
+      font-weight: 900;
+      margin-bottom: 14px;
     }
-    .stat .label{font-size:12px;color:var(--sub);margin-bottom:8px;}
-    .stat .value{font-size:20px;font-weight:900;line-height:1.2;word-break:break-all;}
-    .marketbox{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-top:8px;
+
+    .input-label {
+      font-size: 14px;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+      font-weight: 700;
     }
-    .tag{
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:#0b1220;
-      font-size:12px;
-      font-weight:700;
+
+    .input-wrap {
+      position: relative;
+      margin-bottom: 14px;
     }
-    .stock-list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      max-height:680px;
-      overflow:auto;
-      padding-right:4px;
+
+    .input {
+      width: 100%;
+      background: linear-gradient(180deg, rgba(2,6,23,0.96), rgba(15,23,42,0.94));
+      color: white;
+      border: 1px solid rgba(96,165,250,0.2);
+      border-radius: 18px;
+      padding: 16px 18px;
+      font-size: 17px;
+      outline: none;
+      transition: border-color .12s ease, box-shadow .12s ease;
     }
-    .stock-item{
-      border:1px solid var(--line);
-      border-radius:16px;
-      background:rgba(15,23,42,.72);
-      padding:12px;
-      display:grid;
-      grid-template-columns:1fr auto;
-      gap:10px;
-      cursor:pointer;
-      transition:transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+
+    .input:focus {
+      border-color: rgba(96,165,250,0.78);
+      box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
     }
-    .stock-item:hover{transform:translateY(-1px);border-color:#4b5563;box-shadow:0 10px 20px rgba(0,0,0,.18);}
-    .stock-item.selected{border-color:var(--blue); box-shadow:0 0 0 1px rgba(56,189,248,.2) inset;}
-    .stock-name{font-size:18px;font-weight:900;}
-    .stock-meta{font-size:12px;color:var(--sub);margin-top:4px;}
-    .stock-price{font-size:18px;font-weight:900;text-align:right;}
-    .stock-change{font-size:13px;text-align:right;font-weight:800;margin-top:4px;}
-    .chart-wrap{
-      border:1px solid var(--line);
-      border-radius:18px;
-      background:linear-gradient(180deg,#07101d,#0b1220);
-      padding:12px;
-      margin-bottom:14px;
+
+    .recent-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
     }
-    #chartCanvas{
-      width:100%;
-      height:320px;
-      display:block;
-      background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));
-      border-radius:14px;
+
+    .recent-btn {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #334155;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-weight: 700;
     }
-    .tradepanel{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
     }
-    .input, .select{
-      width:100%;
-      background:#0b1220;
-      border:1px solid var(--line);
-      color:var(--text);
-      border-radius:14px;
-      padding:12px 14px;
-      outline:none;
-      font-size:15px;
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
     }
-    .btnrow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
+
+    .badge {
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 14px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(30,41,59,0.9);
     }
-    button{
-      border:none;
-      cursor:pointer;
-      border-radius:14px;
-      padding:12px 16px;
-      font-weight:900;
-      font-size:14px;
-      color:white;
-      transition:transform .1s ease, filter .1s ease;
+
+    .badge.blue { background: rgba(37,99,235,0.2); border-color: rgba(96,165,250,0.8); color: #bfdbfe; }
+    .badge.red { background: rgba(239,68,68,0.16); border-color: rgba(252,165,165,0.8); color: #fecaca; }
+    .badge.yellow { background: rgba(234,179,8,0.16); border-color: rgba(250,204,21,0.8); color: #fde68a; }
+    .badge.green { background: rgba(16,185,129,0.16); border-color: rgba(74,222,128,0.8); color: #bbf7d0; }
+    .badge.trophy { background: rgba(245,158,11,0.16); border-color: rgba(245,158,11,0.48); color: #fde68a; }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
     }
-    button:hover{transform:translateY(-1px);filter:brightness(1.04);}
-    .buy{background:linear-gradient(135deg,#16a34a,#22c55e);} 
-    .sell{background:linear-gradient(135deg,#dc2626,#ef4444);} 
-    .ghost{background:linear-gradient(135deg,#334155,#475569);} 
-    .bank{background:linear-gradient(135deg,#1d4ed8,#2563eb);} 
-    .warn{background:linear-gradient(135deg,#a16207,#ca8a04);} 
-    .purple{background:linear-gradient(135deg,#6d28d9,#8b5cf6);} 
-    .full{width:100%;}
-    .portfolio-list,.event-list,.loan-list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      max-height:250px;
-      overflow:auto;
-      padding-right:4px;
+
+    .panel { padding: 20px; }
+
+    .map-preview {
+      position: relative;
+      aspect-ratio: 16 / 8;
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid rgba(148,163,184,0.25);
+      background: radial-gradient(circle at center, #1e3a8a 0%, #0f172a 46%, #111827 100%);
+      margin-top: 12px;
     }
-    .lineitem{
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:10px 12px;
-      background:rgba(15,23,42,.7);
+
+    .map-preview .midline {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.34);
     }
-    .lineitem .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
-    .lineitem .name{font-weight:900;}
-    .lineitem .desc{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.45;}
-    .section-gap{margin-top:16px;}
-    .headline{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      margin-bottom:10px;
+
+    .safe-icon {
+      position: absolute;
+      top: 50%;
+      width: 92px;
+      height: 92px;
+      border-radius: 24px;
+      transform: translateY(-50%);
+      border: 4px solid rgba(255,255,255,0.65);
+      box-shadow: 0 0 28px rgba(255,255,255,0.12);
     }
-    .overlay{
-      position:fixed;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:rgba(2,6,23,.72);
-      backdrop-filter: blur(8px);
-      z-index:100;
-      padding:16px;
+
+    .safe-icon.left { left: 10%; background: rgba(59,130,246,0.85); }
+    .safe-icon.right { right: 10%; background: rgba(239,68,68,0.85); }
+
+    .four-preview-grid {
+      position: absolute;
+      inset: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
     }
-    .modal{
-      width:min(520px,100%);
-      background:linear-gradient(180deg,#111827,#0f172a);
-      border:1px solid var(--line);
-      border-radius:24px;
-      padding:20px;
-      box-shadow:0 24px 60px rgba(0,0,0,.4);
+
+    .four-quarter {
+      border-radius: 18px;
+      border: 2px solid rgba(255,255,255,0.18);
+      position: relative;
+      overflow: hidden;
     }
-    .modal h1{margin:0 0 10px;font-size:28px;}
-    .modal p{color:var(--sub);line-height:1.55;}
-    .notice{
-      margin-top:10px;
-      min-height:20px;
-      font-size:13px;
-      font-weight:800;
+
+    .four-quarter .mini-safe {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      border: 3px solid rgba(255,255,255,0.7);
+      position: absolute;
+      inset: 50% auto auto 50%;
+      transform: translate(-50%, -50%);
     }
-    .ticker{
-      margin-top:10px;
-      border:1px solid var(--line);
-      border-radius:14px;
-      background:#0b1220;
-      overflow:hidden;
+
+    .loading-wrap {
+      max-width: 760px;
+      margin: 10vh auto 0;
+      padding: 30px;
     }
-    .ticker-inner{
-      white-space:nowrap;
-      display:inline-block;
-      padding-left:100%;
-      animation:ticker 28s linear infinite;
-      color:#cbd5e1;
-      font-size:13px;
-      padding-top:10px;
-      padding-bottom:10px;
+
+    .bar-bg {
+      height: 26px;
+      border-radius: 999px;
+      background: #0f172a;
+      border: 1px solid rgba(148,163,184,0.25);
+      overflow: hidden;
     }
-    @keyframes ticker{0%{transform:translateX(0);}100%{transform:translateX(-100%);}}
-    .muted{
-      opacity:.75;
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2563eb, #22d3ee, #34d399);
+      transition: width 0.08s linear;
     }
-    @media (max-width:1200px){
-      .grid{grid-template-columns:1fr;}
+
+    .battle-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 390px;
+      gap: 14px;
+      align-items: start;
     }
-    @media (max-width:720px){
-      .tradepanel{grid-template-columns:1fr;}
-      .stats{grid-template-columns:1fr;}
-      .title{font-size:24px;}
-      .chip{width:100%;justify-content:flex-start;}
-      .chiprow{justify-content:stretch;width:100%;}
+
+    .battle-panel { padding: 14px; }
+
+    .notice {
+      background: rgba(30,41,59,0.9);
+      border: 1px solid rgba(148,163,184,0.2);
+      border-radius: 18px;
+      padding: 12px 14px;
+      color: #e2e8f0;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.45;
+    }
+
+    .prep-badge {
+      display: inline-flex;
+      margin-left: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      background: rgba(245,158,11,0.16);
+      color: #fde68a;
+      border: 1px solid rgba(245,158,11,0.45);
+      vertical-align: middle;
+    }
+
+    .field-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1200 / 700;
+      border-radius: 28px;
+      overflow: hidden;
+      border: 2px solid rgba(148,163,184,0.2);
+      background: linear-gradient(135deg, rgba(29,78,216,0.18) 0%, rgba(15,23,42,1) 35%, rgba(15,23,42,1) 65%, rgba(220,38,38,0.18) 100%);
+      touch-action: none;
+      cursor: crosshair;
+    }
+
+    .field-grid {
+      position: absolute;
+      inset: 0;
+      opacity: 0.38;
+      background-image:
+        repeating-linear-gradient(0deg, transparent 0 52px, rgba(255,255,255,0.06) 52px 53px),
+        repeating-linear-gradient(90deg, transparent 0 52px, rgba(255,255,255,0.06) 52px 53px);
+    }
+
+    .field-mid-v {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.24);
+      display: none;
+    }
+
+    .field-mid-h {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 4px;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.24);
+      display: none;
+    }
+
+    .field-wrap.mode-1v1 .field-mid-v { display: block; }
+    .field-wrap.mode-4p .field-mid-v,
+    .field-wrap.mode-4p .field-mid-h { display: block; }
+
+    .zone {
+      position: absolute;
+      border: 6px solid rgba(255,255,255,0.24);
+      border-radius: 28px;
+      pointer-events: none;
+      transition: box-shadow .15s ease, border-color .15s ease, transform .15s ease;
+    }
+
+    .zone.selected {
+      border-color: rgba(255,255,255,0.9);
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.15), 0 0 28px rgba(255,255,255,0.28);
+      transform: scale(1.01);
+    }
+
+    .safe {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      cursor: pointer;
+      z-index: 3;
+    }
+
+    .safe-box {
+      width: 102px;
+      height: 102px;
+      border-radius: 24px;
+      border: 4px solid rgba(255,255,255,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      box-shadow: 0 0 36px rgba(255,255,255,0.14);
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      transition: transform .12s ease, box-shadow .12s ease, opacity .25s ease;
+    }
+
+    .safe.selected .safe-box {
+      transform: scale(1.05);
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.15), 0 0 32px rgba(255,255,255,0.30);
+    }
+
+    .safe-box.blue { background: #3b82f6; box-shadow: 0 0 36px rgba(59,130,246,0.65); }
+    .safe-box.red { background: #ef4444; box-shadow: 0 0 36px rgba(239,68,68,0.65); }
+    .safe-box.yellow { background: #eab308; box-shadow: 0 0 36px rgba(234,179,8,0.65); }
+    .safe-box.green { background: #10b981; box-shadow: 0 0 36px rgba(16,185,129,0.65); }
+
+    .safe-label { margin-top: 10px; font-weight: 900; font-size: 18px; }
+
+    .hpbar {
+      width: 170px;
+      height: 14px;
+      border-radius: 999px;
+      background: #0f172a;
+      border: 1px solid rgba(148,163,184,0.25);
+      overflow: hidden;
+      margin: 8px auto 0;
+    }
+
+    .hpfill { height: 100%; }
+    .hpfill.blue { background: #3b82f6; }
+    .hpfill.red { background: #ef4444; }
+    .hpfill.yellow { background: #eab308; }
+    .hpfill.green { background: #10b981; }
+
+    .hptext { font-size: 13px; margin-top: 6px; color: #e2e8f0; font-weight: 700; }
+
+    .unit {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      text-align: center;
+      z-index: 4;
+    }
+
+    .order-arrow {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .delete-cursor { cursor: not-allowed !important; }
+
+    .unit-level {
+      font-size: 14px;
+      font-weight: 900;
+      margin-bottom: -4px;
+      text-shadow: 0 2px 2px rgba(0,0,0,0.8);
+    }
+
+    .unit-body {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      box-shadow: 0 0 14px rgba(255,255,255,0.22);
+      margin: 0 auto;
+      border-width: 3px;
+      border-style: solid;
+    }
+
+    .unit-hp {
+      width: 46px;
+      height: 7px;
+      border-radius: 999px;
+      background: #020617;
+      border: 1px solid rgba(0,0,0,0.4);
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .unit-hp-fill { height: 100%; background: #4ade80; }
+
+    .under-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .mini-badge { padding: 12px 15px; border-radius: 18px; background: #1e293b; font-weight: 900; }
+
+    .side-title { font-size: 28px; font-weight: 900; margin: 2px 0 12px; }
+
+    .game-card {
+      border: 1px solid rgba(148,163,184,0.22);
+      background: rgba(30,41,59,0.88);
+      border-radius: 24px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .game-card .head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .game-card .name { font-size: 22px; font-weight: 900; }
+    .game-card .desc { color: #cbd5e1; margin-top: 6px; line-height: 1.45; }
+
+    .cost-badge {
+      padding: 10px 14px;
+      border-radius: 18px;
+      font-weight: 900;
+      border: 1px solid rgba(148,163,184,0.22);
+      white-space: nowrap;
+    }
+
+    .tip {
+      border: 1px solid rgba(148,163,184,0.2);
+      background: rgba(2,6,23,0.62);
+      border-radius: 24px;
+      padding: 16px;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.68);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 80;
+    }
+    .overlay.show { display: flex; }
+
+    .overlay-box {
+      width: min(620px, 100%);
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(148,163,184,0.22);
+      border-radius: 28px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 24px 50px rgba(0,0,0,0.45);
+    }
+
+    .overlay-title { font-size: 44px; font-weight: 900; margin-bottom: 10px; }
+    .overlay-text { color: #cbd5e1; margin-bottom: 18px; }
+    .map-modal-grid { display: grid; gap: 14px; }
+
+    .vs-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(2,6,23,0.72);
+      z-index: 90;
+      backdrop-filter: blur(4px);
+    }
+    .vs-overlay.show { display: flex; }
+
+    .vs-box {
+      width: min(1040px, 100%);
+      border-radius: 34px;
+      padding: 28px;
+      background: linear-gradient(135deg, rgba(30,41,59,0.98), rgba(15,23,42,0.98));
+      border: 1px solid rgba(148,163,184,0.2);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+    }
+
+    .vs-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .vs-team {
+      border-radius: 24px;
+      padding: 22px;
+      font-weight: 900;
+      font-size: clamp(24px, 4vw, 42px);
+      text-align: center;
+    }
+
+    .vs-team.blue { background: rgba(37,99,235,0.2); color: #bfdbfe; border: 1px solid rgba(96,165,250,0.45); }
+    .vs-team.red { background: rgba(239,68,68,0.16); color: #fecaca; border: 1px solid rgba(248,113,113,0.45); }
+    .vs-team.yellow { background: rgba(234,179,8,0.16); color: #fde68a; border: 1px solid rgba(250,204,21,0.45); }
+    .vs-team.green { background: rgba(16,185,129,0.16); color: #bbf7d0; border: 1px solid rgba(74,222,128,0.45); }
+
+    .vs-center {
+      font-size: clamp(42px, 8vw, 76px);
+      font-weight: 900;
+      color: white;
+      text-shadow: 0 0 28px rgba(255,255,255,0.22);
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid, .menu-grid, .battle-layout { grid-template-columns: 1fr; }
+      .hero-left { min-height: auto; }
+      .side-title { font-size: 24px; }
+      .safe-box { width: 92px; height: 92px; font-size: 40px; }
+      .safe-label { font-size: 16px; }
+      .hpbar { width: 150px; }
+      .game-card .name { font-size: 20px; }
+      .vs-row { grid-template-columns: 1fr; }
+      .vs-center { order: 2; }
+    }
+
+    @media (max-width: 640px) {
+      .screen { padding: 10px; }
+      .hero-shell { padding: 12px; }
+      .hero-left, .hero-right, .panel { padding: 16px; }
+      .badge { font-size: 12px; padding: 8px 11px; }
+      .under-controls { gap: 8px; }
+      .mini-badge { padding: 10px 12px; font-size: 14px; }
+      .btn { padding: 12px 14px; }
+      .field-wrap { border-radius: 22px; }
+      .safe-box { width: 82px; height: 82px; border-radius: 20px; }
+      .hpbar { width: 130px; }
+      .unit-body { width: 28px; height: 28px; }
+      .unit-hp { width: 40px; }
+      .overlay-title { font-size: 34px; }
     }
   </style>
 </head>
 <body>
-  <div id="nicknameOverlay" class="overlay">
-    <div class="modal">
-      <h1>투자자 등록</h1>
-      <p>투자자 이름을 만들면 이 브라우저에 저장돼. 같은 이름으로 다시 들어오면 이어서 플레이할 수 있어.</p>
-      <input id="nicknameInput" class="input" maxlength="20" placeholder="투자자 이름 입력" />
-      <div class="btnrow" style="margin-top:12px;">
-        <button id="startBtn" class="purple full">시작하기</button>
+  <section id="setupScreen" class="screen active">
+    <div class="hero-shell card">
+      <div class="hero-grid">
+        <div class="hero-left">
+          <div class="hero-badge">🏦 전략 전쟁 게임</div>
+          <h1 class="title" style="text-align:left;">금고 지키기</h1>
+          <div class="subtitle" style="text-align:left; max-width:640px;">
+            금고를 성장시키고, 군사 등급을 올리고, 적 금고를 먼저 파괴하세요.
+            4인전에서는 마지막 한 진영만 남을 때까지 싸웁니다.
+          </div>
+          <div class="hero-desc">
+            기존 저장은 유지됩니다.  
+            키는 그대로 사용합니다:
+            <br>vault-defense-country-list
+            <br>vault-defense-last-country
+            <br>vault-defense-profile-나라명
+          </div>
+          <div class="hero-pills">
+            <div class="pill">닉네임 입력 정상</div>
+            <div class="pill">저장 유지</div>
+            <div class="pill">공격 명령 정상</div>
+            <div class="pill">적 정보 표시</div>
+          </div>
+        </div>
+
+        <div class="hero-right">
+          <div class="section-head">나라 입장</div>
+
+          <div class="input-label">새 나라 만들기</div>
+          <div class="input-wrap">
+            <input id="newCountryInput" class="input" placeholder="예: 청룡국" />
+          </div>
+          <button id="startNewBtn" class="btn btn-blue full" style="margin-bottom:18px;">새 나라로 시작</button>
+
+          <div class="input-label">기존 나라 불러오기</div>
+          <div class="input-wrap">
+            <input id="loadCountryInput" class="input" placeholder="저장된 나라 이름" />
+          </div>
+          <button id="loadBtn" class="btn btn-green full">불러오기</button>
+
+          <div style="margin-top:18px; color:#cbd5e1; font-size:14px; font-weight:700;">최근 나라</div>
+          <div id="recentCountries" class="recent-wrap"></div>
+        </div>
       </div>
-      <div id="nicknameNotice" class="notice"></div>
-      <div class="section-gap small">처음 자금: 10만 원 / 현생 시간 기준으로 시장 시간이 흐름 / 랜덤 중대사건이 실제 가격에 반영됨</div>
+    </div>
+  </section>
+
+  <section id="lobbyScreen" class="screen">
+    <div class="container">
+      <div class="topbar">
+        <button id="backToSetupBtn" class="btn btn-gray">← 뒤로</button>
+        <div class="badge-row">
+          <button id="openTrophyBtn" class="badge trophy" style="cursor:pointer;"></button>
+        </div>
+        <div style="text-align:right;">
+          <div style="color:#94a3b8; font-size:14px;">현재 나라</div>
+          <div id="countryNameLobby" style="font-size:34px; font-weight:900;"></div>
+        </div>
+      </div>
+
+      <div class="menu-grid">
+        <div class="card panel">
+          <div class="section-head">맵</div>
+          <div style="color:#cbd5e1; line-height:1.55;">맵 버튼을 누르면 별도 창에서 맵을 선택할 수 있습니다.</div>
+          <button id="openMapBtn" class="btn btn-blue full" style="margin-top:18px; font-size:22px;">맵</button>
+        </div>
+
+        <div class="card panel">
+          <div class="section-head">전투 시작</div>
+          <div style="color:#cbd5e1; line-height:1.55;">현재 선택된 맵으로 전투를 시작합니다.</div>
+          <div id="selectedMapText" style="margin-top:16px; font-size:20px; font-weight:900; color:#bfdbfe;">선택 맵: 1 vs 1 경기장 A</div>
+          <button id="playBtn" class="btn btn-green full" style="margin-top:18px; font-size:22px;">Play!</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="loadingScreen" class="screen">
+    <div class="loading-wrap card">
+      <div style="font-size:40px; font-weight:900; text-align:center; margin-bottom:8px;">전장 로딩 중...</div>
+      <div style="color:#cbd5e1; text-align:center; margin-bottom:18px;">금고와 병력이 배치되고 있습니다.</div>
+      <div class="bar-bg"><div id="loadingFill" class="bar-fill"></div></div>
+      <div id="loadingText" style="text-align:center; margin-top:10px; font-weight:900;">0%</div>
+    </div>
+  </section>
+
+  <section id="battleScreen" class="screen">
+    <div class="container">
+      <div class="battle-layout">
+        <div class="card battle-panel">
+          <div class="topbar" style="margin-bottom:12px;">
+            <div>
+              <div style="font-size:13px; color:#94a3b8;">맵</div>
+              <div id="battleMapName" style="font-size:28px; font-weight:900;">1 vs 1 경기장 A</div>
+            </div>
+            <div class="badge-row">
+              <div id="playerBadge" class="badge blue"></div>
+              <div id="enemyBadge" class="badge red"></div>
+              <div id="enemyStatsBadge" class="badge red"></div>
+              <div id="activeSafeBadge" class="badge"></div>
+              <button id="exitBattleBtn" class="btn btn-gray" style="padding:10px 14px;">나가기</button>
+            </div>
+          </div>
+
+          <div id="notice" class="notice">아군 금고에서 군사를 소환하세요.</div>
+
+          <div id="field" class="field-wrap mode-1v1">
+            <div class="field-grid"></div>
+            <div class="field-mid-v"></div>
+            <div class="field-mid-h"></div>
+            <svg id="orderArrow" class="order-arrow" viewBox="0 0 1200 700" preserveAspectRatio="none">
+              <defs>
+                <marker id="arrowHead" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                  <path d="M0,0 L12,6 L0,12 z" fill="#fde68a"></path>
+                </marker>
+              </defs>
+              <line id="orderLine" x1="0" y1="0" x2="0" y2="0" stroke="#fde68a" stroke-width="6" stroke-dasharray="14 10" marker-end="url(#arrowHead)" opacity="0"></line>
+            </svg>
+            <div id="zonesLayer"></div>
+            <div id="safesLayer"></div>
+            <div id="unitsLayer"></div>
+          </div>
+
+          <div class="under-controls">
+            <button id="attackBtn" class="btn btn-gold" style="font-size:20px;">공격!</button>
+            <button id="retreatBtn" class="btn btn-red" style="font-size:20px;">철수</button>
+            <div id="playerCount" class="mini-badge">아군: 0명</div>
+            <div id="aliveTeamsCount" class="mini-badge">생존 진영: 0</div>
+            <div id="prepTimerBadge" class="mini-badge">준비시간: 60초</div>
+          </div>
+        </div>
+
+        <div class="card battle-panel">
+          <div class="side-title">카드</div>
+
+          <button id="safeUpgradeBtn" class="game-card" style="width:100%; text-align:left; cursor:pointer;">
+            <div class="head">
+              <div>
+                <div class="name">1. 금고 강화</div>
+                <div id="safeCurrent" class="desc"></div>
+                <div id="safeNext" class="desc"></div>
+              </div>
+              <div id="safeCost" class="cost-badge" style="background:rgba(37,99,235,0.16); border-color:rgba(96,165,250,0.7); color:#bfdbfe;"></div>
+            </div>
+          </button>
+
+          <button id="rankUpgradeBtn" class="game-card" style="width:100%; text-align:left; cursor:pointer;">
+            <div class="head">
+              <div>
+                <div class="name">2. 군사 강화</div>
+                <div id="rankCurrent" class="desc"></div>
+                <div id="rankNext" class="desc"></div>
+              </div>
+              <div id="rankCost" class="cost-badge"></div>
+            </div>
+          </button>
+
+          <button id="summonBtn" class="game-card" style="width:100%; text-align:left; cursor:pointer;">
+            <div class="head">
+              <div>
+                <div class="name">3. 군사 소환</div>
+                <div id="summonNow" class="desc"></div>
+                <div id="summonCostText" class="desc"></div>
+                <div class="desc">선택된 진영 금고 앞에서 바로 소환됩니다.</div>
+              </div>
+              <div id="summonCostBadge" class="cost-badge"></div>
+            </div>
+          </button>
+
+          <button id="deleteModeBtn" class="game-card" style="width:100%; text-align:left; cursor:pointer;">
+            <div class="head">
+              <div>
+                <div class="name">4. 군사 삭제</div>
+                <div class="desc">버튼을 누른 뒤 군사를 클릭하면 삭제됩니다.</div>
+                <div class="desc">삭제 시 해당 등급 소환 가격의 절반을 돌려받습니다.</div>
+              </div>
+              <div class="cost-badge" style="background:rgba(239,68,68,0.14); border-color:rgba(248,113,113,0.45); color:#fecaca;">삭제 모드</div>
+            </div>
+          </button>
+
+          <div class="tip">
+            <div style="font-weight:900; color:white; margin-bottom:6px;">맵별 트로피</div>
+            1vs1: 승리 +10, 패배 -4<br />
+            4인전: 1등 +20, 2등 +10, 3등 -10, 4등 -20
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="trophyOverlay" class="overlay">
+    <div class="overlay-box" style="text-align:left; max-width:760px;">
+      <div class="section-head" style="font-size:30px; margin-bottom:12px;">트로피</div>
+      <div id="trophySummaryLine" style="color:#e2e8f0; font-weight:900; margin-bottom:12px;"></div>
+      <div style="margin-bottom:10px; color:#cbd5e1; font-weight:700;">현재 등급 진행도</div>
+      <div class="hpbar" style="width:100%; height:18px; margin:0 0 8px 0;"><div id="trophyGaugeFill" class="hpfill blue" style="width:0%;"></div></div>
+      <div id="trophyGaugeText" style="color:#cbd5e1; margin-bottom:16px;"></div>
+      <div style="margin-bottom:10px; color:#cbd5e1; font-weight:700;">등급 목록</div>
+      <div id="trophyRankList" style="display:grid; gap:8px; max-height:42vh; overflow:auto; padding-right:4px;"></div>
+      <button id="closeTrophyBtn" class="btn btn-gray full" style="margin-top:14px;">닫기</button>
     </div>
   </div>
 
-  <div class="wrap">
-    <div class="topbar">
-      <div class="titlebox">
-        <div class="title">주식 시뮬레이터</div>
-        <div class="subtitle">현실형 가격 변동 · 랜덤 중대사건 · 대출 · 신용점수 · 포트폴리오</div>
-      </div>
-      <div class="chiprow">
-        <div class="chip">👤 <span id="investorName">-</span></div>
-        <div class="chip">🕒 <span id="clockText">-</span></div>
-        <div class="chip">💵 현금 <span id="cashText">-</span></div>
-        <div class="chip">🏦 대출 <span id="loanTotalText">-</span></div>
-        <div class="chip">📈 순자산 <span id="netWorthText">-</span></div>
-        <div class="chip">💹 손익 <span id="profitText">-</span></div>
-      </div>
+  <div id="resultOverlay" class="overlay">
+    <div class="overlay-box">
+      <div id="resultTitle" class="overlay-title">승리!</div>
+      <div id="resultText" class="overlay-text"></div>
+      <div id="resultRewardText" class="overlay-text"></div>
+      <button id="resultBackBtn" class="btn btn-green full" style="font-size:20px;">로비로 돌아가기</button>
     </div>
+  </div>
 
-    <div class="grid">
-      <div class="card">
-        <div class="headline">
-          <h2>시장 종목</h2>
-          <div class="small">클릭하면 상세/그래프/매매 가능</div>
-        </div>
-        <div class="marketbox">
-          <div class="tag">실시간 시계 연동</div>
-          <div class="tag">사건 반영</div>
-          <div class="tag">매수/매도 수량 지정</div>
-          <div class="tag">대출 가능</div>
-        </div>
-        <div id="stockList" class="stock-list section-gap"></div>
-      </div>
-
-      <div class="card">
-        <div class="headline">
-          <div>
-            <h2 id="selectedStockTitle">종목 선택</h2>
-            <div id="selectedStockMeta" class="small">왼쪽에서 종목을 선택해.</div>
-          </div>
-          <div id="selectedStockPrice" class="stock-price">-</div>
-        </div>
-
-        <div class="chart-wrap">
-          <div class="headline" style="margin-bottom:10px;">
-            <div class="small">최근 구간만 표시</div>
-            <div class="btnrow">
-              <button id="chartShortBtn" class="ghost">짧게</button>
-              <button id="chartMidBtn" class="ghost">중간</button>
-              <button id="chartLongBtn" class="ghost">길게</button>
-            </div>
-          </div>
-          <canvas id="chartCanvas" width="860" height="320"></canvas>
-        </div>
-
-        <div class="stats" style="margin-bottom:12px;">
-          <div class="stat">
-            <div class="label">현재가</div>
-            <div id="detailPrice" class="value">-</div>
-          </div>
-          <div class="stat">
-            <div class="label">금일 등락</div>
-            <div id="detailChange" class="value">-</div>
-          </div>
-          <div class="stat">
-            <div class="label">내 보유 수량</div>
-            <div id="detailOwned" class="value">0주</div>
-          </div>
-          <div class="stat">
-            <div class="label">내 평가금액</div>
-            <div id="detailHoldingValue" class="value">0원</div>
-          </div>
-        </div>
-
-        <div class="splitbar"></div>
-
-        <div class="tradepanel">
-          <div>
-            <div class="small" style="margin-bottom:6px;">수량</div>
-            <input id="quantityInput" class="input" type="number" min="1" step="1" value="1" />
-          </div>
-          <div>
-            <div class="small" style="margin-bottom:6px;">빠른 입력</div>
-            <select id="quickSelect" class="select">
-              <option value="1">1주</option>
-              <option value="5">5주</option>
-              <option value="10">10주</option>
-              <option value="50">50주</option>
-              <option value="100">100주</option>
-              <option value="max">최대 가능</option>
-            </select>
-          </div>
-        </div>
-        <div class="btnrow section-gap">
-          <button id="buyBtn" class="buy">매수</button>
-          <button id="sellBtn" class="sell">매도</button>
-          <button id="buyHalfBtn" class="ghost">가능금액 50% 매수</button>
-          <button id="sellAllBtn" class="ghost">전량 매도</button>
-        </div>
-        <div id="tradeNotice" class="notice"></div>
-
-        <div class="ticker section-gap">
-          <div id="tickerInner" class="ticker-inner">시장 뉴스 로딩 중...</div>
-        </div>
-      </div>
-
-      <div>
-        <div class="card">
-          <h2>내 자산</h2>
-          <div class="stats">
-            <div class="stat">
-              <div class="label">초기 자본</div>
-              <div id="initialCapitalText" class="value">10만 원</div>
-            </div>
-            <div class="stat">
-              <div class="label">신용점수</div>
-              <div id="creditText" class="value">100점</div>
-            </div>
-            <div class="stat">
-              <div class="label">보유주식 평가액</div>
-              <div id="holdingTotalText" class="value">0원</div>
-            </div>
-            <div class="stat">
-              <div class="label">현재 버는 중</div>
-              <div id="earningText" class="value">0원</div>
-            </div>
-          </div>
-
-          <div class="section-gap">
-            <div class="splitbar"></div>
-            <div class="headline">
-              <h3>포트폴리오</h3>
-              <div class="small">평균단가 / 손익 표시</div>
-            </div>
-            <div id="portfolioList" class="portfolio-list"></div>
-          </div>
-        </div>
-
-        <div class="card section-gap">
-          <div class="headline">
-            <h2>은행</h2>
-            <div class="small">이자 2일당 1% / 7일 미상환 시 강제 현금 차감</div>
-          </div>
-          <div class="tradepanel">
+  <div id="mapOverlay" class="overlay">
+    <div class="overlay-box" style="text-align:left; max-width:840px;">
+      <div class="section-head" style="font-size:30px; margin-bottom:14px;">맵 선택</div>
+      <div class="map-modal-grid">
+        <div class="game-card" style="margin-bottom:0;">
+          <div class="head">
             <div>
-              <div class="small" style="margin-bottom:6px;">대출 금액</div>
-              <input id="loanInput" class="input" type="number" min="1000" step="1000" value="10000" />
+              <div class="name">1 vs 1 경기장 A</div>
+              <div class="desc">기본 좌우 대치 맵입니다.</div>
             </div>
-            <div>
-              <div class="small" style="margin-bottom:6px;">상환 금액</div>
-              <input id="repayInput" class="input" type="number" min="1000" step="1000" value="10000" />
-            </div>
+            <button class="btn btn-blue map-select-btn" data-map="duelA" style="padding:11px 14px;">선택</button>
           </div>
-          <div class="btnrow section-gap">
-            <button id="loanBtn" class="bank">대출받기</button>
-            <button id="repayBtn" class="warn">상환하기</button>
-          </div>
-          <div id="bankNotice" class="notice"></div>
-
-          <div class="section-gap">
-            <div class="splitbar"></div>
-            <div class="headline">
-              <h3>대출 목록</h3>
-              <div class="small">미상환 대출별 경과시간 표시</div>
-            </div>
-            <div id="loanList" class="loan-list"></div>
+          <div class="map-preview">
+            <div class="midline"></div>
+            <div class="safe-icon left"></div>
+            <div class="safe-icon right"></div>
           </div>
         </div>
 
-        <div class="card section-gap">
-          <div class="headline">
-            <h2>시장 중대사건</h2>
-            <div class="small">랜덤 발생, 실제 가격에 반영</div>
+        <div class="game-card" style="margin-bottom:0;">
+          <div class="head">
+            <div>
+              <div class="name">1 vs 1 경기장 B</div>
+              <div class="desc">세로 여유가 더 큰 좌우 대치 맵입니다.</div>
+            </div>
+            <button class="btn btn-blue map-select-btn" data-map="duelB" style="padding:11px 14px;">선택</button>
           </div>
-          <div id="eventList" class="event-list"></div>
+          <div class="map-preview" style="background: radial-gradient(circle at center, #0f766e 0%, #0f172a 46%, #111827 100%);">
+            <div class="midline"></div>
+            <div class="safe-icon left" style="top:42%;"></div>
+            <div class="safe-icon right" style="top:58%;"></div>
+          </div>
+        </div>
+
+        <div class="game-card" style="margin-bottom:0;">
+          <div class="head">
+            <div>
+              <div class="name">4인 대난전</div>
+              <div class="desc">4명이 서로 싸우며 금고를 점령합니다.</div>
+            </div>
+            <button class="btn btn-blue map-select-btn" data-map="fourway" style="padding:11px 14px;">선택</button>
+          </div>
+          <div class="map-preview">
+            <div class="four-preview-grid">
+              <div class="four-quarter" style="background:rgba(59,130,246,0.12);"><div class="mini-safe" style="background:#3b82f6;"></div></div>
+              <div class="four-quarter" style="background:rgba(239,68,68,0.12);"><div class="mini-safe" style="background:#ef4444;"></div></div>
+              <div class="four-quarter" style="background:rgba(234,179,8,0.12);"><div class="mini-safe" style="background:#eab308;"></div></div>
+              <div class="four-quarter" style="background:rgba(16,185,129,0.12);"><div class="mini-safe" style="background:#10b981;"></div></div>
+            </div>
+          </div>
         </div>
       </div>
+      <button id="closeMapBtn" class="btn btn-gray full" style="margin-top:14px;">닫기</button>
+    </div>
+  </div>
+
+  <div id="vsOverlay" class="vs-overlay">
+    <div class="vs-box">
+      <div style="text-align:center; color:#cbd5e1; margin-bottom:16px; font-weight:700;">전장 진입</div>
+      <div id="vsTeamsWrap"></div>
     </div>
   </div>
 
   <script>
-    const STORAGE_PREFIX = "stock_sim_kr_v1_";
-    const UNIT_NAMES = ["", "만", "억", "조", "경", "해", "자", "양", "구", "간", "정", "재", "극"];
-    const INITIAL_CASH = 100000;
-    const CREDIT_MIN = -100;
-    const PRICE_TICK_MS = 3000;
-    const EVENT_CHECK_MS = 14000;
-    const SAVE_MS = 2500;
-
-    // 차트는 최근 데이터만 유지
-    const GRAPH_MAX_POINTS = 120;
-    const CHART_WINDOWS = {
-      short: 30,
-      mid: 60,
-      long: 120
-    };
-
-    const INTEREST_RATE_PER_2_DAYS = 0.01;
-    const INTEREST_INTERVAL_MS = 2 * 24 * 60 * 60 * 1000;
-    const OVERDUE_MS = 7 * 24 * 60 * 60 * 1000;
-
-    const defaultStocks = [
-      { key:"samsung", name:"삼성전자", sector:"반도체", price:73500, baseVol:0.012, drift:0.0008, fundamentals:0.83 },
-      { key:"hynix", name:"SK 하이닉스", sector:"반도체", price:164000, baseVol:0.017, drift:0.0012, fundamentals:0.8 },
-      { key:"lg", name:"LG 에너지", sector:"배터리", price:392000, baseVol:0.016, drift:0.0009, fundamentals:0.75 },
-      { key:"gold", name:"금", sector:"원자재", price:312000, baseVol:0.008, drift:0.0005, fundamentals:0.92 },
-      { key:"silver", name:"은", sector:"원자재", price:4200, baseVol:0.014, drift:0.0004, fundamentals:0.7 },
-      { key:"google", name:"구글", sector:"빅테크", price:228000, baseVol:0.014, drift:0.0010, fundamentals:0.86 },
-      { key:"nova", name:"노바클라우드", sector:"AI 클라우드", price:18500, baseVol:0.028, drift:0.0014, fundamentals:0.63 },
-      { key:"orbix", name:"오빅스모빌리티", sector:"로봇/모빌리티", price:9200, baseVol:0.03, drift:0.0011, fundamentals:0.56 },
-      { key:"deepsea", name:"딥씨푸드테크", sector:"푸드테크", price:6800, baseVol:0.026, drift:0.0006, fundamentals:0.45 },
-      { key:"lumen", name:"루멘바이오", sector:"바이오", price:15400, baseVol:0.034, drift:0.0010, fundamentals:0.5 },
-      { key:"quantix", name:"퀀틱스반도체", sector:"반도체", price:12600, baseVol:0.031, drift:0.0013, fundamentals:0.52 },
-      { key:"greenmesh", name:"그린메쉬에너지", sector:"친환경", price:11200, baseVol:0.027, drift:0.0010, fundamentals:0.54 }
-    ];
-
-    const eventTemplates = [
-      {
-        title:"AI 서버 수요 급증",
-        text:"대형 데이터센터 투자 확대 소식이 퍼지며 AI/반도체 섹터 기대감이 상승했다.",
-        effects:{"반도체":0.06,"AI 클라우드":0.08,"빅테크":0.03}
-      },
-      {
-        title:"메모리 가격 하락 우려",
-        text:"메모리 재고 증가 전망이 나오며 반도체 관련주에 단기 매도세가 붙었다.",
-        effects:{"반도체":-0.07}
-      },
-      {
-        title:"친환경 보조금 확대",
-        text:"정부의 신재생 투자 확대 정책 기대감으로 배터리·친환경 종목이 동반 강세를 보였다.",
-        effects:{"배터리":0.06,"친환경":0.07}
-      },
-      {
-        title:"배터리 화재 이슈",
-        text:"대형 리콜 가능성이 거론되며 배터리 관련 종목의 변동성이 커졌다.",
-        effects:{"배터리":-0.08}
-      },
-      {
-        title:"달러 약세와 안전자산 선호",
-        text:"시장 불안 심리로 금과 은 같은 안전자산·원자재가 상승했다.",
-        effects:{"원자재":0.05}
-      },
-      {
-        title:"빅테크 규제 강화",
-        text:"해외 규제 당국의 조사 강화 소식으로 빅테크가 눌렸지만 일부 클라우드주는 선방했다.",
-        effects:{"빅테크":-0.06,"AI 클라우드":-0.02}
-      },
-      {
-        title:"제약 임상 기대감",
-        text:"바이오 섹터에서 긍정적 임상 결과 루머가 돌며 매수세가 몰렸다.",
-        effects:{"바이오":0.09}
-      },
-      {
-        title:"로봇 자동화 계약 체결",
-        text:"물류 자동화 대형 계약 체결 소식으로 모빌리티/로봇 종목이 급등했다.",
-        effects:{"로봇/모빌리티":0.1}
-      },
-      {
-        title:"푸드테크 안전성 논란",
-        text:"신제품 성분 논란으로 푸드테크 종목이 급락했다.",
-        effects:{"푸드테크":-0.1}
-      },
-      {
-        title:"세계 경기 둔화 우려",
-        text:"전반적인 경기 둔화 전망이 나오며 위험자산에 매도 압력이 들어왔다.",
-        effects:{"반도체":-0.04,"빅테크":-0.04,"배터리":-0.05,"로봇/모빌리티":-0.05,"바이오":-0.03,"친환경":-0.03}
-      },
-      {
-        title:"시장 반등 랠리",
-        text:"과매도 인식이 확산되며 성장주 중심으로 반등이 나타났다.",
-        effects:{"AI 클라우드":0.05,"빅테크":0.05,"바이오":0.04,"로봇/모빌리티":0.04}
-      },
-      {
-        title:"귀금속 채굴 공급 차질",
-        text:"채굴 지역 불안으로 금과 은 공급 우려가 커졌다.",
-        effects:{"원자재":0.06}
-      }
-    ];
-
-    const els = {
-      chartShortBtn: document.getElementById('chartShortBtn'),
-      chartMidBtn: document.getElementById('chartMidBtn'),
-      chartLongBtn: document.getElementById('chartLongBtn'),
-      nicknameOverlay: document.getElementById('nicknameOverlay'),
-      nicknameInput: document.getElementById('nicknameInput'),
-      nicknameNotice: document.getElementById('nicknameNotice'),
-      startBtn: document.getElementById('startBtn'),
-      investorName: document.getElementById('investorName'),
-      clockText: document.getElementById('clockText'),
-      cashText: document.getElementById('cashText'),
-      loanTotalText: document.getElementById('loanTotalText'),
-      netWorthText: document.getElementById('netWorthText'),
-      profitText: document.getElementById('profitText'),
-      initialCapitalText: document.getElementById('initialCapitalText'),
-      creditText: document.getElementById('creditText'),
-      holdingTotalText: document.getElementById('holdingTotalText'),
-      earningText: document.getElementById('earningText'),
-      stockList: document.getElementById('stockList'),
-      selectedStockTitle: document.getElementById('selectedStockTitle'),
-      selectedStockMeta: document.getElementById('selectedStockMeta'),
-      selectedStockPrice: document.getElementById('selectedStockPrice'),
-      detailPrice: document.getElementById('detailPrice'),
-      detailChange: document.getElementById('detailChange'),
-      detailOwned: document.getElementById('detailOwned'),
-      detailHoldingValue: document.getElementById('detailHoldingValue'),
-      quantityInput: document.getElementById('quantityInput'),
-      quickSelect: document.getElementById('quickSelect'),
-      buyBtn: document.getElementById('buyBtn'),
-      sellBtn: document.getElementById('sellBtn'),
-      buyHalfBtn: document.getElementById('buyHalfBtn'),
-      sellAllBtn: document.getElementById('sellAllBtn'),
-      tradeNotice: document.getElementById('tradeNotice'),
-      tickerInner: document.getElementById('tickerInner'),
-      portfolioList: document.getElementById('portfolioList'),
-      loanInput: document.getElementById('loanInput'),
-      repayInput: document.getElementById('repayInput'),
-      loanBtn: document.getElementById('loanBtn'),
-      repayBtn: document.getElementById('repayBtn'),
-      bankNotice: document.getElementById('bankNotice'),
-      loanList: document.getElementById('loanList'),
-      eventList: document.getElementById('eventList'),
-      chartCanvas: document.getElementById('chartCanvas')
-    };
-
-    const ctx = els.chartCanvas.getContext('2d');
-
-    const state = {
-      chartWindow: 'mid',
-      investorName: "",
-      initialCash: INITIAL_CASH,
-      cash: INITIAL_CASH,
-      creditScore: 100,
-      loans: [],
-      stocks: [],
-      portfolio: {},
-      events: [],
-      selectedKey: null,
-      totalProfit: 0,
-      lastNetWorth: INITIAL_CASH,
-      lastSaveAt: 0,
-      marketMood: 0,
-      dailyAnchorDay: null,
-      tickerMessages: [],
-      currentDayOpen: {}
-    };
-
-    function cloneStocks(){
-      return defaultStocks.map(s => ({
-        ...s,
-        dayOpen:s.price,
-        lastPrice:s.price,
-        history:createSeedHistory(s.price),
-        eventBias:0,
-        trendMemory:0
-      }));
-    }
-
-    function createSeedHistory(price){
-      const arr=[];
-      let p=price;
-      for(let i=0;i<Math.min(60, GRAPH_MAX_POINTS);i++){
-        p = Math.max(100, Math.round(p * (1 + (Math.random()-0.5)*0.004)));
-        arr.push(p);
-      }
-      return arr.slice(-GRAPH_MAX_POINTS);
-    }
-
-    function trimHistory(stock){
-      if(stock.history.length > GRAPH_MAX_POINTS){
-        stock.history = stock.history.slice(-GRAPH_MAX_POINTS);
-      }
-    }
-
-    function formatKRW(num){
-      const sign = num < 0 ? "-" : "";
-      let value = Math.abs(Math.floor(num));
-      if (value < 10000) return sign + value.toLocaleString('ko-KR') + "원";
-      let parts = [];
-      let unitIndex = 0;
-      while (value > 0 && unitIndex < UNIT_NAMES.length) {
-        const chunk = value % 10000;
-        if (chunk > 0) parts.unshift(chunk.toLocaleString('ko-KR') + UNIT_NAMES[unitIndex]);
-        value = Math.floor(value / 10000);
-        unitIndex++;
-      }
-      return sign + parts.join(' ') + "원";
-    }
-
-    function formatSignedKRW(num){
-      const sign = num > 0 ? "+" : "";
-      return sign + formatKRW(num);
-    }
-
-    function formatPercent(v){
-      const sign = v > 0 ? "+" : "";
-      return sign + (v * 100).toFixed(2) + "%";
-    }
-
-    function now(){ return Date.now(); }
-
-    function getStorageKey(name){ return STORAGE_PREFIX + name; }
-
-    function saveState(){
-      if (!state.investorName) return;
-      const payload = {
-        investorName: state.investorName,
-        initialCash: state.initialCash,
-        cash: state.cash,
-        creditScore: state.creditScore,
-        loans: state.loans,
-        stocks: state.stocks.map(s => ({
-          key:s.key, price:s.price, lastPrice:s.lastPrice, dayOpen:s.dayOpen, history:s.history,
-          eventBias:s.eventBias, trendMemory:s.trendMemory
-        })),
-        portfolio: state.portfolio,
-        events: state.events,
-        selectedKey: state.selectedKey,
-        totalProfit: state.totalProfit,
-        lastNetWorth: state.lastNetWorth,
-        marketMood: state.marketMood,
-        currentDayOpen: state.currentDayOpen,
-        savedAt: now()
-      };
-      localStorage.setItem(getStorageKey(state.investorName), JSON.stringify(payload));
-      state.lastSaveAt = now();
-    }
-
-    function loadState(name){
-      const raw = localStorage.getItem(getStorageKey(name));
-      if (!raw) return false;
-      try{
-        const data = JSON.parse(raw);
-        state.investorName = data.investorName || name;
-        state.initialCash = data.initialCash ?? INITIAL_CASH;
-        state.cash = data.cash ?? INITIAL_CASH;
-        state.creditScore = data.creditScore ?? 100;
-        state.loans = Array.isArray(data.loans) ? data.loans : [];
-        state.portfolio = data.portfolio || {};
-        state.events = Array.isArray(data.events) ? data.events : [];
-        state.selectedKey = data.selectedKey || defaultStocks[0].key;
-        state.totalProfit = data.totalProfit || 0;
-        state.lastNetWorth = data.lastNetWorth || state.initialCash;
-        state.marketMood = data.marketMood || 0;
-        state.currentDayOpen = data.currentDayOpen || {};
-
-        const base = cloneStocks();
-        base.forEach(stock => {
-          const saved = (data.stocks || []).find(x => x.key === stock.key);
-          if(saved){
-            stock.price = saved.price ?? stock.price;
-            stock.lastPrice = saved.lastPrice ?? stock.lastPrice;
-            stock.dayOpen = saved.dayOpen ?? stock.dayOpen;
-            stock.history = Array.isArray(saved.history) && saved.history.length ? saved.history.slice(-GRAPH_MAX_POINTS) : stock.history;
-            stock.eventBias = saved.eventBias ?? 0;
-            stock.trendMemory = saved.trendMemory ?? 0;
-            trimHistory(stock);
-          }
-        });
-        state.stocks = base;
-        return true;
-      }catch(err){
-        console.error(err);
-        return false;
-      }
-    }
-
-    function startNew(name){
-      state.investorName = name;
-      state.initialCash = INITIAL_CASH;
-      state.cash = INITIAL_CASH;
-      state.creditScore = 100;
-      state.loans = [];
-      state.portfolio = {};
-      state.events = [];
-      state.selectedKey = defaultStocks[0].key;
-      state.totalProfit = 0;
-      state.lastNetWorth = INITIAL_CASH;
-      state.marketMood = 0;
-      state.currentDayOpen = {};
-      state.stocks = cloneStocks();
-      saveState();
-    }
-
-    function applyDailyResetIfNeeded(){
-      const d = new Date();
-      const key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-      if(state.dailyAnchorDay === key) return;
-      state.dailyAnchorDay = key;
-      state.stocks.forEach(s => {
-        s.dayOpen = s.price;
-        state.currentDayOpen[s.key] = s.price;
-      });
-    }
-
-    function gaussian(){
-      let u=0,v=0;
-      while(u===0) u=Math.random();
-      while(v===0) v=Math.random();
-      return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
-    }
-
-    function getLocalHour(){
-      return new Date().getHours() + new Date().getMinutes()/60;
-    }
-
-    function marketIntensity(){
-      const h = getLocalHour();
-      if(h >= 9 && h <= 15.5) return 1.25;
-      if(h >= 18 && h <= 23) return 0.85;
-      return 0.55;
-    }
-
-    function updateStocks(){
-      applyDailyResetIfNeeded();
-      const intensity = marketIntensity();
-      state.marketMood *= 0.96;
-
-      state.stocks.forEach(stock => {
-        stock.lastPrice = stock.price;
-
-        const intrinsicBase = stock.dayOpen || stock.price;
-        const valuationGap = (intrinsicBase - stock.price) / Math.max(1, intrinsicBase);
-        const meanReversion = valuationGap * 0.035;
-        const clockWave = Math.sin(Date.now()/180000 + stock.fundamentals*5) * 0.0007;
-        const randomShock = gaussian() * stock.baseVol * 0.22 * intensity;
-        const moodEffect = state.marketMood * 0.0012;
-
-        stock.trendMemory = stock.trendMemory * 0.65 + gaussian() * 0.08;
-        stock.eventBias *= 0.88;
-
-        let change =
-          (stock.drift * 0.18 * intensity)
-          + meanReversion
-          + clockWave
-          + moodEffect
-          + stock.eventBias
-          + stock.trendMemory * stock.baseVol * 0.08
-          + randomShock;
-
-        const band = stock.baseVol * 2.8;
-        change = Math.max(-band, Math.min(band, change));
-
-        let next = Math.round(stock.price * (1 + change));
-        next = Math.max(100, next);
-
-        stock.price = next;
-        stock.history.push(next);
-        trimHistory(stock);
-      });
-
-      renderAll();
-    }
-
-    function maybeTriggerEvent(){
-      const chance = 0.36;
-      if(Math.random() > chance) return;
-      const ev = structuredClone(eventTemplates[Math.floor(Math.random()*eventTemplates.length)]);
-      ev.id = Math.random().toString(36).slice(2);
-      ev.time = new Date().toLocaleString('ko-KR');
-      ev.effectsApplied = [];
-
-      for(const stock of state.stocks){
-        const factor = ev.effects[stock.sector];
-        if(typeof factor === 'number'){
-          const personal = factor * (0.88 + Math.random()*0.24);
-          stock.price = Math.max(100, Math.round(stock.price * (1 + personal)));
-          stock.eventBias += personal * 0.11;
-          stock.history.push(stock.price);
-          trimHistory(stock);
-          ev.effectsApplied.push(`${stock.name} ${personal > 0 ? '+' : ''}${(personal*100).toFixed(1)}%`);
-        }
-      }
-
-      state.marketMood += (Math.random()-0.5)*0.35;
-      state.events.unshift(ev);
-      state.events = state.events.slice(0, 30);
-      pushTicker(`${ev.title} — ${ev.text}`);
-      renderAll();
-      flashNotice(els.tradeNotice, `중대사건 발생: ${ev.title}`, 'good');
-    }
-
-    function pushTicker(message){
-      state.tickerMessages.unshift(message);
-      state.tickerMessages = state.tickerMessages.slice(0, 12);
-      els.tickerInner.textContent = state.tickerMessages.join('   ◆   ') || '시장 뉴스 대기 중';
-    }
-
-    function getStock(key){ return state.stocks.find(s => s.key === key); }
-
-    function getPosition(key){ return state.portfolio[key] || { qty:0, avgPrice:0 }; }
-
-    function getHoldingValue(){
-      return Object.entries(state.portfolio).reduce((sum,[key,pos]) => {
-        const stock = getStock(key);
-        if(!stock) return sum;
-        return sum + stock.price * pos.qty;
-      }, 0);
-    }
-
-    function getLoanOutstanding(loan){
-      const elapsed = now() - loan.lastInterestAt;
-      const intervals = Math.floor(elapsed / INTEREST_INTERVAL_MS);
-      if(intervals <= 0) return loan.amount;
-      return Math.round(loan.amount * Math.pow(1 + INTEREST_RATE_PER_2_DAYS, intervals));
-    }
-
-    function applyLoanInterest(){
-      let changed = false;
-      state.loans.forEach(loan => {
-        const elapsed = now() - loan.lastInterestAt;
-        const intervals = Math.floor(elapsed / INTEREST_INTERVAL_MS);
-        if(intervals > 0){
-          loan.amount = Math.round(loan.amount * Math.pow(1 + INTEREST_RATE_PER_2_DAYS, intervals));
-          loan.lastInterestAt += intervals * INTEREST_INTERVAL_MS;
-          changed = true;
-        }
-        const overdueElapsed = now() - loan.borrowedAt;
-        if(!loan.forced && overdueElapsed >= OVERDUE_MS){
-          state.cash -= loan.amount;
-          state.creditScore -= 30;
-          loan.forced = true;
-          loan.forceTime = now();
-          changed = true;
-          flashNotice(els.bankNotice, `대출 연체 7일 경과! ${formatKRW(loan.amount)}가 강제로 현금에서 차감됨`, 'bad');
-          pushTicker(`은행 강제 회수 발생 — ${formatKRW(loan.amount)} 차감, 신용점수 하락`);
-        }
-      });
-      state.loans = state.loans.filter(loan => loan.amount > 0);
-      if(changed) renderAll();
-    }
-
-    function getTotalLoan(){
-      applyLoanInterest();
-      return state.loans.reduce((sum,loan)=>sum+loan.amount,0);
-    }
-
-    function getCurrentEarning(){
-      let total = 0;
-      Object.entries(state.portfolio).forEach(([key,pos]) => {
-        const stock = getStock(key);
-        if(!stock || pos.qty <= 0) return;
-        total += (stock.price - pos.avgPrice) * pos.qty;
-      });
-      return total;
-    }
-
-    function buyStock(){
-      const stock = getStock(state.selectedKey);
-      if(!stock) return;
-      let qty = Math.floor(Number(els.quantityInput.value));
-      if(!Number.isFinite(qty) || qty < 1) qty = 1;
-      const cost = stock.price * qty;
-      if(cost > state.cash){
-        flashNotice(els.tradeNotice, `현금 부족: 필요 ${formatKRW(cost)}`, 'bad');
-        return;
-      }
-      const pos = getPosition(stock.key);
-      const newQty = pos.qty + qty;
-      const newAvg = Math.round(((pos.avgPrice * pos.qty) + (stock.price * qty)) / newQty);
-      state.portfolio[stock.key] = { qty:newQty, avgPrice:newAvg };
-      state.cash -= cost;
-      flashNotice(els.tradeNotice, `${stock.name} ${qty.toLocaleString('ko-KR')}주 매수 완료`, 'good');
-      pushTicker(`${state.investorName} 님이 ${stock.name} ${qty}주 매수`);
-      renderAll();
-    }
-
-    function sellStock(qtyOverride){
-      const stock = getStock(state.selectedKey);
-      if(!stock) return;
-      const pos = getPosition(stock.key);
-      let qty = qtyOverride ?? Math.floor(Number(els.quantityInput.value));
-      if(!Number.isFinite(qty) || qty < 1) qty = 1;
-      if(pos.qty < qty){
-        flashNotice(els.tradeNotice, `보유 수량 부족: 현재 ${pos.qty.toLocaleString('ko-KR')}주`, 'bad');
-        return;
-      }
-      const revenue = stock.price * qty;
-      pos.qty -= qty;
-      if(pos.qty <= 0) delete state.portfolio[stock.key];
-      else state.portfolio[stock.key] = pos;
-      state.cash += revenue;
-      flashNotice(els.tradeNotice, `${stock.name} ${qty.toLocaleString('ko-KR')}주 매도 완료`, 'good');
-      pushTicker(`${state.investorName} 님이 ${stock.name} ${qty}주 매도`);
-      renderAll();
-    }
-
-    function maxAffordableQty(stock){
-      return Math.max(0, Math.floor(state.cash / stock.price));
-    }
-
-    function borrowMoney(){
-      applyLoanInterest();
-      if(state.creditScore <= CREDIT_MIN){
-        flashNotice(els.bankNotice, '신용점수 -100점 이하라 더 이상 대출 불가', 'bad');
-        return;
-      }
-      let amount = Math.floor(Number(els.loanInput.value));
-      if(!Number.isFinite(amount) || amount < 1000){
-        flashNotice(els.bankNotice, '대출 금액은 최소 1,000원', 'bad');
-        return;
-      }
-      state.cash += amount;
-      state.creditScore -= Math.max(2, Math.floor(amount / 50000));
-      state.loans.push({
-        id: Math.random().toString(36).slice(2),
-        amount,
-        borrowedAt: now(),
-        lastInterestAt: now(),
-        forced:false
-      });
-      flashNotice(els.bankNotice, `${formatKRW(amount)} 대출 완료`, 'good');
-      pushTicker(`은행 대출 실행 — ${formatKRW(amount)} / 신용점수 하락`);
-      renderAll();
-    }
-
-    function repayMoney(){
-      applyLoanInterest();
-      let amount = Math.floor(Number(els.repayInput.value));
-      if(!Number.isFinite(amount) || amount < 1000){
-        flashNotice(els.bankNotice, '상환 금액은 최소 1,000원', 'bad');
-        return;
-      }
-      if(state.loans.length === 0){
-        flashNotice(els.bankNotice, '상환할 대출이 없음', 'bad');
-        return;
-      }
-      if(state.cash < amount){
-        flashNotice(els.bankNotice, '현금 부족으로 상환 불가', 'bad');
-        return;
-      }
-      state.cash -= amount;
-      state.loans.sort((a,b)=>a.borrowedAt-b.borrowedAt);
-      let remain = amount;
-      for(const loan of state.loans){
-        if(remain <= 0) break;
-        const used = Math.min(loan.amount, remain);
-        loan.amount -= used;
-        remain -= used;
-      }
-      state.loans = state.loans.filter(loan => loan.amount > 0);
-      state.creditScore = Math.min(100, state.creditScore + Math.max(3, Math.floor(amount / 40000)));
-      flashNotice(els.bankNotice, `${formatKRW(amount - remain)} 상환 완료`, 'good');
-      pushTicker(`은행 상환 처리 — ${formatKRW(amount - remain)}`);
-      renderAll();
-    }
-
-    function flashNotice(el, text, cls){
-      el.textContent = text;
-      el.className = 'notice ' + (cls || '');
-    }
-
-    function renderStockList(){
-      els.stockList.innerHTML = '';
-      state.stocks.forEach(stock => {
-        const ch = (stock.price - stock.dayOpen) / stock.dayOpen;
-        const item = document.createElement('div');
-        item.className = 'stock-item' + (stock.key === state.selectedKey ? ' selected' : '');
-        item.innerHTML = `
-          <div>
-            <div class="stock-name">${stock.name}</div>
-            <div class="stock-meta">${stock.sector} · 보유 ${getPosition(stock.key).qty.toLocaleString('ko-KR')}주</div>
-          </div>
-          <div>
-            <div class="stock-price">${formatKRW(stock.price)}</div>
-            <div class="stock-change ${ch >= 0 ? 'good' : 'bad'}">${formatPercent(ch)}</div>
-          </div>
-        `;
-        item.onclick = () => {
-          state.selectedKey = stock.key;
-          renderAll();
-        };
-        els.stockList.appendChild(item);
-      });
-    }
-
-    function renderSelected(){
-      const stock = getStock(state.selectedKey);
-      if(!stock){
-        els.selectedStockTitle.textContent = '종목 선택';
-        return;
-      }
-      const pos = getPosition(stock.key);
-      const ch = (stock.price - stock.dayOpen) / stock.dayOpen;
-      els.selectedStockTitle.textContent = stock.name;
-      els.selectedStockMeta.textContent = `${stock.sector} · 기본 변동성 ${(stock.baseVol*100).toFixed(1)}% · 펀더멘털 ${(stock.fundamentals*100).toFixed(0)}점`;
-      els.selectedStockPrice.textContent = formatKRW(stock.price);
-      els.detailPrice.textContent = formatKRW(stock.price);
-      els.detailChange.innerHTML = `<span class="${ch >= 0 ? 'good' : 'bad'}">${formatPercent(ch)}</span>`;
-      els.detailOwned.textContent = `${pos.qty.toLocaleString('ko-KR')}주`;
-      els.detailHoldingValue.textContent = formatKRW(pos.qty * stock.price);
-      drawChart(stock);
-    }
-
-    function drawChart(stock){
-      const canvas = els.chartCanvas;
-      const w = canvas.width;
-      const h = canvas.height;
-      ctx.clearRect(0,0,w,h);
-      ctx.fillStyle = '#08111d';
-      ctx.fillRect(0,0,w,h);
-
-      const pad = {l:58,r:22,t:18,b:34};
-      const windowSize = CHART_WINDOWS[state.chartWindow] || CHART_WINDOWS.mid;
-      const data = stock.history.slice(-windowSize); // 최근 것만 표시
-      const min = Math.min(...data);
-      const max = Math.max(...data);
-      const range = Math.max(1, max - min);
-
-      ctx.strokeStyle = 'rgba(148,163,184,.15)';
-      ctx.lineWidth = 1;
-      for(let i=0;i<5;i++){
-        const y = pad.t + ((h - pad.t - pad.b) * i / 4);
-        ctx.beginPath();
-        ctx.moveTo(pad.l, y);
-        ctx.lineTo(w - pad.r, y);
-        ctx.stroke();
-      }
-
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '12px Malgun Gothic';
-      for(let i=0;i<5;i++){
-        const ratio = 1 - i/4;
-        const value = Math.round(min + range * ratio);
-        const y = pad.t + ((h - pad.t - pad.b) * i / 4);
-        ctx.fillText(formatKRW(value), 8, y + 4);
-      }
-
-      const change = data[data.length-1] - data[0];
-      const lineColor = change >= 0 ? '#22c55e' : '#ef4444';
-
-      const grad = ctx.createLinearGradient(0,pad.t,0,h-pad.b);
-      grad.addColorStop(0, change >= 0 ? 'rgba(34,197,94,.28)' : 'rgba(239,68,68,.28)');
-      grad.addColorStop(1, 'rgba(15,23,42,0)');
-
-      ctx.beginPath();
-      data.forEach((price, i) => {
-        const x = pad.l + (w - pad.l - pad.r) * (i / (data.length - 1 || 1));
-        const y = pad.t + (h - pad.t - pad.b) * (1 - (price - min) / range);
-        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-      });
-      const lastX = pad.l + (w - pad.l - pad.r);
-      const firstX = pad.l;
-      ctx.lineTo(lastX, h-pad.b);
-      ctx.lineTo(firstX, h-pad.b);
-      ctx.closePath();
-      ctx.fillStyle = grad;
-      ctx.fill();
-
-      ctx.beginPath();
-      data.forEach((price, i) => {
-        const x = pad.l + (w - pad.l - pad.r) * (i / (data.length - 1 || 1));
-        const y = pad.t + (h - pad.t - pad.b) * (1 - (price - min) / range);
-        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-      });
-      ctx.strokeStyle = lineColor;
-      ctx.lineWidth = 2.5;
-      ctx.stroke();
-
-      const lastPrice = data[data.length-1];
-      const lx = pad.l + (w - pad.l - pad.r);
-      const ly = pad.t + (h - pad.t - pad.b) * (1 - (lastPrice - min) / range);
-      ctx.beginPath();
-      ctx.arc(lx, ly, 4, 0, Math.PI*2);
-      ctx.fillStyle = lineColor;
-      ctx.fill();
-
-      ctx.fillStyle = '#cbd5e1';
-      ctx.font = '13px Malgun Gothic';
-      const label = state.chartWindow === 'short' ? '짧게' : state.chartWindow === 'mid' ? '중간' : '길게';
-      ctx.fillText(`최근 ${label} 구간`, pad.l, h - 8);
-      ctx.fillText(`시초가 ${formatKRW(stock.dayOpen)} / 현재가 ${formatKRW(stock.price)}`, w - 290, h - 8);
-    }
-
-    function renderPortfolio(){
-      els.portfolioList.innerHTML = '';
-      const entries = Object.entries(state.portfolio).filter(([,pos]) => pos.qty > 0);
-      if(entries.length === 0){
-        els.portfolioList.innerHTML = '<div class="lineitem"><div class="desc">아직 보유 중인 종목이 없어.</div></div>';
-        return;
-      }
-      entries.forEach(([key,pos]) => {
-        const stock = getStock(key);
-        if(!stock) return;
-        const value = stock.price * pos.qty;
-        const pl = (stock.price - pos.avgPrice) * pos.qty;
-        const item = document.createElement('div');
-        item.className = 'lineitem';
-        item.innerHTML = `
-          <div class="top">
-            <div>
-              <div class="name">${stock.name} · ${pos.qty.toLocaleString('ko-KR')}주</div>
-              <div class="desc">평균단가 ${formatKRW(pos.avgPrice)} / 평가금액 ${formatKRW(value)}</div>
-            </div>
-            <div class="${pl >= 0 ? 'good' : 'bad'}" style="font-weight:900;">${formatSignedKRW(pl)}</div>
-          </div>
-        `;
-        item.onclick = () => { state.selectedKey = key; renderAll(); };
-        els.portfolioList.appendChild(item);
-      });
-    }
-
-    function renderLoans(){
-      els.loanList.innerHTML = '';
-      if(state.loans.length === 0){
-        els.loanList.innerHTML = '<div class="lineitem"><div class="desc">현재 대출 없음</div></div>';
-        return;
-      }
-      state.loans.forEach(loan => {
-        const elapsed = now() - loan.borrowedAt;
-        const overdueLeft = Math.max(0, OVERDUE_MS - elapsed);
-        const d = Math.floor(overdueLeft / (24*60*60*1000));
-        const h = Math.floor((overdueLeft % (24*60*60*1000)) / (60*60*1000));
-        const item = document.createElement('div');
-        item.className = 'lineitem';
-        item.innerHTML = `
-          <div class="top">
-            <div>
-              <div class="name">대출 ${formatKRW(loan.amount)}</div>
-              <div class="desc">강제 회수까지 ${d}일 ${h}시간 / 이자 2일당 1%</div>
-            </div>
-            <div class="${loan.forced ? 'bad' : 'blue'}" style="font-weight:900;">${loan.forced ? '회수됨' : '진행중'}</div>
-          </div>
-        `;
-        els.loanList.appendChild(item);
-      });
-    }
-
-    function renderEvents(){
-      els.eventList.innerHTML = '';
-      if(state.events.length === 0){
-        els.eventList.innerHTML = '<div class="lineitem"><div class="desc">아직 발생한 중대사건이 없어.</div></div>';
-        return;
-      }
-      state.events.slice(0,8).forEach(ev => {
-        const item = document.createElement('div');
-        item.className = 'lineitem';
-        item.innerHTML = `
-          <div class="top">
-            <div>
-              <div class="name">${ev.title}</div>
-              <div class="desc">${ev.text}<br>${(ev.effectsApplied || []).join(' / ')}</div>
-            </div>
-            <div class="small">${ev.time}</div>
-          </div>
-        `;
-        els.eventList.appendChild(item);
-      });
-    }
-
-    function renderSummary(){
-      const holding = getHoldingValue();
-      const loanTotal = getTotalLoan();
-      const netWorth = state.cash + holding - loanTotal;
-      const profit = netWorth - state.initialCash;
-      state.totalProfit = profit;
-      els.investorName.textContent = state.investorName || '-';
-      els.clockText.textContent = new Date().toLocaleString('ko-KR');
-      els.cashText.textContent = formatKRW(state.cash);
-      els.loanTotalText.textContent = formatKRW(loanTotal);
-      els.netWorthText.textContent = formatKRW(netWorth);
-      els.profitText.innerHTML = `<span class="${profit >= 0 ? 'good' : 'bad'}">${formatSignedKRW(profit)}</span>`;
-      els.initialCapitalText.textContent = formatKRW(state.initialCash);
-      els.creditText.innerHTML = `<span class="${state.creditScore <= -50 ? 'bad' : state.creditScore < 30 ? 'gold' : 'good'}">${state.creditScore}점</span>`;
-      els.holdingTotalText.textContent = formatKRW(holding);
-      const earning = getCurrentEarning();
-      els.earningText.innerHTML = `<span class="${earning >= 0 ? 'good' : 'bad'}">${formatSignedKRW(earning)}</span>`;
-
-      if(els.chartShortBtn && els.chartMidBtn && els.chartLongBtn){
-        els.chartShortBtn.style.outline = state.chartWindow === 'short' ? '2px solid rgba(255,255,255,.25)' : 'none';
-        els.chartMidBtn.style.outline = state.chartWindow === 'mid' ? '2px solid rgba(255,255,255,.25)' : 'none';
-        els.chartLongBtn.style.outline = state.chartWindow === 'long' ? '2px solid rgba(255,255,255,.25)' : 'none';
-      }
-    }
-
-    function renderAll(){
-      renderSummary();
-      renderStockList();
-      renderSelected();
-      renderPortfolio();
-      renderLoans();
-      renderEvents();
-      if(now() - state.lastSaveAt > SAVE_MS) saveState();
-    }
-
-    function handleQuickSelect(){
-      const stock = getStock(state.selectedKey);
-      if(!stock) return;
-      const v = els.quickSelect.value;
-      if(v === 'max') els.quantityInput.value = maxAffordableQty(stock) || 1;
-      else els.quantityInput.value = v;
-    }
-
-    function bindEvents(){
-      els.startBtn.onclick = () => {
-        const name = els.nicknameInput.value.trim();
-        if(name.length < 2){
-          els.nicknameNotice.textContent = '투자자 이름은 2글자 이상으로 해줘.';
-          els.nicknameNotice.className = 'notice bad';
-          return;
-        }
-        const loaded = loadState(name);
-        if(!loaded) startNew(name);
-        els.nicknameOverlay.style.display = 'none';
-        pushTicker(`투자자 ${name} 입장 — 초기 자본 ${formatKRW(state.initialCash)}`);
-        renderAll();
-      };
-      els.nicknameInput.addEventListener('keydown', e => { if(e.key === 'Enter') els.startBtn.click(); });
-      els.quickSelect.onchange = handleQuickSelect;
-      els.buyBtn.onclick = buyStock;
-      els.sellBtn.onclick = () => sellStock();
-      els.buyHalfBtn.onclick = () => {
-        const stock = getStock(state.selectedKey);
-        if(!stock) return;
-        const qty = Math.floor((state.cash * 0.5) / stock.price);
-        if(qty < 1){ flashNotice(els.tradeNotice,'가능금액 50%로는 1주도 못 삼','bad'); return; }
-        els.quantityInput.value = qty;
-        buyStock();
-      };
-      els.sellAllBtn.onclick = () => {
-        const stock = getStock(state.selectedKey);
-        if(!stock) return;
-        const pos = getPosition(stock.key);
-        if(pos.qty <= 0){ flashNotice(els.tradeNotice,'전량 매도할 보유 수량이 없음','bad'); return; }
-        sellStock(pos.qty);
-      };
-      els.loanBtn.onclick = borrowMoney;
-      els.repayBtn.onclick = repayMoney;
-      if(els.chartShortBtn) els.chartShortBtn.onclick = () => { state.chartWindow = 'short'; renderAll(); };
-      if(els.chartMidBtn) els.chartMidBtn.onclick = () => { state.chartWindow = 'mid'; renderAll(); };
-      if(els.chartLongBtn) els.chartLongBtn.onclick = () => { state.chartWindow = 'long'; renderAll(); };
-      window.addEventListener('beforeunload', saveState);
-    }
-
-    function boot(){
-      bindEvents();
-      state.stocks = cloneStocks();
-      state.selectedKey = defaultStocks[0].key;
-      renderAll();
-      setInterval(() => {
-        els.clockText.textContent = new Date().toLocaleString('ko-KR');
-        applyLoanInterest();
-        renderSummary();
-      }, 1000);
-      setInterval(updateStocks, PRICE_TICK_MS);
-      setInterval(maybeTriggerEvent, EVENT_CHECK_MS);
-      setInterval(saveState, SAVE_MS + 1000);
-    }
-
-    boot();
+    renderRecentCountries();
   </script>
 </body>
 </html>
