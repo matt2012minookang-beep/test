@@ -12,13 +12,13 @@
       --line:#334155;
       --text:#e5eefc;
       --sub:#94a3b8;
-      --good:#22c55e;
-      --bad:#ef4444;
+      --up:#ef4444;    /* 상승 = 빨강 */
+      --down:#38bdf8;  /* 하락 = 파랑 */
       --gold:#fbbf24;
-      --blue:#38bdf8;
       --purple:#a78bfa;
     }
     *{box-sizing:border-box;}
+    html,body{width:100%;overflow-x:hidden;}
     body{
       margin:0;
       font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;
@@ -27,6 +27,7 @@
       min-height:100vh;
     }
     .wrap{
+      width:100%;
       max-width:1440px;
       margin:0 auto;
       padding:18px;
@@ -74,13 +75,21 @@
       gap:8px;
       box-shadow:0 8px 20px rgba(0,0,0,.18);
     }
-    .good{color:var(--good);} .bad{color:var(--bad);} .gold{color:var(--gold);} .sub{color:var(--sub);} .blue{color:var(--blue);}
+
+    .good{color:var(--up);}
+    .bad{color:var(--down);}
+    .gold{color:var(--gold);}
+    .sub{color:var(--sub);}
+    .blue{color:var(--down);}
+
     .grid{
       display:grid;
-      grid-template-columns:370px 1fr 360px;
+      grid-template-columns:320px minmax(0,1fr) 320px;
       gap:16px;
+      align-items:start;
     }
     .card{
+      min-width:0;
       background:linear-gradient(180deg,rgba(17,24,39,.98),rgba(15,23,42,.98));
       border:1px solid var(--line);
       border-radius:22px;
@@ -111,9 +120,19 @@
       border:1px solid var(--line);
       border-radius:16px;
       padding:12px;
+      min-width:0;
     }
-    .stat .label{font-size:12px;color:var(--sub);margin-bottom:8px;}
-    .stat .value{font-size:20px;font-weight:900;line-height:1.2;word-break:break-all;}
+    .stat .label{
+      font-size:12px;
+      color:var(--sub);
+      margin-bottom:8px;
+    }
+    .stat .value{
+      font-size:20px;
+      font-weight:900;
+      line-height:1.2;
+      word-break:break-all;
+    }
     .marketbox{
       display:flex;
       gap:8px;
@@ -132,7 +151,7 @@
       display:flex;
       flex-direction:column;
       gap:10px;
-      max-height:680px;
+      max-height:calc(100vh - 260px);
       overflow:auto;
       padding-right:4px;
     }
@@ -142,23 +161,47 @@
       background:rgba(15,23,42,.72);
       padding:12px;
       display:grid;
-      grid-template-columns:1fr auto;
+      grid-template-columns:minmax(0,1fr) auto;
       gap:10px;
       cursor:pointer;
       transition:transform .12s ease, border-color .12s ease, box-shadow .12s ease;
     }
-    .stock-item:hover{transform:translateY(-1px);border-color:#4b5563;box-shadow:0 10px 20px rgba(0,0,0,.18);}
-    .stock-item.selected{border-color:var(--blue); box-shadow:0 0 0 1px rgba(56,189,248,.2) inset;}
+    .stock-item:hover{
+      transform:translateY(-1px);
+      border-color:#4b5563;
+      box-shadow:0 10px 20px rgba(0,0,0,.18);
+    }
+    .stock-item.selected{
+      border-color:var(--down);
+      box-shadow:0 0 0 1px rgba(56,189,248,.2) inset;
+    }
     .stock-name{font-size:18px;font-weight:900;}
-    .stock-meta{font-size:12px;color:var(--sub);margin-top:4px;}
-    .stock-price{font-size:18px;font-weight:900;text-align:right;}
-    .stock-change{font-size:13px;text-align:right;font-weight:800;margin-top:4px;}
+    .stock-meta{
+      font-size:12px;
+      color:var(--sub);
+      margin-top:4px;
+      word-break:break-word;
+    }
+    .stock-price{
+      font-size:18px;
+      font-weight:900;
+      text-align:right;
+      white-space:nowrap;
+    }
+    .stock-change{
+      font-size:13px;
+      text-align:right;
+      font-weight:800;
+      margin-top:4px;
+      white-space:nowrap;
+    }
     .chart-wrap{
       border:1px solid var(--line);
       border-radius:18px;
       background:linear-gradient(180deg,#07101d,#0b1220);
       padding:12px;
       margin-bottom:14px;
+      overflow:hidden;
     }
     #chartCanvas{
       width:100%;
@@ -172,7 +215,7 @@
       grid-template-columns:1fr 1fr;
       gap:12px;
     }
-    .input, .select{
+    .input,.select{
       width:100%;
       background:#0b1220;
       border:1px solid var(--line);
@@ -181,6 +224,7 @@
       padding:12px 14px;
       outline:none;
       font-size:15px;
+      min-width:0;
     }
     .btnrow{
       display:flex;
@@ -209,7 +253,7 @@
       display:flex;
       flex-direction:column;
       gap:10px;
-      max-height:250px;
+      max-height:240px;
       overflow:auto;
       padding-right:4px;
     }
@@ -219,9 +263,20 @@
       padding:10px 12px;
       background:rgba(15,23,42,.7);
     }
-    .lineitem .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
+    .lineitem .top{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+    }
     .lineitem .name{font-weight:900;}
-    .lineitem .desc{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.45;}
+    .lineitem .desc{
+      font-size:12px;
+      color:var(--sub);
+      margin-top:6px;
+      line-height:1.45;
+      word-break:break-word;
+    }
     .section-gap{margin-top:16px;}
     .headline{
       display:flex;
@@ -229,6 +284,7 @@
       align-items:center;
       gap:10px;
       margin-bottom:10px;
+      min-width:0;
     }
     .overlay{
       position:fixed;
@@ -237,7 +293,7 @@
       align-items:center;
       justify-content:center;
       background:rgba(2,6,23,.72);
-      backdrop-filter: blur(8px);
+      backdrop-filter:blur(8px);
       z-index:100;
       padding:16px;
     }
@@ -274,10 +330,15 @@
       padding-top:10px;
       padding-bottom:10px;
     }
-    @keyframes ticker{0%{transform:translateX(0);}100%{transform:translateX(-100%);}}
+    @keyframes ticker{
+      0%{transform:translateX(0);}
+      100%{transform:translateX(-100%);}
+    }
     .muted{opacity:.75;}
+
     @media (max-width:1200px){
       .grid{grid-template-columns:1fr;}
+      .stock-list{max-height:420px;}
     }
     @media (max-width:720px){
       .tradepanel{grid-template-columns:1fr;}
@@ -480,7 +541,7 @@
   </div>
 
   <script>
-    const STORAGE_PREFIX = "stock_sim_kr_v3_parkjihun";
+    const STORAGE_PREFIX = "stock_sim_kr_v4_parkjihun_redblue";
     const UNIT_NAMES = ["", "만", "억", "조", "경", "해", "자", "양", "구", "간", "정", "재", "극"];
     const INITIAL_CASH = 100000;
     const CREDIT_MIN = -100;
@@ -510,7 +571,6 @@
       { key:"lumen", name:"루멘바이오", sector:"바이오", price:15400, baseVol:0.034, drift:0.0010, fundamentals:0.50 },
       { key:"quantix", name:"퀀틱스반도체", sector:"반도체", price:12600, baseVol:0.031, drift:0.0013, fundamentals:0.52 },
       { key:"greenmesh", name:"그린메쉬에너지", sector:"친환경", price:11200, baseVol:0.027, drift:0.0010, fundamentals:0.54 },
-
       { key:"parkjihun", name:"박지훈 회사", sector:"특수테마", price:13333, baseVol:0.010, drift:0.0016, fundamentals:0.72 }
     ];
 
@@ -527,7 +587,6 @@
       { title:"세계 경기 둔화 우려", text:"전반적인 경기 둔화 전망이 나오며 위험자산에 매도 압력이 들어왔다.", effects:{"반도체":-0.04,"빅테크":-0.04,"배터리":-0.05,"로봇/모빌리티":-0.05,"바이오":-0.03,"친환경":-0.03} },
       { title:"시장 반등 랠리", text:"과매도 인식이 확산되며 성장주 중심으로 반등이 나타났다.", effects:{"AI 클라우드":0.05,"빅테크":0.05,"바이오":0.04,"로봇/모빌리티":0.04} },
       { title:"귀금속 채굴 공급 차질", text:"채굴 지역 불안으로 금과 은 공급 우려가 커졌다.", effects:{"원자재":0.06} },
-
       { title:"박지훈 회사 신사업 발표", text:"특수테마 기대감이 붙으며 박지훈 회사가 관심을 받았다.", effects:{"특수테마":0.03} },
       { title:"박지훈 회사 루머 확산", text:"근거 없는 소문이 돌며 박지훈 회사의 투자 심리가 흔들렸다.", effects:{"특수테마":-0.03} }
     ];
@@ -762,22 +821,12 @@
       return /박.*지.*훈/.test(compact);
     }
 
-    function hasBoughtParkJihun(){
-      const pos = state.portfolio["parkjihun"];
-      return !!(pos && pos.qty > 0);
-    }
-
     function updateStocks(){
       applyDailyResetIfNeeded();
       const intensity = marketIntensity();
       state.marketMood *= 0.96;
 
-      const parkNickMatched = isParkJihunNick(state.investorName);
-      const parkHolding = hasBoughtParkJihun();
-
       state.stocks.forEach(stock => {
-        stock.lastPrice = stock.price;
-
         const intrinsicBase = stock.dayOpen || stock.price;
         const valuationGap = (intrinsicBase - stock.price) / Math.max(1, intrinsicBase);
         const meanReversion = valuationGap * 0.035;
@@ -797,8 +846,8 @@
           + stock.trendMemory * stock.baseVol * 0.08
           + randomShock;
 
-        if(stock.key === "parkjihun" && parkHolding){
-          change += parkNickMatched ? 0.0001 : -0.0001; // 0.01%
+        if(stock.key === "parkjihun"){
+          change += isParkJihunNick(state.investorName) ? 0.0001 : -0.0001; // ±0.01%
         }
 
         const band = stock.baseVol * 2.8;
@@ -860,13 +909,6 @@
       }, 0);
     }
 
-    function getLoanOutstanding(loan){
-      const elapsed = now() - loan.lastInterestAt;
-      const intervals = Math.floor(elapsed / INTEREST_INTERVAL_MS);
-      if(intervals <= 0) return loan.amount;
-      return Math.round(loan.amount * Math.pow(1 + INTEREST_RATE_PER_2_DAYS, intervals));
-    }
-
     function applyLoanInterest(){
       let changed = false;
       state.loans.forEach(loan => {
@@ -895,10 +937,6 @@
     function getTotalLoan(){
       applyLoanInterest();
       return state.loans.reduce((sum,loan)=>sum+loan.amount,0);
-    }
-
-    function getNetWorth(){
-      return state.cash + getHoldingValue() - getTotalLoan();
     }
 
     function getCurrentEarning(){
@@ -1093,10 +1131,10 @@
       }
 
       const change = data[data.length-1] - data[0];
-      const lineColor = change >= 0 ? '#22c55e' : '#ef4444';
+      const lineColor = change >= 0 ? '#ef4444' : '#38bdf8'; // 상승 빨강, 하락 파랑
 
       const grad = ctx.createLinearGradient(0,pad.t,0,h-pad.b);
-      grad.addColorStop(0, change >= 0 ? 'rgba(34,197,94,.28)' : 'rgba(239,68,68,.28)');
+      grad.addColorStop(0, change >= 0 ? 'rgba(239,68,68,.28)' : 'rgba(56,189,248,.28)');
       grad.addColorStop(1, 'rgba(15,23,42,0)');
 
       ctx.beginPath();
