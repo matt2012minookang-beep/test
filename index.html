@@ -3,1470 +3,5558 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>주식 시뮬레이터</title>
+  <title>chat웹</title>
   <style>
+    *{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --bg:#0f172a;
-      --panel:#111827;
-      --panel2:#1f2937;
-      --line:#334155;
-      --text:#e5eefc;
-      --sub:#94a3b8;
-      --up:#ef4444;      /* 상승 = 빨강 */
-      --down:#38bdf8;    /* 하락 = 파랑 */
-      --gold:#fbbf24;
-      --purple:#a78bfa;
+      --green:#00c73c;--green-dark:#00a832;--bg:#050505;--text:#111;--muted:#777;--line:#e5e5e5;
+      --novel-bg:#fff;--yellow-skill:#9a7600;
+      --red-system-bg:#4c0b0b;--red-system-text:#ffe3e3;--red-system-line:#d92d2d;
+      --blue-system-bg:#e7f1ff;--blue-system-text:#064a9b;--blue-system-line:#2b7cff;
+      --rank-red:#c40000;
     }
-    *{box-sizing:border-box;}
-    html,body{width:100%;overflow-x:hidden;}
-    body{
-      margin:0;
-      font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;
-      background:linear-gradient(180deg,#020617 0%, #0f172a 40%, #111827 100%);
-      color:var(--text);
-      min-height:100vh;
-    }
-    .wrap{
-      max-width:1440px;
-      margin:0 auto;
-      padding:18px;
-    }
-    .topbar{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom:16px;
-    }
-    .titlebox{
-      background:linear-gradient(135deg,#1e293b,#0f172a);
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:16px 20px;
-      box-shadow:0 14px 30px rgba(0,0,0,.25);
-    }
-    .title{
-      font-size:30px;
-      font-weight:900;
-      letter-spacing:-0.5px;
-      margin:0 0 4px;
-    }
-    .subtitle{
-      color:var(--sub);
-      font-size:14px;
-    }
-    .chiprow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:flex-end;
-    }
-    .chip{
-      background:rgba(15,23,42,.92);
-      border:1px solid var(--line);
-      border-radius:999px;
-      padding:10px 14px;
-      font-weight:700;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      box-shadow:0 8px 20px rgba(0,0,0,.18);
-    }
+    body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;background:var(--bg);color:var(--text)}
+    button,input{font-family:inherit}
+    a{color:inherit;text-decoration:none}
 
-    .good{color:var(--up);}
-    .bad{color:var(--down);}
-    .gold{color:var(--gold);}
-    .sub{color:var(--sub);}
-    .blue{color:var(--down);}
+    .top-header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
+    .top-inner{max-width:1100px;margin:0 auto;min-height:58px;display:flex;align-items:center;gap:18px;padding:10px 16px}
+    .logo{font-size:24px;font-weight:900;color:var(--green);letter-spacing:-1px;white-space:nowrap;cursor:pointer}
+    .search-area{flex:1;max-width:520px;display:flex;gap:8px}
+    .search-box{width:100%;height:38px;border:2px solid var(--green);border-radius:20px;padding:0 15px;color:#111;font-size:14px;outline:none;background:#fff;font-weight:700}
+    .search-box::placeholder{color:#999;font-weight:500}
+    .search-btn{border:none;background:var(--green);color:#fff;border-radius:20px;padding:0 16px;font-weight:900;cursor:pointer;white-space:nowrap}
+    .account-btn{border:1px solid #ddd;background:#fff;border-radius:18px;padding:8px 14px;font-size:13px;font-weight:800;white-space:nowrap;cursor:pointer}
+    .account-btn.logged{background:#111;color:#fff;border-color:#111}
+    .account-btn.author{background:#3b1168;color:#fff;border-color:#3b1168}
 
-    .grid{
-      display:grid;
-      grid-template-columns:370px 1fr 360px;
-      gap:16px;
-      align-items:start;
-    }
-    .card{
-      min-width:0;
-      background:linear-gradient(180deg,rgba(17,24,39,.98),rgba(15,23,42,.98));
-      border:1px solid var(--line);
-      border-radius:22px;
-      padding:16px;
-      box-shadow:0 16px 32px rgba(0,0,0,.24);
-    }
-    .card h2,.card h3{
-      margin:0 0 12px;
-      letter-spacing:-0.3px;
-    }
-    .small{
-      font-size:13px;
-      color:var(--sub);
-    }
-    .stats{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-bottom:8px;
-    }
-    .splitbar{
-      height:1px;
-      background:linear-gradient(90deg,transparent,rgba(148,163,184,.35),transparent);
-      margin:14px 0;
-    }
-    .stat{
-      background:rgba(30,41,59,.52);
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:12px;
-      min-width:0;
-    }
-    .stat .label{
-      font-size:12px;
-      color:var(--sub);
-      margin-bottom:8px;
-    }
-    .stat .value{
-      font-size:20px;
-      font-weight:900;
-      line-height:1.2;
-      word-break:break-all;
-    }
+    .nav-bar{background:var(--green);color:#fff}
+    .nav-inner{max-width:1100px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:0 10px}
+    .nav-item{padding:13px 16px;font-weight:800;font-size:15px;white-space:nowrap;opacity:.9;cursor:pointer}
+    .nav-item.active{background:var(--green-dark);opacity:1}
 
-    .marketbox{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-top:8px;
-    }
-    .tag{
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:#0b1220;
-      font-size:12px;
-      font-weight:700;
-    }
+    .locked-home{min-height:calc(100vh - 104px);background:#000;color:#fff;display:flex;align-items:center;justify-content:center;padding:40px 18px;text-align:center}
+    .locked-box{max-width:520px;width:100%;border:1px solid rgba(255,255,255,.12);background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border-radius:22px;padding:38px 24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+    .locked-box h1{font-size:30px;margin-bottom:14px;letter-spacing:-1px}
+    .locked-box p{color:rgba(255,255,255,.72);line-height:1.7;margin-bottom:24px}
+    .locked-box button{border:none;background:var(--green);color:#fff;border-radius:12px;padding:13px 22px;font-size:16px;font-weight:900;cursor:pointer}
 
-    .stock-list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      max-height:680px;
-      overflow:auto;
-      padding-right:4px;
-    }
-    .stock-item{
-      border:1px solid var(--line);
-      border-radius:16px;
-      background:rgba(15,23,42,.72);
-      padding:12px;
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto;
-      gap:10px;
-      cursor:pointer;
-      transition:transform .12s ease, border-color .12s ease, box-shadow .12s ease;
-    }
-    .stock-item:hover{
-      transform:translateY(-1px);
-      border-color:#4b5563;
-      box-shadow:0 10px 20px rgba(0,0,0,.18);
-    }
-    .stock-item.selected{
-      border-color:var(--down);
-      box-shadow:0 0 0 1px rgba(56,189,248,.2) inset;
-    }
-    .stock-name{font-size:18px;font-weight:900;}
-    .stock-meta{
-      font-size:12px;
-      color:var(--sub);
-      margin-top:4px;
-      word-break:break-word;
-    }
-    .stock-price{
-      font-size:18px;
-      font-weight:900;
-      text-align:right;
-      white-space:nowrap;
-    }
-    .stock-change{
-      font-size:13px;
-      text-align:right;
-      font-weight:800;
-      margin-top:4px;
-      white-space:nowrap;
-    }
+    .page{display:none;max-width:1100px;margin:0 auto;padding:18px 14px 80px}
+    body.logged-in .locked-home{display:none}
+    body.logged-in .page.active{display:block}
+    .dashboard-title{color:#fff;font-size:26px;font-weight:900;margin:10px 0 18px;letter-spacing:-1px}
+    .section{margin-top:24px;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+    .section:first-child{margin-top:0}
+    .section-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+    .section-head h2{font-size:19px;letter-spacing:-.5px}
+    .section-head span{color:var(--muted);font-size:13px;font-weight:700}
+    .empty-box{padding:22px 18px;color:#777;font-weight:800;line-height:1.6}
 
-    .chart-wrap{
-      border:1px solid var(--line);
-      border-radius:18px;
-      background:linear-gradient(180deg,#07101d,#0b1220);
-      padding:12px;
-      margin-bottom:14px;
-      overflow:hidden;
-    }
-    #chartCanvas{
-      width:100%;
-      height:320px;
-      display:block;
-      background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));
-      border-radius:14px;
-    }
+    .work-row{display:flex;align-items:center;gap:14px;padding:14px 18px;border-top:1px solid var(--line);cursor:pointer;transition:background .15s}
+    .work-row:first-of-type{border-top:none}
+    .work-row:hover{background:#f8fff9}
+    .mini-cover{width:72px;height:92px;border-radius:10px;flex-shrink:0;background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.05)),radial-gradient(circle at 70% 20%,#7048ff,transparent 30%),radial-gradient(circle at 25% 70%,#101927,#080910 55%);position:relative;overflow:hidden}
+    .mini-cover::after{content:"세계를";position:absolute;left:8px;bottom:8px;color:#fff;font-size:13px;font-weight:900;letter-spacing:-.5px}
+    .mini-cover.kill{background:linear-gradient(to top,rgba(0,0,0,.95),rgba(60,0,0,.15)),radial-gradient(circle at 75% 20%,#ff2222,transparent 28%),radial-gradient(circle at 22% 78%,#ff8a00,transparent 32%),linear-gradient(135deg,#210303,#050505 60%,#160000)}
+    .mini-cover.kill::before{content:"";position:absolute;inset:10px;border:1px solid rgba(255,60,60,.48);border-radius:8px;box-shadow:0 0 18px rgba(255,0,0,.38)}
+    .mini-cover.kill::after{content:"킬 게이지"}
 
-    .tradepanel{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
-    .input,.select{
-      width:100%;
-      background:#0b1220;
-      border:1px solid var(--line);
-      color:var(--text);
-      border-radius:14px;
-      padding:12px 14px;
-      outline:none;
-      font-size:15px;
-      min-width:0;
-    }
-    .btnrow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    button{
-      border:none;
-      cursor:pointer;
-      border-radius:14px;
-      padding:12px 16px;
-      font-weight:900;
-      font-size:14px;
-      color:white;
-      transition:transform .1s ease, filter .1s ease;
-    }
-    button:hover{transform:translateY(-1px);filter:brightness(1.04);}
-    .buy{background:linear-gradient(135deg,#16a34a,#22c55e);}
-    .sell{background:linear-gradient(135deg,#dc2626,#ef4444);}
-    .ghost{background:linear-gradient(135deg,#334155,#475569);}
-    .bank{background:linear-gradient(135deg,#1d4ed8,#2563eb);}
-    .warn{background:linear-gradient(135deg,#a16207,#ca8a04);}
-    .purple{background:linear-gradient(135deg,#6d28d9,#8b5cf6);}
-    .full{width:100%;}
+    .work-row-info{min-width:0;flex:1}
+    .work-row-info h3{font-size:18px;margin-bottom:5px;letter-spacing:-.5px}
+    .work-row-info p{font-size:13px;color:#777;line-height:1.5}
+    .work-row-badge{background:#f1f3f5;color:#555;padding:7px 9px;border-radius:999px;font-size:12px;font-weight:900;white-space:nowrap}
+    .work-row-badge.preview{background:#fff4d6;color:#9a6500;border:1px solid #ffd36b}
+    .work-row-badge.owned{background:#e8fff0;color:#008f2b;border:1px solid #7be49a}
+    .work-row-badge.free{background:#eef4ff;color:#0f63ff;border:1px solid #8fb8ff}
 
-    .portfolio-list,.event-list,.loan-list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      max-height:250px;
-      overflow:auto;
-      padding-right:4px;
-    }
-    .lineitem{
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:10px 12px;
-      background:rgba(15,23,42,.7);
-    }
-    .lineitem .top{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:flex-start;
-    }
-    .lineitem .name{font-weight:900;}
-    .lineitem .desc{
-      font-size:12px;
-      color:var(--sub);
-      margin-top:6px;
-      line-height:1.45;
-      word-break:break-word;
-    }
+    .weekday-tabs{display:flex;gap:8px;overflow-x:auto;padding:14px 18px;background:#fff;border-bottom:1px solid var(--line)}
+    .weekday-tab-btn{border:1px solid #ddd;background:#fff;color:#333;border-radius:999px;padding:10px 17px;font-size:14px;font-weight:900;cursor:pointer;white-space:nowrap}
+    .weekday-tab-btn.active{background:var(--green);color:#fff;border-color:var(--green)}
+    .weekday-panel{display:none;background:#fff;padding:0}
+    .weekday-panel.active{display:block}
+    .weekday-empty-wrap{padding:48px 18px;text-align:center;color:#999;font-weight:900}
+    .weekday-work-row{display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;border-top:1px solid var(--line)}
+    .weekday-work-row:first-child{border-top:none}
+    .weekday-cover{width:82px;height:104px;border-radius:12px;background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.05)),radial-gradient(circle at 70% 20%,#7048ff,transparent 30%),radial-gradient(circle at 25% 70%,#101927,#080910 55%);position:relative;overflow:hidden;flex-shrink:0}
+    .weekday-cover::after{content:"세계를";position:absolute;left:9px;bottom:9px;color:#fff;font-size:14px;font-weight:900}
+    .weekday-cover.kill{background:linear-gradient(to top,rgba(0,0,0,.95),rgba(60,0,0,.15)),radial-gradient(circle at 75% 20%,#ff2222,transparent 28%),radial-gradient(circle at 22% 78%,#ff8a00,transparent 32%),linear-gradient(135deg,#210303,#050505 60%,#160000)}
+    .weekday-cover.kill::before{content:"";position:absolute;inset:10px;border:1px solid rgba(255,60,60,.48);border-radius:8px;box-shadow:0 0 18px rgba(255,0,0,.38)}
+    .weekday-cover.kill::after{content:"킬 게이지"}
+    .weekday-work-info h3{font-size:18px;margin-bottom:6px;letter-spacing:-.5px}
+    .weekday-work-info p{font-size:13px;color:#777;font-weight:800}
+    .rank-row{display:flex;align-items:center;gap:14px;padding:16px 18px;border-top:1px solid var(--line);cursor:pointer}
+    .rank-num{width:38px;height:38px;border-radius:12px;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;flex-shrink:0}
 
-    .section-gap{margin-top:16px;}
-    .headline{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      margin-bottom:10px;
-      min-width:0;
-    }
+    .search-empty-page{min-height:calc(100vh - 150px);background:#fff;border-radius:18px;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px 18px;margin-top:18px}
+    .search-empty-page strong{color:#e00000;font-size:24px;font-weight:900}
+    .search-result-title{color:#fff;font-size:24px;font-weight:900;margin-bottom:18px}
 
-    .overlay{
-      position:fixed;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:rgba(2,6,23,.72);
-      backdrop-filter:blur(8px);
-      z-index:100;
-      padding:16px;
-    }
-    .modal{
-      width:min(520px,100%);
-      background:linear-gradient(180deg,#111827,#0f172a);
-      border:1px solid var(--line);
-      border-radius:24px;
-      padding:20px;
-      box-shadow:0 24px 60px rgba(0,0,0,.4);
-    }
-    .modal h1{margin:0 0 10px;font-size:28px;}
-    .modal p{color:var(--sub);line-height:1.55;}
-    .notice{
-      margin-top:10px;
-      min-height:20px;
-      font-size:13px;
-      font-weight:800;
-      line-height:1.45;
-    }
+    .profile-card{background:#fff;border-radius:18px;overflow:hidden;border:1px solid var(--line);margin-top:18px}
+    .profile-top{padding:30px 18px;text-align:center;border-bottom:1px solid var(--line);background:linear-gradient(135deg,#f8fff9,#fff)}
+    .profile-img{width:92px;height:92px;margin:0 auto 12px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#fff,transparent 16%),linear-gradient(135deg,#00c73c,#151515);box-shadow:0 8px 24px rgba(0,0,0,.16);border:4px solid #fff;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+    .profile-img::before{content:"";display:block;width:62%;height:62%;background:rgba(255,255,255,.86);border-radius:50%;box-shadow:0 7px 18px rgba(0,0,0,.12)}
+    .profile-img.avatar-square::before{border-radius:14px}
+    .profile-img.avatar-triangle::before{width:0;height:0;background:transparent;border-left:30px solid transparent;border-right:30px solid transparent;border-bottom:56px solid rgba(255,255,255,.88);border-radius:0;box-shadow:none}
+    .profile-img.avatar-star::before{content:"★";background:transparent;width:auto;height:auto;color:rgba(255,255,255,.92);font-size:64px;line-height:1;box-shadow:none}
+    .profile-img.avatar-photo::before{display:none!important}
+    .profile-img.avatar-photo{background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}
+    .avatar-red{background:linear-gradient(135deg,#ff4d4d,#8b0000)!important}
+    .avatar-orange{background:linear-gradient(135deg,#ff9f1c,#c85c00)!important}
+    .avatar-yellow{background:linear-gradient(135deg,#ffd93d,#d6a400)!important}
+    .avatar-green{background:linear-gradient(135deg,#00c73c,#006b2a)!important}
+    .avatar-blue{background:linear-gradient(135deg,#3d8bff,#003c9e)!important}
+    .avatar-pink{background:linear-gradient(135deg,#ff6fb2,#b80063)!important}
+    .avatar-white{background:linear-gradient(135deg,#fff,#d8d8d8)!important}
+    .avatar-purple{background:linear-gradient(135deg,#8e44ff,#3b1168)!important}
 
-    .ticker{
-      margin-top:10px;
-      border:1px solid var(--line);
-      border-radius:14px;
-      background:#0b1220;
-      overflow:hidden;
-    }
-    .ticker-inner{
-      white-space:nowrap;
-      display:inline-block;
-      padding-left:100%;
-      animation:ticker 28s linear infinite;
-      color:#cbd5e1;
-      font-size:13px;
-      padding-top:10px;
-      padding-bottom:10px;
-    }
-    @keyframes ticker{
-      0%{transform:translateX(0);}
-      100%{transform:translateX(-100%);}
-    }
+    .profile-name{font-size:24px;font-weight:900;letter-spacing:-1px;margin-bottom:6px}
+    .profile-role{display:inline-block;padding:6px 10px;border-radius:999px;background:#f1f3f5;color:#555;font-size:12px;font-weight:900}
+    .profile-role.author{background:#f2e8ff;color:#5a1a92}
+    .profile-buttons{margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+    .logout-btn,.edit-profile-btn,.ticket-btn,.avatar-edit-btn{border:none;background:#111;color:#fff;border-radius:999px;padding:9px 16px;font-size:13px;font-weight:900;cursor:pointer}
+    .edit-profile-btn{background:#3b1168}
+    .ticket-btn{background:#00a832}
+    .avatar-edit-btn{background:#0f63ff}
+    .profile-ticket-info{margin-top:12px;color:#555;font-size:13px;font-weight:900;display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+    .profile-sections{display:grid;grid-template-columns:1fr 1fr;gap:0}
+    .profile-section{padding:18px;border-bottom:1px solid var(--line)}
+    .profile-section:first-child{border-right:1px solid var(--line)}
+    .profile-section h2{font-size:18px;margin-bottom:12px;letter-spacing:-.5px}
 
-    @media (max-width:1200px){
-      .grid{grid-template-columns:1fr;}
-    }
-    @media (max-width:720px){
-      .tradepanel{grid-template-columns:1fr;}
-      .stats{grid-template-columns:1fr;}
-      .title{font-size:24px;}
-      .chip{width:100%;justify-content:flex-start;}
-      .chiprow{justify-content:stretch;width:100%;}
+    .hero{background:linear-gradient(135deg,#111827,#191b2a 45%,#2b1246);border-radius:18px;min-height:260px;color:#fff;overflow:hidden;position:relative;box-shadow:0 12px 30px rgba(0,0,0,.18)}
+    .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 78% 18%,rgba(138,92,255,.42),transparent 28%),radial-gradient(circle at 15% 85%,rgba(0,199,60,.18),transparent 35%),linear-gradient(90deg,rgba(0,0,0,.75),rgba(0,0,0,.2))}
+    .hero::after{content:"天 空 要 塞";position:absolute;right:24px;bottom:22px;color:rgba(255,255,255,.08);font-size:74px;font-weight:900;letter-spacing:-8px;transform:rotate(-6deg)}
+    .hero.kill-hero{background:linear-gradient(135deg,#160000,#250404 44%,#050505)}
+    .hero.kill-hero::before{background:radial-gradient(circle at 78% 18%,rgba(255,0,0,.35),transparent 30%),radial-gradient(circle at 20% 82%,rgba(255,130,0,.22),transparent 35%),linear-gradient(90deg,rgba(0,0,0,.8),rgba(0,0,0,.18))}
+    .hero.kill-hero::after{content:"KILL GAUGE";font-size:64px;letter-spacing:-4px;color:rgba(255,70,70,.13);transform:rotate(-4deg)}
+    .hero-content{position:relative;z-index:2;padding:32px 30px;max-width:620px}
+    .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,199,60,.16);border:1px solid rgba(0,199,60,.5);color:#7cff9e;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;margin-bottom:13px}
+    .badge.red{background:rgba(255,0,0,.14);border-color:rgba(255,80,80,.55);color:#ff9b9b}
+    .hero h1{font-size:clamp(30px,5vw,52px);line-height:1.08;letter-spacing:-2.4px;margin-bottom:12px}
+    .hero p{color:rgba(255,255,255,.82);line-height:1.65;font-size:15px;max-width:560px}
+    .hero-actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+    .main-btn{border:none;background:var(--green);color:#fff;font-weight:900;border-radius:10px;padding:12px 18px;cursor:pointer;font-size:15px}
+    .main-btn.red{background:#d20000}
+    .sub-btn{border:1px solid rgba(255,255,255,.34);background:rgba(255,255,255,.1);color:#fff;font-weight:800;border-radius:10px;padding:12px 18px;cursor:pointer;font-size:15px}
+
+    .work-card{display:grid;grid-template-columns:160px 1fr;gap:18px;padding:18px}
+    .cover{height:220px;border-radius:12px;background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.05)),radial-gradient(circle at 70% 20%,#7048ff,transparent 28%),radial-gradient(circle at 25% 70%,#101927,#080910 55%);position:relative;overflow:hidden;box-shadow:inset 0 0 45px rgba(255,255,255,.04);cursor:pointer}
+    .cover::before{content:"";position:absolute;width:110px;height:110px;border:2px solid rgba(150,120,255,.7);border-radius:50%;right:-16px;top:22px;box-shadow:0 0 30px rgba(150,120,255,.75)}
+    .cover::after{content:"세계를\A구하고,\A버려졌다";white-space:pre;position:absolute;left:14px;bottom:14px;color:#fff;font-size:24px;line-height:1.08;font-weight:900;letter-spacing:-1.2px}
+    .cover.kill-cover{background:linear-gradient(to top,rgba(0,0,0,.96),rgba(50,0,0,.18)),radial-gradient(circle at 72% 18%,#ff2222,transparent 29%),radial-gradient(circle at 20% 76%,#ff8a00,transparent 36%),linear-gradient(135deg,#230303,#050505 58%,#160000)}
+    .cover.kill-cover::before{width:auto;height:auto;inset:14px;border:1px solid rgba(255,65,65,.55);border-radius:10px;right:14px;top:14px;box-shadow:0 0 34px rgba(255,0,0,.36),inset 0 0 20px rgba(255,0,0,.12)}
+    .cover.kill-cover::after{content:"킬 게이지\A시스템";color:#fff;text-shadow:0 0 14px rgba(255,0,0,.7)}
+
+    .work-info h3{font-size:26px;margin-bottom:8px;letter-spacing:-1px}
+    .meta{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+    .chip{background:#f1f3f5;color:#555;font-size:12px;font-weight:800;padding:6px 9px;border-radius:999px}
+    .summary{color:#444;line-height:1.7;font-size:14px;max-width:700px;margin-bottom:18px}
+    .stats{display:flex;gap:18px;color:#777;font-size:13px;font-weight:700;margin-bottom:18px;flex-wrap:wrap}
+
+    .episode-list{background:#fff}
+    .episode{display:grid;grid-template-columns:86px 1fr auto;gap:14px;align-items:center;padding:14px 18px;border-top:1px solid var(--line);cursor:pointer;transition:background .15s,opacity .15s}
+    .episode:hover{background:#f8fff9}
+    .episode.read{background:#f1f1f1;opacity:.78}
+    .episode.read:hover{background:#e8e8e8}
+    .episode.read .ep-title::after{content:"  읽음";color:#999;font-size:12px;font-weight:800}
+    .thumb{width:86px;height:58px;border-radius:8px;background:linear-gradient(to top,rgba(0,0,0,.75),transparent),radial-gradient(circle at 72% 25%,#8c6dff,#131522 48%,#07080c);position:relative;overflow:hidden}
+    .thumb.kill{background:linear-gradient(to top,rgba(0,0,0,.85),rgba(80,0,0,.1)),radial-gradient(circle at 72% 25%,#ff2b2b,#1c0505 45%,#060606)}
+    .thumb::after{content:attr(data-ep);position:absolute;left:8px;bottom:6px;color:#fff;font-weight:900;font-size:13px}
+    .ep-title{font-weight:900;margin-bottom:4px;font-size:15px}
+    .ep-desc{color:#777;font-size:13px}
+    .ep-date{color:#999;font-size:12px;white-space:nowrap}
+
+    .reader{position:fixed;inset:0;background:#fff;z-index:200;display:none;flex-direction:column}
+    .reader.open{display:flex}
+    .reader-top{height:54px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:#fff;position:sticky;top:0;z-index:5}
+    .reader-title-mini{min-width:0}
+    .reader-title-mini strong{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .reader-title-mini span{display:block;font-size:12px;color:#888;margin-top:2px}
+    .close-btn{border:none;background:#111;color:#fff;border-radius:999px;padding:8px 13px;font-weight:900;cursor:pointer}
+    .reader-scroll{overflow-y:auto;flex:1;background:var(--novel-bg)}
+    .novel-wrap{max-width:760px;margin:0 auto;padding:34px 18px 120px}
+    .novel-header{border-bottom:2px solid #222;padding-bottom:18px;margin-bottom:28px}
+    .novel-header .series-name{color:var(--green);font-weight:900;font-size:14px;margin-bottom:8px}
+    .novel-header .series-name.kill-name{color:#d20000}
+    .novel-header h1{font-size:clamp(26px,5vw,40px);letter-spacing:-1.4px;margin-bottom:10px}
+    .novel-header .novel-sub{color:#777;font-size:13px;font-weight:700}
+    .novel-body{font-family:"Nanum Myeongjo","Noto Serif KR","Batang",serif;font-size:19px;line-height:2.15;color:#151515;word-break:keep-all;white-space:normal}
+    .novel-body p{margin:0 0 22px}
+    .scene{text-align:center;color:#888;letter-spacing:8px;margin:36px 0;font-family:inherit}
+    .system{font-family:"Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:var(--red-system-bg);color:var(--red-system-text);border-left:4px solid var(--red-system-line);padding:12px 14px;border-radius:8px;line-height:1.8;font-size:16px;margin:22px 0;font-weight:800}
+    .blue-system{font-family:"Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:var(--blue-system-bg);color:var(--blue-system-text);border-left:4px solid var(--blue-system-line);padding:12px 14px;border-radius:8px;line-height:1.8;font-size:16px;margin:22px 0;font-weight:900}
+    .skill{color:var(--yellow-skill);font-weight:900;white-space:nowrap}
+    .rank-skill{color:var(--rank-red);font-weight:900;white-space:nowrap}
+    .quote-strong{font-weight:900;color:#000}
+    .bottom-nav{max-width:760px;margin:30px auto 0;display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid #ddd;border-radius:12px;overflow:hidden;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif}
+    .bottom-nav button{border:none;background:#fff;padding:16px 8px;font-size:15px;font-weight:900;cursor:pointer;border-right:1px solid #ddd}
+    .bottom-nav button:last-child{border-right:none}
+    .bottom-nav button:hover:not(:disabled){background:#f4fff6;color:var(--green)}
+    .bottom-nav button:disabled{color:#bbb;background:#fafafa;cursor:not-allowed}
+
+    .login-modal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;display:none;align-items:center;justify-content:center;padding:18px}
+    .login-modal.open{display:flex}
+    .login-panel{width:min(440px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,.35)}
+    .login-panel h2{font-size:24px;margin-bottom:8px;letter-spacing:-1px}
+    .login-panel p{color:#777;line-height:1.6;font-size:14px;margin-bottom:18px}
+    .login-field{margin-bottom:13px}
+    .login-field label{display:block;font-size:14px;font-weight:900;margin-bottom:7px}
+    .login-field input{width:100%;height:44px;border:1px solid #ddd;border-radius:10px;padding:0 12px;outline:none;font-size:15px;font-weight:700}
+    .login-field input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,199,60,.12)}
+    .login-actions{display:flex;gap:8px;margin-top:18px}
+    .login-actions button{flex:1;border:none;border-radius:10px;padding:13px 10px;font-weight:900;cursor:pointer;font-size:15px}
+    .confirm-login{background:var(--green);color:#fff}
+    .cancel-login{background:#eee;color:#111}
+    .danger-login{background:#d93025!important;color:#fff!important}
+    .profile-edit-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+    .profile-edit-tabs button{border:1px solid #ddd;background:#fff;border-radius:10px;padding:11px;font-weight:900;cursor:pointer}
+    .profile-edit-tabs button.active{background:#111;color:#fff;border-color:#111}
+    .edit-panel{display:none}.edit-panel.active{display:block}
+    .avatar-preview-box{display:flex;align-items:center;gap:14px;background:#fafafa;border:1px solid #eee;border-radius:14px;padding:14px;margin:12px 0}
+    .avatar-preview-box .profile-img{margin:0;width:76px;height:76px;border-width:3px;flex-shrink:0}
+    .avatar-preview-text{font-size:13px;color:#555;font-weight:800;line-height:1.6}
+    .avatar-option-title{font-weight:900;font-size:14px;margin:14px 0 8px}
+    .avatar-color-grid,.avatar-shape-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+    .avatar-choice{border:1px solid #ddd;background:#fff;border-radius:12px;padding:10px 6px;font-size:13px;font-weight:900;cursor:pointer;text-align:center}
+    .avatar-choice.active{border-color:#111;box-shadow:0 0 0 2px #111 inset}
+    .avatar-color-dot{width:26px;height:26px;border-radius:50%;display:block;margin:0 auto 6px;border:1px solid rgba(0,0,0,.15)}
+    .file-btn{display:block;background:#0f63ff;color:#fff;text-align:center;border-radius:12px;padding:12px;font-weight:900;cursor:pointer;margin-top:8px}
+    .file-btn input{display:none}
+    .ticket-box{border:1px solid #eee;background:#fafafa;border-radius:14px;padding:14px;margin:12px 0}
+    .ticket-box strong{display:block;margin-bottom:6px}
+    .ticket-box p{margin:4px 0;color:#555;font-weight:800}
+    .ticket-shop{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
+    .ticket-shop button,.collect-btn,.start-coin-btn,.go-ticket-btn,.own-btn,.view-once-btn{border:none;background:var(--green);color:#fff;border-radius:10px;padding:12px;font-weight:900;cursor:pointer}
+    .collect-btn{background:#111}
+    .go-ticket-btn{background:#3b1168;margin-top:10px;width:100%}
+    .own-btn{background:#3b1168}
+    .view-once-btn{background:#00a832}
+    .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:rgba(0,0,0,.82);color:#fff;padding:10px 14px;border-radius:999px;font-size:13px;display:none;z-index:600;font-weight:800}
+
+    @media(max-width:720px){
+      .top-inner{height:auto;padding:10px 12px;flex-wrap:wrap}.logo{width:100%}.search-area{order:3;width:100%;max-width:none}.account-btn{position:absolute;right:12px;top:10px}.dashboard-title{font-size:22px}.profile-sections{grid-template-columns:1fr}.profile-section:first-child{border-right:none}.hero-content{padding:26px 20px}.work-card{grid-template-columns:112px 1fr;gap:13px;padding:14px}.cover{height:160px}.cover::after{font-size:18px}.work-info h3{font-size:21px}.summary{font-size:13px;line-height:1.55}.stats{gap:10px}.episode{grid-template-columns:76px 1fr}.thumb{width:76px;height:52px}.ep-date{display:none}.novel-body{font-size:17px;line-height:2.05}.bottom-nav{border-radius:0;position:sticky;bottom:0;z-index:10}.avatar-color-grid,.avatar-shape-grid{grid-template-columns:repeat(2,1fr)}
     }
   </style>
 </head>
 <body>
-  <div id="nicknameOverlay" class="overlay">
-    <div class="modal">
-      <h1>투자자 등록</h1>
-      <p>투자자 이름을 만들면 이 브라우저에 저장돼. 같은 이름으로 다시 들어오면 이어서 플레이할 수 있어.</p>
-      <input id="nicknameInput" class="input" maxlength="20" placeholder="투자자 이름 입력" />
-      <div class="btnrow" style="margin-top:12px;">
-        <button id="startBtn" class="purple full">시작하기</button>
+  <header class="top-header">
+    <div class="top-inner">
+      <div class="logo" onclick="goHome()">chat웹</div>
+      <div class="search-area">
+        <input class="search-box" id="searchInput" type="text" placeholder="작품명, 작가명 검색" onkeydown="handleSearchKey(event)" />
+        <button class="search-btn" onclick="searchWorks()">검색</button>
       </div>
-      <div id="nicknameNotice" class="notice"></div>
-      <div class="section-gap small">처음 자금: 10만 원 / 실제 회사 시작값 반영 / 1틱 등락 표시 / 상승 빨강 · 하락 파랑 / 대출은 1회 최대 100만 원</div>
+      <button class="account-btn" id="accountBtn" onclick="handleAccountButton()">로그인</button>
     </div>
-  </div>
-
-  <div class="wrap">
-    <div class="topbar">
-      <div class="titlebox">
-        <div class="title">주식 시뮬레이터</div>
-        <div class="subtitle">현실형 가격 변동 · 랜덤 중대사건 · 대출 · 신용점수 · 포트폴리오</div>
+    <nav class="nav-bar">
+      <div class="nav-inner">
+        <a class="nav-item active" id="navHome" onclick="goHome()">홈</a>
+        <a class="nav-item" id="navWeekday" onclick="openTabPage('weekdayPage','navWeekday')">요일별</a>
+        <a class="nav-item" id="navFantasy" onclick="openTabPage('fantasyPage','navFantasy')">판타지</a>
+        <a class="nav-item" id="navAction" onclick="openTabPage('actionPage','navAction')">액션</a>
+        <a class="nav-item" id="navNew" onclick="openTabPage('newPage','navNew')">신작</a>
+        <a class="nav-item" id="navRanking" onclick="openTabPage('rankingPage','navRanking')">랭킹</a>
+        <a class="nav-item" id="navComplete" onclick="openTabPage('completePage','navComplete')">완결</a>
       </div>
-      <div class="chiprow">
-        <div class="chip">👤 <span id="investorName">-</span></div>
-        <div class="chip">🕒 <span id="clockText">-</span></div>
-        <div class="chip">💵 현금 <span id="cashText">-</span></div>
-        <div class="chip">🏦 대출 <span id="loanTotalText">-</span></div>
-        <div class="chip">📈 순자산 <span id="netWorthText">-</span></div>
-        <div class="chip">💹 손익 <span id="profitText">-</span></div>
+    </nav>
+  </header>
+
+  <section class="locked-home" id="lockedHome">
+    <div class="locked-box">
+      <h1>로그인 하시면 보실수 있습니다.</h1>
+      <p>chat웹의 작품 목록과 회차는 로그인 후 이용할 수 있습니다.<br>새로고침해도 마지막 계정으로 자동 로그인됩니다.</p>
+      <button onclick="openLogin()">로그인</button>
+    </div>
+  </section>
+
+  <main class="page" id="homePage">
+    <h1 class="dashboard-title" id="homeGreeting">홈</h1>
+    <section class="section">
+      <div class="section-head"><h2>최근 본 작품</h2><span id="recentCountText">0개</span></div>
+      <div id="recentWorksBox"></div>
+    </section>
+    <section class="section">
+      <div class="section-head"><h2>추천 작품</h2><span>판타지 · 액션</span></div>
+      <div class="work-row" onclick="openWorkDetail('world')">
+        <div class="mini-cover"></div>
+        <div class="work-row-info">
+          <h3>세계를 구하고, 버려졌다</h3>
+          <p>작가 고쓰비 · 세계를 구한 용사, 자신의 세계에서 버려지다.</p>
+        </div>
+        <div class="work-row-badge">10화 공개</div>
+      </div>
+      <div class="work-row" onclick="openWorkDetail('kill')">
+        <div class="mini-cover kill"></div>
+        <div class="work-row-info">
+          <h3>킬 게이지 시스템</h3>
+          <p>작가 고쓰비 · 죽음의 시대, 살아남은 자만 강해지는 시스템.</p>
+        </div>
+        <div class="work-row-badge">1화 공개</div>
+      </div>
+    </section>
+  </main>
+
+  <main class="page" id="weekdayPage">
+    <h1 class="dashboard-title">요일별</h1>
+    <section class="section">
+      <div class="section-head"><h2>요일별 작품</h2><span>네웹식 요일 탭</span></div>
+      <div class="weekday-tabs">
+        <button class="weekday-tab-btn active" id="weekdayBtnMon" onclick="showWeekday('mon')">월</button>
+        <button class="weekday-tab-btn" id="weekdayBtnTue" onclick="showWeekday('tue')">화</button>
+        <button class="weekday-tab-btn" id="weekdayBtnWed" onclick="showWeekday('wed')">수</button>
+        <button class="weekday-tab-btn" id="weekdayBtnThu" onclick="showWeekday('thu')">목</button>
+        <button class="weekday-tab-btn" id="weekdayBtnFri" onclick="showWeekday('fri')">금</button>
+        <button class="weekday-tab-btn" id="weekdayBtnSat" onclick="showWeekday('sat')">토</button>
+        <button class="weekday-tab-btn" id="weekdayBtnSun" onclick="showWeekday('sun')">일</button>
+        <button class="weekday-tab-btn" id="weekdayBtnDaily" onclick="showWeekday('daily')">매일+</button>
+      </div>
+      <div class="weekday-panel active" id="weekdayPanelMon"><div class="weekday-empty-wrap">월요일 작품은 아직 없습니다.</div></div>
+      <div class="weekday-panel" id="weekdayPanelTue"><div class="weekday-empty-wrap">화요일 작품은 아직 없습니다.</div></div>
+      <div class="weekday-panel" id="weekdayPanelWed"><div class="weekday-empty-wrap">수요일 작품은 아직 없습니다.</div></div>
+      <div class="weekday-panel" id="weekdayPanelThu"><div class="weekday-empty-wrap">목요일 작품은 아직 없습니다.</div></div>
+      <div class="weekday-panel" id="weekdayPanelFri"><div class="weekday-empty-wrap">금요일 작품은 아직 없습니다.</div></div>
+      <div class="weekday-panel" id="weekdayPanelSat"><div class="weekday-empty-wrap">토요일 작품은 아직 없습니다.</div></div>
+      <div class="weekday-panel" id="weekdayPanelSun"><div class="weekday-empty-wrap">일요일 작품은 아직 없습니다.</div></div>
+      <div class="weekday-panel" id="weekdayPanelDaily">
+        <div class="weekday-work-row" onclick="openWorkDetail('world')">
+          <div class="weekday-cover"></div>
+          <div class="weekday-work-info">
+            <h3>세계를 구하고, 버려졌다</h3>
+            <p>작가 고쓰비 · 매일+ 연재</p>
+          </div>
+          <div class="work-row-badge">바</div>
+        </div>
+        <div class="weekday-work-row" onclick="openWorkDetail('kill')">
+          <div class="weekday-cover kill"></div>
+          <div class="weekday-work-info">
+            <h3>킬 게이지 시스템</h3>
+            <p>작가 고쓰비 · 매일+ 연재</p>
+          </div>
+          <div class="work-row-badge">바</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <main class="page" id="fantasyPage">
+    <h1 class="dashboard-title">판타지</h1>
+    <section class="section">
+      <div class="section-head"><h2>판타지 작품</h2><span>2개</span></div>
+      <div class="work-row" onclick="openWorkDetail('world')">
+        <div class="mini-cover"></div>
+        <div class="work-row-info"><h3>세계를 구하고, 버려졌다</h3><p>작가 고쓰비 · 다크 판타지</p></div>
+        <div class="work-row-badge">바</div>
+      </div>
+      <div class="work-row" onclick="openWorkDetail('kill')">
+        <div class="mini-cover kill"></div>
+        <div class="work-row-info"><h3>킬 게이지 시스템</h3><p>작가 고쓰비 · 시스템 판타지</p></div>
+        <div class="work-row-badge">바</div>
+      </div>
+    </section>
+  </main>
+
+  <main class="page" id="actionPage">
+    <h1 class="dashboard-title">액션</h1>
+    <section class="section">
+      <div class="section-head"><h2>액션 작품</h2><span>2개</span></div>
+      <div class="work-row" onclick="openWorkDetail('world')">
+        <div class="mini-cover"></div>
+        <div class="work-row-info"><h3>세계를 구하고, 버려졌다</h3><p>작가 고쓰비 · 권능 액션</p></div>
+        <div class="work-row-badge">바</div>
+      </div>
+      <div class="work-row" onclick="openWorkDetail('kill')">
+        <div class="mini-cover kill"></div>
+        <div class="work-row-info"><h3>킬 게이지 시스템</h3><p>작가 고쓰비 · 차수 배틀 액션</p></div>
+        <div class="work-row-badge">바</div>
+      </div>
+    </section>
+  </main>
+
+  <main class="page" id="newPage">
+    <h1 class="dashboard-title">신작</h1>
+    <section class="section">
+      <div class="section-head"><h2>신작 작품</h2><span>1개</span></div>
+      <div class="work-row" onclick="openWorkDetail('kill')">
+        <div class="mini-cover kill"></div>
+        <div class="work-row-info"><h3>킬 게이지 시스템</h3><p>작가 고쓰비 · 신작 · 1화 공개</p></div>
+        <div class="work-row-badge">바</div>
+      </div>
+    </section>
+  </main>
+
+  <main class="page" id="rankingPage">
+    <h1 class="dashboard-title">랭킹</h1>
+    <section class="section">
+      <div class="section-head"><h2>실시간 랭킹</h2><span>TOP 3</span></div>
+      <div class="rank-row" onclick="openWorkDetail('world')">
+        <div class="rank-num">1</div>
+        <div class="mini-cover"></div>
+        <div class="work-row-info"><h3>세계를 구하고, 버려졌다</h3><p>작가 고쓰비 · 랭킹 1위</p></div>
+        <div class="work-row-badge">바</div>
+      </div>
+      <div class="rank-row" onclick="openWorkDetail('kill')">
+        <div class="rank-num">2</div>
+        <div class="mini-cover kill"></div>
+        <div class="work-row-info"><h3>킬 게이지 시스템</h3><p>작가 고쓰비 · 신작 랭킹</p></div>
+        <div class="work-row-badge">바</div>
+      </div>
+      <div class="empty-box">3위 작품은 아직 없습니다.</div>
+    </section>
+  </main>
+
+  <main class="page" id="completePage">
+    <h1 class="dashboard-title">완결</h1>
+    <section class="section">
+      <div class="section-head"><h2>완결작</h2><span>0개</span></div>
+      <div class="empty-box">아직 완결작이 없습니다.</div>
+    </section>
+  </main>
+
+  <main class="page" id="searchPage">
+    <h1 class="search-result-title" id="searchTitle">검색 결과</h1>
+    <section class="section" id="searchFoundSection">
+      <div class="section-head"><h2>작품</h2><span>검색 결과</span></div>
+      <div id="searchResultsBox"></div>
+    </section>
+    <section class="search-empty-page" id="searchEmptyPage"><strong>검색하신 작품이 없습니다.</strong></section>
+  </main>
+
+  <main class="page" id="profilePage">
+    <div class="profile-card">
+      <div class="profile-top">
+        <div class="profile-img" id="profileAvatar"></div>
+        <div class="profile-name" id="profileNickname">닉네임</div>
+        <div class="profile-role" id="profileRole">일반 계정</div>
+        <div class="profile-buttons">
+          <button class="logout-btn" onclick="logout()">로그아웃</button>
+          <button class="edit-profile-btn" onclick="openProfileEditModal()">프로필 편집</button>
+          <button class="avatar-edit-btn" onclick="openAvatarModal()">표지 편집</button>
+          <button class="ticket-btn" onclick="openTicketModal()">내 이용권</button>
+        </div>
+        <div class="profile-ticket-info">
+          <span id="profileTicketCount">보유 이용권 0장</span>
+          <span id="profileCoinCount">보유 코인 0개</span>
+        </div>
+      </div>
+      <div class="profile-sections">
+        <div class="profile-section" id="authorWorksSection">
+          <h2>제작중인 작품</h2>
+          <div class="work-row" onclick="openWorkDetail('world')">
+            <div class="mini-cover"></div>
+            <div class="work-row-info"><h3>세계를 구하고, 버려졌다</h3><p>작가 고쓰비 · 제작중</p></div>
+            <div class="work-row-badge">작가</div>
+          </div>
+          <div class="work-row" onclick="openWorkDetail('kill')">
+            <div class="mini-cover kill"></div>
+            <div class="work-row-info"><h3>킬 게이지 시스템</h3><p>작가 고쓰비 · 제작중</p></div>
+            <div class="work-row-badge">신작</div>
+          </div>
+        </div>
+        <div class="profile-section">
+          <h2>보고있는 작품</h2>
+          <div id="watchingWorksBox"></div>
+        </div>
       </div>
     </div>
+  </main>
 
-    <div class="grid">
-      <div class="card">
-        <div class="headline">
-          <h2>시장 종목</h2>
-          <div class="small">클릭하면 상세/그래프/매매 가능</div>
-        </div>
-        <div class="marketbox">
-          <div class="tag">실시간 시계 연동</div>
-          <div class="tag">1틱 등락</div>
-          <div class="tag">실제 회사 시작값</div>
-          <div class="tag">대출 가능</div>
-        </div>
-        <div id="stockList" class="stock-list section-gap"></div>
-      </div>
-
-      <div class="card">
-        <div class="headline">
-          <div>
-            <h2 id="selectedStockTitle">종목 선택</h2>
-            <div id="selectedStockMeta" class="small">왼쪽에서 종목을 선택해.</div>
-          </div>
-          <div id="selectedStockPrice" class="stock-price">-</div>
-        </div>
-
-        <div class="chart-wrap">
-          <div class="headline" style="margin-bottom:10px;">
-            <div class="small">최근 구간만 표시</div>
-            <div class="btnrow">
-              <button id="chartShortBtn" class="ghost">짧게</button>
-              <button id="chartMidBtn" class="ghost">중간</button>
-              <button id="chartLongBtn" class="ghost">길게</button>
-            </div>
-          </div>
-          <canvas id="chartCanvas" width="860" height="320"></canvas>
-        </div>
-
-        <div class="stats" style="margin-bottom:12px;">
-          <div class="stat">
-            <div class="label">현재가</div>
-            <div id="detailPrice" class="value">-</div>
-          </div>
-          <div class="stat">
-            <div class="label">1틱 등락</div>
-            <div id="detailChange" class="value">-</div>
-          </div>
-          <div class="stat">
-            <div class="label">내 보유 수량</div>
-            <div id="detailOwned" class="value">0주</div>
-          </div>
-          <div class="stat">
-            <div class="label">내 평가금액</div>
-            <div id="detailHoldingValue" class="value">0원</div>
-          </div>
-        </div>
-
-        <div class="splitbar"></div>
-
-        <div class="tradepanel">
-          <div>
-            <div class="small" style="margin-bottom:6px;">수량</div>
-            <input id="quantityInput" class="input" type="number" min="1" step="1" value="1" />
-          </div>
-          <div>
-            <div class="small" style="margin-bottom:6px;">빠른 입력</div>
-            <select id="quickSelect" class="select">
-              <option value="1">1주</option>
-              <option value="5">5주</option>
-              <option value="10">10주</option>
-              <option value="50">50주</option>
-              <option value="100">100주</option>
-              <option value="max">최대 가능</option>
-            </select>
-          </div>
-        </div>
-        <div class="btnrow section-gap">
-          <button id="buyBtn" class="buy">매수</button>
-          <button id="sellBtn" class="sell">매도</button>
-          <button id="buyHalfBtn" class="ghost">가능금액 50% 매수</button>
-          <button id="sellAllBtn" class="ghost">전량 매도</button>
-        </div>
-        <div id="tradeNotice" class="notice"></div>
-
-        <div class="ticker section-gap">
-          <div id="tickerInner" class="ticker-inner">시장 뉴스 로딩 중...</div>
+  <main class="page" id="workDetailPage">
+    <section class="hero" id="workHero">
+      <div class="hero-content">
+        <div class="badge" id="workBadge">고쓰비 · 다크 판타지</div>
+        <h1 id="workHeroTitle">세계를 구하고,<br>버려졌다</h1>
+        <p id="workHeroDesc">마왕을 쓰러뜨리고 돌아온 소년. 하지만 그를 기다리던 것은 가족의 죽음, 사라진 자리, 그리고 아무도 받아주지 않는 세계였다.</p>
+        <div class="hero-actions">
+          <button class="main-btn" id="firstReadBtn" onclick="openFirstEpisode()">첫 화 바로 읽기</button>
+          <button class="sub-btn" onclick="scrollToEpisodes()">회차 목록 보기</button>
         </div>
       </div>
+    </section>
 
-      <div>
-        <div class="card">
-          <h2>내 자산</h2>
-          <div class="stats">
-            <div class="stat">
-              <div class="label">초기 자본</div>
-              <div id="initialCapitalText" class="value">10만 원</div>
-            </div>
-            <div class="stat">
-              <div class="label">신용점수</div>
-              <div id="creditText" class="value">100점</div>
-            </div>
-            <div class="stat">
-              <div class="label">보유주식 평가액</div>
-              <div id="holdingTotalText" class="value">0원</div>
-            </div>
-            <div class="stat">
-              <div class="label">현재 버는 중</div>
-              <div id="earningText" class="value">0원</div>
-            </div>
-          </div>
-
-          <div class="section-gap">
-            <div class="splitbar"></div>
-            <div class="headline">
-              <h3>포트폴리오</h3>
-              <div class="small">평균단가 / 손익 표시</div>
-            </div>
-            <div id="portfolioList" class="portfolio-list"></div>
-          </div>
+    <section class="section">
+      <div class="section-head"><h2>작품 정보</h2><span id="workInfoAuthor">작가 · 고쓰비</span></div>
+      <div class="work-card">
+        <div class="cover" id="workCover" onclick="openFirstEpisode()" title="작품 보기"></div>
+        <div class="work-info">
+          <h3 id="workTitle">세계를 구하고, 버려졌다</h3>
+          <div class="meta" id="workMeta"></div>
+          <p class="summary" id="workSummary"></p>
+          <div class="stats" id="workStats"></div>
+          <button class="main-btn" id="workReadButton" onclick="openFirstEpisode()">첫 화 보기</button>
         </div>
+      </div>
+    </section>
 
-        <div class="card section-gap">
-          <div class="headline">
-            <h2>은행</h2>
-            <div class="small">빌릴 때 즉시 1% / 2일마다 1% 복리 / 1일 뒤 신용점수 하락 / 7일 연체 시 크게 하락</div>
-          </div>
-          <div class="tradepanel">
-            <div>
-              <div class="small" style="margin-bottom:6px;">대출 금액</div>
-              <input id="loanInput" class="input" type="number" min="1000" max="1000000" step="1000" value="10000" />
-            </div>
-            <div>
-              <div class="small" style="margin-bottom:6px;">상환 금액</div>
-              <input id="repayInput" class="input" type="number" min="1000" step="1000" value="10000" />
-            </div>
-          </div>
-          <div class="btnrow section-gap">
-            <button id="loanBtn" class="bank">대출받기</button>
-            <button id="repayBtn" class="warn">상환하기</button>
-          </div>
-          <div id="bankNotice" class="notice"></div>
+    <section class="section" id="episodes">
+      <div class="section-head"><h2>회차 목록</h2><span id="episodeCountText">총 0화 공개</span></div>
+      <div class="episode-list" id="episodeList"></div>
+    </section>
+  </main>
 
-          <div class="section-gap">
-            <div class="splitbar"></div>
-            <div class="headline">
-              <h3>대출 목록</h3>
-              <div class="small">남은 기한 / 적용 이자 / 신용점수 반영 여부</div>
-            </div>
-            <div id="loanList" class="loan-list"></div>
-          </div>
+  <section class="reader" id="reader">
+    <div class="reader-top">
+      <div class="reader-title-mini">
+        <strong id="readerMiniTitle">1화 - 귀환</strong>
+        <span id="readerSeriesMini">세계를 구하고, 버려졌다</span>
+      </div>
+      <button class="close-btn" onclick="closeReader()">닫기</button>
+    </div>
+    <div class="reader-scroll" id="readerScroll">
+      <article class="novel-wrap">
+        <header class="novel-header">
+          <div class="series-name" id="readerSeriesName">세계를 구하고, 버려졌다</div>
+          <h1 id="readerTitle">1화 - 귀환</h1>
+          <div class="novel-sub" id="readerSub">강도윤 · 소환의 권능 · 귀환</div>
+        </header>
+        <div class="novel-body" id="novelBody"></div>
+        <div class="bottom-nav">
+          <button id="prevBtn" onclick="moveEpisode(-1)">&lt;- 이전화</button>
+          <button onclick="closeReader()">목록</button>
+          <button id="nextBtn" onclick="moveEpisode(1)">다음화 -&gt;</button>
         </div>
+      </article>
+    </div>
+  </section>
 
-        <div class="card section-gap">
-          <div class="headline">
-            <h2>시장 중대사건</h2>
-            <div class="small">랜덤 발생, 실제 가격에 반영</div>
-          </div>
-          <div id="eventList" class="event-list"></div>
+  <section class="login-modal" id="loginModal">
+    <div class="login-panel">
+      <h2>chat웹 로그인</h2>
+      <p id="loginGuideText">닉네임과 비밀번호를 입력하세요. 일반 계정은 브라우저에 1개만 저장됩니다.</p>
+      <div class="login-field"><label for="nicknameInput">1. 닉네임 입력</label><input id="nicknameInput" type="text" placeholder="닉네임" autocomplete="username"></div>
+      <div class="login-field"><label for="passwordInput">2. 비밀번호 입력</label><input id="passwordInput" type="password" placeholder="비밀번호" autocomplete="current-password"></div>
+      <div class="login-actions">
+        <button class="cancel-login" onclick="closeLogin()">취소</button>
+        <button class="confirm-login" onclick="confirmLogin()">확인</button>
+      </div>
+      <div class="login-actions" id="deleteSavedAccountBox" style="display:none">
+        <button class="danger-login" onclick="deleteNormalAccount()">기존 계정 지우기</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="login-modal" id="profileEditModal">
+    <div class="login-panel">
+      <h2>프로필 편집</h2>
+      <p>닉네임이나 비밀번호를 바꿔도 이용권, 코인, 타이머는 그대로 유지됩니다.</p>
+      <div class="profile-edit-tabs">
+        <button id="editNicknameTab" class="active" onclick="showProfileEditPanel('nickname')">닉네임 변경</button>
+        <button id="editPasswordTab" onclick="showProfileEditPanel('password')">비밀번호 변경</button>
+      </div>
+      <div class="edit-panel active" id="editNicknamePanel">
+        <div class="login-field"><label for="newNicknameInput">새 닉네임</label><input id="newNicknameInput" type="text" placeholder="새 닉네임"></div>
+        <div class="login-actions">
+          <button class="cancel-login" onclick="closeProfileEditModal()">취소</button>
+          <button class="confirm-login" onclick="changeNickname()">닉네임 변경</button>
+        </div>
+      </div>
+      <div class="edit-panel" id="editPasswordPanel">
+        <div class="login-field"><label for="oldPasswordInput">현재 비밀번호</label><input id="oldPasswordInput" type="password" placeholder="현재 비밀번호"></div>
+        <div class="login-field"><label for="newPasswordInput">새 비밀번호</label><input id="newPasswordInput" type="password" placeholder="새 비밀번호"></div>
+        <div class="login-actions">
+          <button class="cancel-login" onclick="closeProfileEditModal()">취소</button>
+          <button class="confirm-login" onclick="changePassword()">비밀번호 변경</button>
         </div>
       </div>
     </div>
-  </div>
+  </section>
+  <section class="login-modal" id="avatarModal">
+    <div class="login-panel">
+      <h2>표지 편집</h2>
+      <p id="avatarGuideText">프로필 표지를 꾸밀 수 있습니다. 일반 계정은 보라색을 제외한 색만 사용할 수 있습니다.</p>
+      <div class="avatar-preview-box">
+        <div class="profile-img" id="avatarPreview"></div>
+        <div class="avatar-preview-text">현재 선택한 표지 미리보기입니다.<br>사진을 고르면 자동으로 작게 압축해서 저장됩니다.</div>
+      </div>
+      <div class="avatar-option-title">색 선택</div>
+      <div class="avatar-color-grid" id="avatarColorGrid">
+        <button class="avatar-choice" data-color="red" onclick="selectAvatarColor('red')"><span class="avatar-color-dot avatar-red"></span>빨강</button>
+        <button class="avatar-choice" data-color="orange" onclick="selectAvatarColor('orange')"><span class="avatar-color-dot avatar-orange"></span>주황</button>
+        <button class="avatar-choice" data-color="yellow" onclick="selectAvatarColor('yellow')"><span class="avatar-color-dot avatar-yellow"></span>노랑</button>
+        <button class="avatar-choice" data-color="green" onclick="selectAvatarColor('green')"><span class="avatar-color-dot avatar-green"></span>초록</button>
+        <button class="avatar-choice" data-color="blue" onclick="selectAvatarColor('blue')"><span class="avatar-color-dot avatar-blue"></span>파랑</button>
+        <button class="avatar-choice" data-color="pink" onclick="selectAvatarColor('pink')"><span class="avatar-color-dot avatar-pink"></span>핑크</button>
+        <button class="avatar-choice" data-color="white" onclick="selectAvatarColor('white')"><span class="avatar-color-dot avatar-white"></span>흰색</button>
+      </div>
+      <div class="avatar-option-title">모양 선택</div>
+      <div class="avatar-shape-grid">
+        <button class="avatar-choice" data-shape="circle" onclick="selectAvatarShape('circle')">공</button>
+        <button class="avatar-choice" data-shape="square" onclick="selectAvatarShape('square')">네모</button>
+        <button class="avatar-choice" data-shape="triangle" onclick="selectAvatarShape('triangle')">세모</button>
+        <button class="avatar-choice" data-shape="star" onclick="selectAvatarShape('star')">별</button>
+      </div>
+      <label class="file-btn">
+        갤러리에서 사진 고르기
+        <input type="file" accept="image/*" onchange="handleAvatarFile(event)">
+      </label>
+      <div class="login-actions">
+        <button class="cancel-login" onclick="closeAvatarModal()">취소</button>
+        <button class="danger-login" onclick="removeAvatarPhoto()">사진 제거</button>
+        <button class="confirm-login" onclick="saveAvatar()">저장</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="login-modal" id="ticketModal">
+    <div class="login-panel">
+      <h2>내 이용권</h2>
+      <div class="ticket-box">
+        <strong>이용권</strong>
+        <p id="ticketStatusText">현재 이용권 수는 0개입니다.</p>
+        <p id="coinStatusText">현재 코인 수는 0개입니다.</p>
+      </div>
+      <div class="ticket-box">
+        <strong>코인 얻기</strong>
+        <p id="coinBankText">쌓인 코인: 0개 / 최대 10개</p>
+        <p id="coinTimerText">코인 생성 대기 중</p>
+        <button class="start-coin-btn" onclick="startCoinGenerator()">코인 얻기 시작</button>
+        <button class="collect-btn" onclick="collectCoins()">쌓인 코인 회수</button>
+      </div>
+      <div class="ticket-box">
+        <strong>코인상점</strong>
+        <p>코인 3개 = 이용권 1장</p>
+        <div class="ticket-shop">
+          <button onclick="buyTickets(1)">이용권 1장 구매 · 코인 3개</button>
+          <button onclick="buyTickets(2)">이용권 2장 구매 · 코인 6개</button>
+          <button onclick="buyTickets(3)">이용권 3장 구매 · 코인 9개</button>
+        </div>
+      </div>
+      <div class="login-actions">
+        <button class="cancel-login" onclick="closeTicketModal()">닫기</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="login-modal" id="paidEpisodeModal">
+    <div class="login-panel">
+      <h2 id="paidEpisodeTitle">미리보기 열람</h2>
+      <p id="paidEpisodeMessage">이용권 3장이 소모됩니다. 보시겠습니까?</p>
+      <div class="ticket-box">
+        <strong>선택</strong>
+        <p>열람은 볼 때마다 이용권 3장이 필요합니다.</p>
+        <p>소장은 이용권 5장이 필요하고, 이후 계속 볼 수 있습니다.</p>
+      </div>
+      <div class="ticket-shop">
+        <button class="view-once-btn" onclick="confirmPaidView()">이용권 3장 쓰고 보기</button>
+        <button class="own-btn" onclick="confirmOwnEpisode()">이용권 5장으로 소장하기</button>
+      </div>
+      <div class="login-actions">
+        <button class="cancel-login" onclick="closePaidEpisodeModal()">아니오</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="login-modal" id="needTicketModal">
+    <div class="login-panel">
+      <h2>보유 이용권 수가 부족합니다.</h2>
+      <p>미리보기 회차는 열람 3장, 소장 5장이 필요합니다.</p>
+      <button class="go-ticket-btn" onclick="goTicketFromNeed()">내 이용권 수 보기 -&gt;</button>
+      <div class="login-actions">
+        <button class="cancel-login" onclick="closeNeedTicketModal()">닫기</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="login-modal" id="freeTicketModal">
+    <div class="login-panel">
+      <h2>처음 오셨군요?</h2>
+      <p>
+        chat웹 첫 방문 보상으로 무료 이용권 3장을 받을 수 있습니다.<br>
+        이 보상은 같은 브라우저에서 한 번만 받을 수 있습니다.
+      </p>
+      <div class="ticket-box">
+        <strong>무료 이용권 받기!</strong>
+        <p>받는 즉시 이용권 3장이 지급됩니다.</p>
+      </div>
+      <button class="go-ticket-btn" onclick="claimFreeTickets()">무료 이용권 3장 받기</button>
+      <div class="login-actions">
+        <button class="cancel-login" onclick="closeFreeTicketModal()">나중에 받기</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="toast" id="toast">알림</div>
 
   <script>
-    const STORAGE_PREFIX = "stock_sim_kr_v6_realprice_loanrules";
-    const UNIT_NAMES = ["", "만", "억", "조", "경", "해", "자", "양", "구", "간", "정", "재", "극"];
-    const INITIAL_CASH = 100000;
-    const CREDIT_MIN = -100;
-    const PRICE_TICK_MS = 3000;
-    const EVENT_CHECK_MS = 14000;
-    const SAVE_MS = 2500;
+    const pages=["homePage","weekdayPage","fantasyPage","actionPage","newPage","rankingPage","completePage","searchPage","profilePage","workDetailPage"];
+    const navItems=["navHome","navWeekday","navFantasy","navAction","navNew","navRanking","navComplete"];
 
-    const LOAN_MAX_PER_BORROW = 1000000;
-    const LOAN_IMMEDIATE_RATE = 0.01;
-    const LOAN_DAILY_CREDIT_DELAY_MS = 1 * 24 * 60 * 60 * 1000;
-    const LOAN_COMPOUND_RATE = 0.01;
-    const LOAN_COMPOUND_INTERVAL_MS = 2 * 24 * 60 * 60 * 1000;
-    const LOAN_OVERDUE_MS = 7 * 24 * 60 * 60 * 1000;
+    const reader=document.getElementById("reader");
+    const readerScroll=document.getElementById("readerScroll");
+    const toast=document.getElementById("toast");
+    const loginModal=document.getElementById("loginModal");
+    const profileEditModal=document.getElementById("profileEditModal");
+    const avatarModal=document.getElementById("avatarModal");
+    const ticketModal=document.getElementById("ticketModal");
+    const needTicketModal=document.getElementById("needTicketModal");
+    const freeTicketModal=document.getElementById("freeTicketModal");
+    const paidEpisodeModal=document.getElementById("paidEpisodeModal");
+    const accountBtn=document.getElementById("accountBtn");
+    const searchInput=document.getElementById("searchInput");
 
-    const GRAPH_MAX_POINTS = 140;
-    const CHART_WINDOWS = {
-      short: 40,
-      mid: 80,
-      long: 140
-    };
+    const readerMiniTitle=document.getElementById("readerMiniTitle");
+    const readerSeriesMini=document.getElementById("readerSeriesMini");
+    const readerSeriesName=document.getElementById("readerSeriesName");
+    const readerTitle=document.getElementById("readerTitle");
+    const readerSub=document.getElementById("readerSub");
+    const novelBody=document.getElementById("novelBody");
+    const prevBtn=document.getElementById("prevBtn");
+    const nextBtn=document.getElementById("nextBtn");
 
-    const defaultStocks = [
-      { key:"samsung", name:"삼성전자", sector:"반도체", price:206000, baseVol:0.012, drift:0.0008, fundamentals:0.83, realCompany:true },
-      { key:"hynix", name:"SK 하이닉스", sector:"반도체", price:1027000, baseVol:0.017, drift:0.0012, fundamentals:0.80, realCompany:true },
-      { key:"lg", name:"LG 에너지", sector:"배터리", price:412000, baseVol:0.016, drift:0.0009, fundamentals:0.75, realCompany:true },
-      { key:"gold", name:"금", sector:"원자재", price:226765, baseVol:0.008, drift:0.0005, fundamentals:0.92, realCompany:true },
-      { key:"silver", name:"은", sector:"원자재", price:3622, baseVol:0.014, drift:0.0004, fundamentals:0.70, realCompany:true },
-      { key:"google", name:"구글", sector:"빅테크", price:471073, baseVol:0.014, drift:0.0010, fundamentals:0.86, realCompany:true },
+    let currentUser=null;
+    let currentWorkId="world";
+    let currentEpisode=1;
+    let pendingEpisodeNumber=null;
+    let pendingWorkId=null;
+    let avatarDraft={color:"green",shape:"circle",photo:""};
 
-      { key:"nova", name:"노바클라우드", sector:"AI 클라우드", price:18500, baseVol:0.028, drift:0.0014, fundamentals:0.63, realCompany:false },
-      { key:"orbix", name:"오빅스모빌리티", sector:"로봇/모빌리티", price:9200, baseVol:0.030, drift:0.0011, fundamentals:0.56, realCompany:false },
-      { key:"deepsea", name:"딥씨푸드테크", sector:"푸드테크", price:6800, baseVol:0.026, drift:0.0006, fundamentals:0.45, realCompany:false },
-      { key:"lumen", name:"루멘바이오", sector:"바이오", price:15400, baseVol:0.034, drift:0.0010, fundamentals:0.50, realCompany:false },
-      { key:"quantix", name:"퀀틱스반도체", sector:"반도체", price:12600, baseVol:0.031, drift:0.0013, fundamentals:0.52, realCompany:false },
-      { key:"greenmesh", name:"그린메쉬에너지", sector:"친환경", price:11200, baseVol:0.027, drift:0.0010, fundamentals:0.54, realCompany:false },
-      { key:"parkjihun", name:"박지훈 회사", sector:"특수테마", price:13333, baseVol:0.010, drift:0.0016, fundamentals:0.72, realCompany:false }
-    ];
+    const AUTHOR_NAME="고쓰비";
+    const AUTHOR_PASSWORD="2012424!";
+    const COIN_INTERVAL=2700000;
+    const COIN_BANK_MAX=10;
 
-    const eventTemplates = [
-      { title:"AI 서버 수요 급증", text:"대형 데이터센터 투자 확대 소식이 퍼지며 AI/반도체 섹터 기대감이 상승했다.", effects:{"반도체":0.06,"AI 클라우드":0.08,"빅테크":0.03} },
-      { title:"메모리 가격 하락 우려", text:"메모리 재고 증가 전망이 나오며 반도체 관련주에 단기 매도세가 붙었다.", effects:{"반도체":-0.07} },
-      { title:"친환경 보조금 확대", text:"정부의 신재생 투자 확대 정책 기대감으로 배터리·친환경 종목이 동반 강세를 보였다.", effects:{"배터리":0.06,"친환경":0.07} },
-      { title:"배터리 화재 이슈", text:"대형 리콜 가능성이 거론되며 배터리 관련 종목의 변동성이 커졌다.", effects:{"배터리":-0.08} },
-      { title:"달러 약세와 안전자산 선호", text:"시장 불안 심리로 금과 은 같은 안전자산·원자재가 상승했다.", effects:{"원자재":0.05} },
-      { title:"빅테크 규제 강화", text:"해외 규제 당국의 조사 강화 소식으로 빅테크가 눌렸지만 일부 클라우드주는 선방했다.", effects:{"빅테크":-0.06,"AI 클라우드":-0.02} },
-      { title:"제약 임상 기대감", text:"바이오 섹터에서 긍정적 임상 결과 루머가 돌며 매수세가 몰렸다.", effects:{"바이오":0.09} },
-      { title:"로봇 자동화 계약 체결", text:"물류 자동화 대형 계약 체결 소식으로 모빌리티/로봇 종목이 급등했다.", effects:{"로봇/모빌리티":0.10} },
-      { title:"푸드테크 안전성 논란", text:"신제품 성분 논란으로 푸드테크 종목이 급락했다.", effects:{"푸드테크":-0.10} },
-      { title:"세계 경기 둔화 우려", text:"전반적인 경기 둔화 전망이 나오며 위험자산에 매도 압력이 들어왔다.", effects:{"반도체":-0.04,"빅테크":-0.04,"배터리":-0.05,"로봇/모빌리티":-0.05,"바이오":-0.03,"친환경":-0.03} },
-      { title:"시장 반등 랠리", text:"과매도 인식이 확산되며 성장주 중심으로 반등이 나타났다.", effects:{"AI 클라우드":0.05,"빅테크":0.05,"바이오":0.04,"로봇/모빌리티":0.04} },
-      { title:"귀금속 채굴 공급 차질", text:"채굴 지역 불안으로 금과 은 공급 우려가 커졌다.", effects:{"원자재":0.06} },
-      { title:"박지훈 회사 신사업 발표", text:"특수테마 기대감이 붙으며 박지훈 회사가 관심을 받았다.", effects:{"특수테마":0.03} },
-      { title:"박지훈 회사 루머 확산", text:"근거 없는 소문이 돌며 박지훈 회사의 투자 심리가 흔들렸다.", effects:{"특수테마":-0.03} }
-    ];
+    const NORMAL_ACCOUNT_KEY="chatweb_single_normal_account";
+    const AUTHOR_ACCOUNT_KEY="chatweb_author_account";
+    const CURRENT_LOGIN_KEY="chatweb_current_login";
+    const FREE_TICKET_KEY="chatweb_free_ticket_claimed";
 
-    const els = {
-      chartShortBtn: document.getElementById('chartShortBtn'),
-      chartMidBtn: document.getElementById('chartMidBtn'),
-      chartLongBtn: document.getElementById('chartLongBtn'),
-      nicknameOverlay: document.getElementById('nicknameOverlay'),
-      nicknameInput: document.getElementById('nicknameInput'),
-      nicknameNotice: document.getElementById('nicknameNotice'),
-      startBtn: document.getElementById('startBtn'),
-      investorName: document.getElementById('investorName'),
-      clockText: document.getElementById('clockText'),
-      cashText: document.getElementById('cashText'),
-      loanTotalText: document.getElementById('loanTotalText'),
-      netWorthText: document.getElementById('netWorthText'),
-      profitText: document.getElementById('profitText'),
-      initialCapitalText: document.getElementById('initialCapitalText'),
-      creditText: document.getElementById('creditText'),
-      holdingTotalText: document.getElementById('holdingTotalText'),
-      earningText: document.getElementById('earningText'),
-      stockList: document.getElementById('stockList'),
-      selectedStockTitle: document.getElementById('selectedStockTitle'),
-      selectedStockMeta: document.getElementById('selectedStockMeta'),
-      selectedStockPrice: document.getElementById('selectedStockPrice'),
-      detailPrice: document.getElementById('detailPrice'),
-      detailChange: document.getElementById('detailChange'),
-      detailOwned: document.getElementById('detailOwned'),
-      detailHoldingValue: document.getElementById('detailHoldingValue'),
-      quantityInput: document.getElementById('quantityInput'),
-      quickSelect: document.getElementById('quickSelect'),
-      buyBtn: document.getElementById('buyBtn'),
-      sellBtn: document.getElementById('sellBtn'),
-      buyHalfBtn: document.getElementById('buyHalfBtn'),
-      sellAllBtn: document.getElementById('sellAllBtn'),
-      tradeNotice: document.getElementById('tradeNotice'),
-      tickerInner: document.getElementById('tickerInner'),
-      portfolioList: document.getElementById('portfolioList'),
-      loanInput: document.getElementById('loanInput'),
-      repayInput: document.getElementById('repayInput'),
-      loanBtn: document.getElementById('loanBtn'),
-      repayBtn: document.getElementById('repayBtn'),
-      bankNotice: document.getElementById('bankNotice'),
-      loanList: document.getElementById('loanList'),
-      eventList: document.getElementById('eventList'),
-      chartCanvas: document.getElementById('chartCanvas')
-    };
+    const AVATAR_COLORS=["red","orange","yellow","green","blue","pink","white"];
+    const AVATAR_SHAPES=["circle","square","triangle","star"];
 
-    const ctx = els.chartCanvas.getContext('2d');
+    const works={
+      world:{
+        id:"world",
+        title:"세계를 구하고, 버려졌다",
+        author:"고쓰비",
+        firstEpisode:1,
+        type:"world",
+        heroTitle:"세계를 구하고,<br>버려졌다",
+        heroDesc:"마왕을 쓰러뜨리고 돌아온 소년. 하지만 그를 기다리던 것은 가족의 죽음, 사라진 자리, 그리고 아무도 받아주지 않는 세계였다.",
+        badge:"고쓰비 · 다크 판타지",
+        meta:["다크 판타지","귀환자","복수","각성자"],
+        summary:"2100년대, 각성자들은 자신의 권능과 연결된 세계로 보내진다. 소환의 권능을 얻은 강도윤은 마왕을 처치하고 지구로 돌아오지만, 그가 지킨 세계는 이미 그를 버린 뒤였다.",
+        stats:["★ 0","조회 0","관심 0","총 10화 공개"],
+        aliases:["세계를","세계를구하고","세계를구하고버려졌다","세계를구했더니","세계를구했더니버려졌다","버려졌다","강도윤","귀환","고쓰비","포위","분류되지않은힘","충전된하늘","남겨진것의형태","해가없는나라","끊어지지않는선","모여드는불씨","모여드는불씨2","모여드는불씨(2)","솔라리스","강세윤","한태민","한지훈","번개의권능","망치의권능","번개압력","번개분분","번개난벽","천마신공","염화의손","아스","천공의요새","이도현","HG","검술의권능","신화급각성자","캡슐"],
+        episodes:{
+          1:{title:"1화 - 귀환",sub:"강도윤 · 소환의 권능 · 귀환",desc:"세계를 구한 용사, 자신의 세계에서 버려지다.",date:"2026.04.30",raw:`“……이걸로, 끝이군.”
 
-    const state = {
-      chartWindow: 'mid',
-      investorName: "",
-      initialCash: INITIAL_CASH,
-      cash: INITIAL_CASH,
-      creditScore: 100,
-      loans: [],
-      stocks: [],
-      portfolio: {},
-      events: [],
-      selectedKey: null,
-      totalProfit: 0,
-      lastNetWorth: INITIAL_CASH,
-      lastSaveAt: 0,
-      marketMood: 0,
-      dailyAnchorDay: null,
-      tickerMessages: []
-    };
+검게 갈라진 대지 위에 서 있던 소년이, 아주 천천히 숨을 내쉬었다.
+피비린내가 가시지 않은 공기, 무너진 성채, 그리고 더 이상 움직이지 않는 거대한 존재.
 
-    function cloneStocks(){
-      return defaultStocks.map(s => ({
-        ...s,
-        dayOpen:s.price,
-        lastPrice:s.price,
-        lastTickChange:0,
-        history:createSeedHistory(s.price),
-        eventBias:0,
-        trendMemory:0
-      }));
-    }
+마왕.
 
-    function createSeedHistory(price){
-      const arr=[];
-      let p=price;
-      for(let i=0;i<60;i++){
-        p = Math.max(100, Math.round(p * (1 + (Math.random()-0.5)*0.004)));
-        arr.push(p);
+그 이름으로 불리던 존재는, 이제 그저 시체에 불과했다.
+
+소년—아직 고등학생 티를 완전히 벗지 못한 얼굴의 그는, 한 손을 들어 올렸다.
+허공에, 붉은빛의 문장이 조용히 떠올랐다.
+
+[마왕 처치 완료]
+[귀환이 가능합니다.]
+
+“…드디어.”
+
+그의 입꼬리가, 아주 미세하게 올라갔다.
+
+그 순간이었다.
+
+“용사님!”
+
+뒤에서 달려오는 발걸음 소리.
+익숙한 목소리에, 그는 천천히 고개를 돌렸다.
+
+은빛 머리의 소녀가 숨을 헐떡이며 멈춰 섰다. 그 뒤로, 함께 싸워온 동료들이 하나둘 모습을 드러냈다.
+
+“끝났… 네요.”
+
+검을 짚은 채 서 있던 남자가 낮게 웃었다.
+“진짜로, 해낸 거야.”
+
+소년은 아무 말 없이 그들을 바라봤다.
+
+짧지 않은 시간이었다.
+수없이 죽을 뻔했고, 몇 번이나 포기할 뻔했다.
+
+그래도 결국—
+
+여기까지 왔다.
+
+“……이제, 돌아가시는 겁니까.”
+
+조용히 묻는 목소리.
+은빛 머리의 소녀였다.
+
+소년은 잠시 대답하지 않았다.
+
+그저 하늘을 올려다봤다.
+이 세계의 하늘은 끝까지 낯설었다.
+
+“…그래야지.”
+
+짧은 대답.
+
+그 말에, 소녀는 입술을 꽉 물었다.
+그리고—
+
+결국, 눈물이 흘러내렸다.
+
+“…용사님도… 원래의 세계에 분명 소중한 존재가 있을 거예요.”
+
+소년의 시선이, 아주 미세하게 흔들렸다.
+
+“돌아가면… 행복하시겠죠.”
+
+잠깐의 침묵.
+
+“……그렇겠지.”
+
+그는 그렇게 말했다.
+
+그 말이, 왜인지 모르게 가볍게 느껴졌다.
+
+소녀는 고개를 떨군 채 한 발짝 물러섰다.
+
+어깨가 작게 떨리고 있었다.
+
+“…그러니까… 돌아가세요.”
+
+그리고—
+
+아주 작게, 끊어질 듯한 목소리로 말했다.
+
+“…잘가요.”
+
+그 말은 거의 들리지 않을 정도로 작았지만,
+분명히, 가슴 깊숙이 박혔다.
+
+다른 동료들도 아무 말 없이 고개를 숙였다.
+
+붙잡지 않았다.
+잡을 수도 없다는 걸 알고 있었으니까.
+
+소년은 그들을 한 명씩 바라봤다.
+
+함께 싸웠던 시간들이 스쳐 지나갔다.
+
+피, 비명, 웃음, 그리고—
+
+살아남기 위해 발버둥치던 순간들.
+
+“…고맙다.”
+
+짧게, 하지만 분명하게 말했다.
+
+그게 전부였다.
+
+그는 더 이상 아무 말도 하지 않고, 손을 들어 올렸다.
+
+[귀환을 시작합니다.]
+
+빛이 터져 나왔다.
+
+시야가 하얗게 물들었다.
+
+—
+
+“…이제, 집이다.”
+
+눈을 떴을 때, 그는 콘크리트 냄새가 나는 골목에 서 있었다.
+
+소환되기전 바로 그 자리였다.
+
+숨을 들이마셨다.
+
+낯익은 공기였다.
+
+“하하…”
+
+작게 웃음이 새어나왔다.
+
+“진짜… 돌아왔네.”
+
+손을 내려다봤다.
+
+떨리고 있었다.
+
+그건 공포가 아니라—
+
+안도였다.
+
+“…엄마, 아빠.”
+
+그 이름을 입에 담는 순간, 가슴이 조여왔다.
+
+“기다렸지…?”
+
+그는 바로 뛰기 시작했다.
+
+익숙한 길이었다.
+
+수없이 걸었던 길.
+학교 가던 길, 집에 가던 길.
+
+그런데—
+
+“…뭐야.”
+
+발걸음이 점점 느려졌다.
+
+“이거… 뭐야.”
+
+분명히 알고 있는 거리인데, 어딘가 달랐다.
+
+간판이 바뀌어 있었다.
+건물 색이 달랐다.
+지나가는 사람들의 옷차림도—
+
+묘하게 낯설었다.
+
+“…언제 이렇게 바뀌었지?”
+
+중얼거리며 주위를 둘러봤다.
+
+그때, 전광판 하나가 눈에 들어왔다.
+
+날짜.
+
+“…3년?”
+
+눈이 멈췄다.
+
+“…뭐야, 이거.”
+
+다시 봤다.
+
+틀리지 않았다.
+
+“…….”
+
+숨이 멎은 것처럼 조용해졌다.
+
+“…상관없어.”
+
+그는 고개를 세게 저었다.
+
+“집에 가면 되잖아.”
+
+다시 달렸다.
+
+조금 더 빨리.
+
+조금 더, 더—
+
+그리고—
+
+멈췄다.
+
+“…여기… 맞는데.”
+
+눈앞의 집.
+
+분명히 자신의 집이 있어야 할 자리였다.
+
+그런데—
+
+다른 집이었다.
+
+외벽도, 문도, 전부 다—
+
+처음 보는 모습이었다.
+
+“…….”
+
+심장이 이상하게 뛰었다.
+
+쿵, 쿵.
+
+“…이사 간 건가?”
+
+그럴 수도 있다.
+
+그럴 수밖에 없다.
+
+그는 천천히 초인종을 눌렀다.
+
+딩동—
+
+잠시 후,
+
+철컥.
+
+문이 열렸다.
+
+낯선 남자가 고개를 내밀었다.
+
+“누구세요?”
+
+소년은 잠깐 말을 잇지 못했다.
+
+“…저기.”
+
+목이 말랐다.
+
+“여기… 살던 사람들…”
+
+말이 끊겼다.
+
+“…어디갔나요?”
+
+남자가 눈을 가늘게 떴다.
+
+“여기?”
+
+“네, 여기 살던—”
+
+“아.”
+
+남자가 고개를 끄덕였다.
+
+“이사 오기 전에 살던 사람 말하는 거죠?”
+
+“네.”
+
+소년의 눈이 흔들렸다.
+
+남자는 아무렇지도 않게 말했다.
+
+“음… 그 사람들, 죽었다던데.”
+
+“…네?”
+
+“사고 났다고 들었어요. 꽤 됐을걸요?”
+
+그 말이—
+
+너무 가볍게 떨어졌다.
+
+“…언제요?”
+
+입이 멋대로 움직였다.
+
+“글쎄, 3년쯤 됐나?”
+
+3년.
+
+그 숫자가, 머릿속에서 맴돌았다.
+
+3년.
+
+“…아.”
+
+소년의 시야가 흔들렸다.
+
+“이미 오래된 얘기예요.”
+
+남자는 별 관심 없다는 듯 어깨를 으쓱했다.
+
+“그쪽 가족이에요?”
+
+“…….”
+
+대답이 나오지 않았다.
+
+“아니면 뭐, 알아보시던가요. 전 잘 몰라요.”
+
+철컥.
+
+문이 닫혔다.
+
+쿵—
+
+그 소리가 유난히 크게 울렸다.
+
+“…3년.”
+
+중얼거렸다.
+
+“…죽었다고?”
+
+숨이 막혔다.
+
+그 자리에서 움직일 수가 없었다.
+
+“…거짓말.”
+
+하지만 아무도 대답해주지 않았다.
+
+—
+
+며칠 뒤.
+
+“…도윤이냐?”
+
+전화 너머의 목소리는 놀람과 짜증이 뒤섞여 있었다.
+
+“…삼촌.”
+
+소년—이제 이름을 되찾은, 강도윤은 겨우 입을 열었다.
+
+“저… 집이…”
+
+“도대체 지금까지 어디 있었어?”
+
+말을 끊듯 쏘아붙였다.
+
+“…연락도 안 되고, 사람을 이렇게—”
+
+“…저는—”
+
+“니 부모님 돌아가신 지가 언젠데.”
+
+목소리가 낮아졌다.
+
+“장례식에도 안 오고.”
+
+도윤의 손이 떨렸다.
+
+“…저, 그게—”
+
+“지금 와서 뭐 어쩌자는 거냐? 너때문에 내 동생이 죽었다고!”
+
+말이 막혔다.
+
+아무 말도 할 수 없었다.
+
+어머니는 뺑소니범에게 치여 돌아가셨고
+
+아버지는 가족을 지키지 못한 죄책감에
+
+자살하셨다.
+
+“됐고, 우리한테 연락하지 마라. 우리도 상황 안좋으니까.”
+
+뚝.
+
+전화가 끊겼다.
+
+“…”
+
+그날 이후—
+
+아무도 그를 받아주지 않았다.
+
+학교는 이미 제적 처리.
+나이는 애매해서 복학도 불가.
+
+친척도 그를 배척했다.
+기록은 끊겨 있고, 증명할 방법도 없다.
+
+집도 없고, 돈도 없고, 갈 곳도 없다.
+
+“…나는.”
+
+중얼거렸다.
+
+“…뭐지.”
+
+세계를 구했더니 버려졌다.
+
+주변의 사람들이 웃으며 걸어다녔다.
+
+손을 내려다봤다.
+
+천천히, 손을 들어 올렸다.
+
+그리고—
+
+작게, 읊조렸다.
+
+「소환의 권능」 「단검」
+
+순간, 허공이 갈라지며 기운이 응집됐다.
+
+단검 한 자루가, 그의 손에 쥐어졌다.
+
+이 세계에서는 존재할 수 없는, 이질적인 힘.
+
+그러나—
+
+그 검을 쥔 감각은, 너무나도 익숙했다.
+
+“…하.”
+
+허탈한 웃음이 흘러나왔다.
+
+“이걸로… 뭘 하라고.”
+
+그때.
+
+머릿속에 떠오른 목소리.
+
+—“…잘가요.”
+
+—“돌아가면… 행복하시겠죠.”
+
+“…행복?”
+
+웃음이 새어나왔다.
+
+“…하.”
+
+작게, 그리고 점점 크게.
+
+“하하…”
+
+“하하하하—”
+
+사람들이 쳐다봤다.
+
+그는 멈추지 않았다.
+
+“…행복?”
+
+고개를 들었다.
+
+눈동자가 텅 비어 있었다.
+
+“…내가?”
+
+아무것도 남지 않았다.
+
+집도, 가족도, 자리도—
+
+전부 다.
+
+“……그래.”
+
+중얼거렸다.
+
+아주 천천히.
+
+“세계를 지켰는데…”
+
+입꼬리가 비틀렸다.
+
+“…나를 버렸네.”
+
+그 순간,
+
+무언가가 끊어졌다.
+
+툭.
+
+아주 작은 소리였다.
+
+하지만 분명히—
+
+돌이킬 수 없는 무언가였다.
+
+“…그럼.”
+
+그는 자리에서 일어났다.
+
+“부숴버리면 되겠네.”
+
+손을 들어 올렸다.
+
+다시 한 번—
+
+힘을 끌어올렸다.
+
+「소환의 권능」 「빛의 검 액스칼리버」
+
+빛이, 더 크게 일그러졌다.
+
+공기가 떨리고, 공간이 비명을 질렀다.
+
+이 세계가 감당하지 못하는 힘.
+
+도윤이, 그걸 내려다보며 중얼거렸다.
+
+“…이제는.”
+
+그리고—
+
+아주 조용하게 웃었다.
+
+“내가 버린다.”`},
+          2:{title:"2화 - 공모",sub:"백진우 · 유하린 · 제주도",desc:"버려진 자들이 만나고, 세계를 향한 전쟁이 시작된다.",date:"2026.04.30",raw:`쾅—
+
+빛이, 가로로 베어졌다.
+
+도로 위를 달리던 차량이, 아무런 저항도 없이 두 동강이 났다.
+
+“…하.”
+
+소년—강도윤은 천천히 숨을 내쉬었다.
+
+손에 쥐어진 빛의 검이, 미세하게 떨리고 있었다.
+
+피가 튀었다.
+
+비명도 뒤따랐다.
+
+“사, 살려—”
+
+콰직.
+
+말은 끝까지 이어지지 못했다.
+
+빛의 검 액스칼리버
+
+한 번 휘두를 때마다—
+
+무언가가 사라졌다.
+
+사람이든, 건물이든, 차량이든.
+
+구분은 없었다.
+
+필요도 없었다.
+
+“…너네는 행복하겠지.”
+
+도윤이 낮게 중얼거렸다.
+
+귀를 찢는 비명, 울부짖음, 도망치는 발소리.
+
+모두가—
+
+거슬렸다.
+
+“그만 좀—”
+
+휘익.
+
+또 한 번, 검이 지나갔다.
+
+“사라져라”
+
+그리고—
+
+조용해졌다.
+
+텅 빈 거리.
+
+부서진 잔해.
+
+그리고—
+
+아무도 남지 않은 공간.
+
+“….”
+
+도윤은 잠시 그 자리에 서 있었다.
+
+아무 감정도 들지 않았다.
+
+그저—
+
+조용했다.
+
+“……재밌냐, 그거.”
+
+그때였다.
+
+낮은 목소리가, 뒤에서 들려왔다.
+
+도윤의 눈이, 아주 천천히 돌아갔다.
+
+그곳에는—
+
+두 사람이 서 있었다.
+
+하나는, 긴 머리를 묶은 남자.
+
+다른 하나는, 붉은 머리의 여자.
+
+둘 다—
+
+평범한 사람의 분위기가 아니었다.
+
+“처음 보는 방식인데.”
+
+남자가 입꼬리를 올렸다.
+
+“그거, 소환 계열이냐?”
+
+“….”
+
+도윤은 대답하지 않았다.
+
+그저—
+
+검을 들었다.
+
+위험하다고 판단했으니까.
+
+그 순간,
+
+남자의 발이, 허공 위에 멈췄다.
+
+툭.
+
+아무것도 없는 공중.
+
+그 위를, 자연스럽게 딛고 올라섰다.
+
+「무림의 권능」 「허공답보」
+
+공기가, 발판처럼 고정됐다.
+
+“아, 진짜네.”
+
+남자가 작게 웃었다.
+
+“우리랑 같은 부류네.”
+
+“…같은?”
+
+도윤이 처음으로 입을 열었다.
+
+그때, 붉은 머리의 여자가 피식 웃었다.
+
+“그래. 우리도—”
+
+그녀의 손끝에, 불꽃이 피어올랐다.
+
+붉고, 거칠고, 폭력적인 불꽃.
+
+“다 버려진 쪽이거든.”
+
+도윤의 눈이, 아주 미세하게 흔들렸다.
+
+“…버려졌다고?”
+
+“그래.”
+
+남자가 어깨를 으쓱했다.
+
+“나도 돌아와 보니까, 아무것도 없더라.”
+
+“가족도, 자리도, 전부.”
+
+여자가 말을 이었다.
+
+“그래서 그냥—”
+
+불꽃이 더 커졌다.
+
+“태워버리기로 했어.”
+
+잠깐의 침묵.
+
+바람이 불었다.
+
+부서진 도시의 냄새가 스쳤다.
+
+“…그래서.”
+
+남자가 말했다.
+
+“너도 그러고 있는 거잖아.”
+
+도윤은 아무 말도 하지 않았다.
+
+하지만—
+
+부정하지도 않았다.
+
+“…하.”
+
+짧게 웃음이 흘러나왔다.
+
+“그래.”
+
+고개를 들었다.
+
+눈동자는 이미—
+
+완전히 식어 있었다.
+
+“부수고 있었어.”
+
+그 말에, 둘의 표정이 살짝 변했다.
+
+“그럼 쉽네.”
+
+남자가 웃었다.
+
+“같이 할래?”
+
+“…뭘.”
+
+“세상 부수는 거.”
+
+아주 가볍게 던진 말이었다.
+
+하지만—
+
+무겁게 가라앉았다.
+
+도윤은 잠시 생각했다.
+
+아니,
+
+생각할 필요도 없었다.
+
+“…그래.”
+
+짧게 대답했다.
+
+“어차피—”
+
+입꼬리가 비틀렸다.
+
+“남은 것도 없으니까.”
+
+그 말에,
+
+세 사람의 시선이 마주쳤다.
+
+그 순간—
+
+어딘가, 완전히 틀어졌다.
+
+—
+
+“일단, 여기서는 눈에 너무 띄어.”
+
+남자가 허공에 서서 아래를 내려다봤다.
+
+“좀 넓고, 사람 많은 데 가야지.”
+
+“그래야 제대로 터뜨리지.”
+
+여자가 피식 웃었다.
+
+“…어디.”
+
+도윤이 물었다.
+
+남자가 고개를 기울였다.
+
+“…제주도.”
+
+“섬이라 좋거든.”
+
+도윤은 잠시 생각하다가—
+
+고개를 끄덕였다.
+
+“가자.”
+
+그 말이 떨어지자마자,
+
+남자의 발이 공중을 밟았다.
+
+툭.
+
+툭.
+
+「무림의 권능」 「허공답보」
+
+그는 그대로—
+
+하늘 위를 달리기 시작했다.
+
+“따라와.”
+
+짧은 한마디.
+
+여자도, 도윤도 움직였다.
+
+그리고—
+
+세 사람은, 하늘을 가로질렀다.
+
+—
+
+제주도.
+
+푸른 바다와, 평화로운 도시.
+
+그 위에—
+
+세 개의 그림자가 떨어졌다.
+
+“…좋네.”
+
+여자가 웃었다.
+
+“태우기 딱이다.”
+
+그녀의 손이 올라갔다.
+
+불꽃이, 폭발하듯 터져 나왔다.
+
+「염화의 권능」 「열화참!」
+
+콰아아아—
+
+붉은 선이, 도시를 가로질렀다.
+
+건물이 갈라지고,
+
+도로가 뒤집히고,
+
+사람들이—
+
+사라졌다.
+
+비명조차, 제대로 남지 않았다.
+
+“…시작이다.”
+
+남자가 중얼거렸다.
+
+도윤은 아무 말 없이—
+
+손을 들어 올렸다.
+
+“끝내자.”
+
+낮게 말했다.
+
+그리고—
+
+「소환의 권능」 「대공포!」
+
+공간이, 찢어졌다.
+
+거대한 포신이, 허공에 소환됐다.
+
+이 세계에 존재할 수 없는 구조.
+
+이해할 수 없는 위력.
+
+그것이—
+
+천천히, 방향을 잡았다.
+
+목표.
+
+한라산.
+
+“…발사.”
+
+콰아아아아아아아아—
+
+빛이, 쏟아졌다.
+
+세상이 흔들렸다.
+
+산이—
+
+사라졌다.
+
+폭음이, 몇 초 뒤에야 따라왔다.
+
+그리고—
+
+침묵.
+
+“…끝났네.”
+
+여자가 중얼거렸다.
+
+도윤은 아무 말도 하지 않았다.
+
+그저—
+
+그 자리를 바라봤다.
+
+—
+
+잠시 후.
+
+그들은 그 자리 위에 서 있었다.
+
+도윤이 손을 들어 올렸다.
+
+「소환의 권능」 「거주지 소환」
+
+허공에, 작은 집 하나가 모습을 드러냈다.
+
+“…여기서 잠깐 쉬자.”
+
+아무렇지 않게 말했다.
+
+셋은 안으로 들어갔다.
+
+잠깐의 정적.
+
+그리고—
+
+남자가 먼저 입을 열었다.
+
+“이름이나 말하지.”
+
+“난, 백진우다.”
+
+여자가 피식 웃었다.
+
+“유하린.”
+
+둘의 시선이 도윤에게 향했다.
+
+잠시 후,
+
+그가 입을 열었다.
+
+“…강도윤.”
+
+짧은 자기소개였다.
+
+하지만—
+
+충분했다.
+
+세 사람은, 서로를 이해했다.
+
+—
+
+그때였다.
+
+밖에서—
+
+소리가 들렸다.
+
+웅성거림.
+
+그리고—
+
+규칙적인 발걸음.
+
+도윤이 창밖을 바라봤다.
+
+“…왔네.”
+
+수많은 병력.
+
+군인들.
+
+총을 들고, 이곳을 포위하고 있었다.
+
+백진우가 웃었다.
+
+“생각보다 빠르네.”
+
+유하린이 불꽃을 피워 올렸다.
+
+“재밌어지겠네.”
+
+도윤은—
+
+아무 말도 하지 않았다.
+
+그저—
+
+천천히, 손을 들어 올렸다.
+
+그리고—
+
+밖을 바라봤다.
+
+눈동자에는—
+
+아무것도 담겨 있지 않았다.
+
+“…….”
+
+전쟁이—
+
+시작되려 하고 있었다.`},
+          3:{title:"3화 - 포위",sub:"아스 길드 · 포위 · 천공의 요새",desc:"제주도에서 포위된 세 사람, 그리고 아스 길드와의 첫 충돌.",date:"2026.04.30",raw:`“……정리 좀 해보자.”
+
+작은 집 안, 기묘하게 조용한 공간이었다.
+
+밖에서는 이미 아수라장이 벌어졌지만—
+이 안만큼은, 마치 다른 세계처럼 고요했다.
+
+강도윤은 창가에서 시선을 떼며 입을 열었다.
+
+“지금 상황이 어떻게 돌아가는지.”
+
+백진우가 벽에 기대며 피식 웃었다.
+
+“간단해.”
+
+“우리가 좀 크게 터뜨렸고, 바로 반응 온 거지.”
+
+유하린이 손끝에 불꽃을 피워 올리며 말을 이었다.
+
+“여긴 2100년대야. 옛날이랑 다르다고.”
+
+“…뭐가.”
+
+도윤의 짧은 질문.
+
+하린이 어깨를 으쓱했다.
+
+“전투 방식부터 다르지.”
+
+“밖에 있는 애들, 그냥 총 든 인간들 아니야.”
+
+백진우가 손가락을 들어 창밖을 가리켰다.
+
+“저거 다 B3탄 쓴다.”
+
+“…B3?”
+
+“단계 탄환.”
+
+진우가 웃었다.
+
+“A1부터 시작해서 A10, 그 다음이 B단계.”
+
+“지금 저건—”
+
+눈을 가늘게 떴다.
+
+“각성자 대응용 중에서도 꽤 위쪽이다.”
+
+하린이 말을 이었다.
+
+“방탄복도 마찬가지고.”
+
+“일반 장비 아니야. 권능 대응용으로 강화된 거지.”
+
+도윤은 아무 말 없이 듣고 있었다.
+
+진우가 다시 입을 열었다.
+
+“그리고 중요한 건 따로 있어.”
+
+“…뭔데.”
+
+“길드.”
+
+짧은 한 단어.
+
+“각성자들, 이제 개인으로 안 움직여.”
+
+“전부 길드 단위야.”
+
+하린이 덧붙였다.
+
+“서열도 있고.”
+
+“전국 랭킹.”
+
+“…그래서.”
+
+도윤이 낮게 물었다.
+
+“지금 밖에 있는 놈들은.”
+
+진우가 입꼬리를 올렸다.
+
+“한국 서열 34위.”
+
+“[아스] 길드.”
+
+잠깐의 정적.
+
+“…34위.”
+
+도윤이 중얼거렸다.
+
+그 말에, 진우가 웃음을 터뜨렸다.
+
+“왜, 낮다고 생각하냐?”
+
+“이 바닥에서 34위면—”
+
+손가락을 튕겼다.
+
+“도시 하나쯤은 그냥 밀어버리는 급이다.”
+
+하린이 불꽃을 더 키웠다.
+
+“그리고.”
+
+눈이 반짝였다.
+
+“중요한 건 따로야.”
+
+“그러니까 저기 밖에 있는 총 든 녀석들—”
+
+손가락으로 밖을 가리켰다.
+
+“다 각성자긴 한데.”
+
+잠깐 웃었다.
+
+“우리처럼 강하고, 권능이 다양한 애들은 아니야.”
+
+진우가 말을 이어받았다.
+
+“거의 대부분은, 능력 하나 겨우 쓰는 수준.”
+
+“총이랑 장비 없으면 일반인이랑 별 차이도 없어.”
+
+“우리는—”
+
+잠깐 멈췄다.
+
+“그 위쪽이다.”
+
+그 말이 끝나는 순간—
+
+밖에서 소리가 들려왔다.
+
+쿵.
+
+쿵.
+
+쿵.
+
+“……왔네.”
+
+도윤이 창밖을 바라봤다.
+
+수십, 아니—
+
+수백 명의 병력이 포위하고 있었다.
+
+모두 같은 장비.
+
+같은 움직임.
+
+그리고—
+
+그 중심.
+
+한 남자가 앞으로 걸어나왔다.
+
+두꺼운 방탄복 위에, 다른 기류가 흐르고 있었다.
+
+각성자.
+
+그가 입을 열었다.
+
+“감히—”
+
+목소리가 울려 퍼졌다.
+
+“여기가 어디라고 이런 짓을 벌인 거지?”
+
+정적.
+
+그리고—
+
+“전원, 사격 준비!”
+
+찰칵.
+
+찰칵.
+
+수십 정의 총이, 동시에 겨눠졌다.
+
+“사격!!”
+
+타다다다다다다—
+
+B3탄이, 폭우처럼 쏟아졌다.
+
+—
+
+“간다.”
+
+백진우가 먼저 움직였다.
+
+발을 내디뎠다.
+
+아니—
+
+공중을 밟았다.
+
+툭.
+
+툭.
+
+「무림의 권능」 「허공답보」
+
+그의 몸이, 허공 위를 질주했다.
+
+“느려.”
+
+중얼거리며 손을 휘둘렀다.
+
+「무림의 권능」 「파천장」
+
+공기가 갈라졌다.
+
+보이지 않는 장력이—
+
+정면의 병력들을 통째로 밀어버렸다.
+
+콰아아앙—
+
+사람들이 날아갔다.
+
+“다음.”
+
+진우의 눈이 번뜩였다.
+
+「무림의 권능」 「비룡참」
+
+허공을 가르는 검기가—
+
+수십 명을 한 번에 베어냈다.
+
+—
+
+“하, 재밌네.”
+
+유하린이 앞으로 나섰다.
+
+불꽃이 폭발하듯 피어올랐다.
+
+「염화의 권능」 「화력참!」
+
+붉은 궤적이—
+
+지면을 갈라버렸다.
+
+콰아아—
+
+“더 가볼까?”
+
+그녀가 웃었다.
+
+「염화의 권능」 「화염풍!」
+
+불꽃의 소용돌이가—
+
+병력들을 집어삼켰다.
+
+비명도, 흔적도—
+
+남지 않았다.
+
+“끝까지 버텨봐.”
+
+「염화의 권능」 「화력난벽!」
+
+거대한 불의 벽이 솟아올라—
+
+퇴로를 막아버렸다.
+
+—
+
+“…….”
+
+도윤은, 그 모든 걸 바라보고 있었다.
+
+움직이지 않았다.
+
+그저—
+
+지켜봤다.
+
+“……이 정도인가.”
+
+중얼거렸다.
+
+그리고—
+
+천천히 손을 들어 올렸다.
+
+“그럼—”
+
+낮게 말했다.
+
+「소환의 권능」 「국군」
+
+그 순간—
+
+공간이 열렸다.
+
+그리고—
+
+수십 명의 군인이 나타났다.
+
+완전 무장 상태.
+
+총을 들고—
+
+조준하고 있었다.
+
+“사격.”
+
+짧은 명령.
+
+타다다다다다다—
+
+이번엔—
+
+다른 방향에서 쏟아지는 탄환.
+
+아스 길드의 병력들이—
+
+순식간에 무너졌다.
+
+혼란.
+
+붕괴.
+
+그리고—
+
+종말.
+
+—
+
+“…끝났네.”
+
+하린이 중얼거렸다.
+
+진우가 어깨를 돌렸다.
+
+“생각보다 별거 없네.”
+
+도윤은 아무 말 없이 돌아섰다.
+
+“여기 말고.”
+
+짧게 말했다.
+
+“다른 데 가자.”
+
+—
+
+잠시 후.
+
+그들은—
+
+사라진 한라산의, 다른 쪽 끝에 도착했다.
+
+도윤이 손을 들어 올렸다.
+
+그리고—
+
+천천히, 힘을 끌어올렸다.
+
+공간이 떨렸다.
+
+공기가 비명을 질렀다.
+
+「소환의 권능」 「천공의 요새」
+
+하늘이—
+
+열렸다.
+
+거대한 구조물이—
+
+천천히 모습을 드러냈다.
+
+성.
+
+아니—
+
+요새.
+
+공중에 떠 있는, 압도적인 규모의 구조물.
+
+그 그림자가—
+
+대지를 덮었다.
+
+진우가 웃었다.
+
+“…이거지.”
+
+하린의 눈이 빛났다.
+
+“이제 좀—”
+
+도윤이, 그 위를 바라봤다.
+
+그리고—
+
+아주 조용하게 말했다.
+
+“…시작이다.”
+
+그 순간—
+
+요새가 완전히 모습을 드러냈다.
+
+세상이, 그 아래에 눌렸다.`},
+          4:{title:"4화 - 분류되지 않은 힘",sub:"소환 포인트 · 각성자 등급 · 이도현",desc:"소환 포인트, 권능의 한계, 그리고 국방부의 대응.",date:"2026.04.30",raw:`천공의 요새는 하늘 위에 떠 있었다.
+
+구름 아래로 펼쳐진 세상은 너무 멀어 보였고, 이 공간만이 유독 현실과 분리된 듯 고요했다. 방금 전까지 벌어졌던 전투의 흔적조차 이 안에서는 희미하게 가라앉아 있었다.
+
+강도윤은 창가에 서서 아래를 내려다보고 있었다. 이 공간이 자신의 권능으로 만들어졌다는 사실은 분명했지만, 완전히 통제된 느낌은 아니었다. 마치 손끝에서 조금씩 미끄러지는 세계처럼.
+
+백진우가 바닥에 털썩 주저앉았다.
+
+“야.”
+
+그가 도윤을 올려다보며 웃었다.
+
+“근데 말이야. 너 정도면 진짜 세계 하나쯤은 그냥 없앨 수 있는 거 아니냐?”
+
+유하린도 옆에서 팔짱을 낀 채 고개를 끄덕였다.
+
+“맞아. 솔직히 우리 입장에서는 좀 이상해.”
+
+“왜 안 하는데?”
+
+도윤은 잠시 말이 없었다.
+
+그리고 조용히 입을 열었다.
+
+“…나의 권능에도 한계가 있어.”
+
+두 사람의 시선이 동시에 그에게 향했다.
+
+“소환 포인트라고 불러.”
+
+도윤은 손끝을 들어 허공을 가리켰다.
+
+“이걸 다 쓰면 더 이상 소환이 안 돼.”
+
+잠깐의 침묵이 흘렀다.
+
+“방금 이 요새 소환하면서.”
+
+“…전부 썼다.”
+
+진우가 눈을 깜빡였다.
+
+“아예?”
+
+“그래.”
+
+도윤은 담담하게 말했다.
+
+“지금은 아무것도 못 만든다.”
+
+유하린이 피식 웃었다.
+
+“생각보다 현실적이네.”
+
+진우는 잠시 생각하더니 고개를 저었다.
+
+“근데 그거 진짜 위험한 설정인데.”
+
+도윤은 더 설명하지 않았다.
+
+대신 두 사람을 바라봤다.
+
+“너희는.”
+
+“어떤 건데.”
+
+진우가 먼저 입꼬리를 올렸다.
+
+“나는 무림이다.”
+
+“무협지에 나오는 건 전부 쓸 수 있다고 보면 된다.”
+
+그는 손을 가볍게 휘둘렀다.
+
+공기가 얇게 찢어지듯 흔들렸다.
+
+“검법, 장법, 보법, 내공 운용 전부.”
+
+“어릴 때 무협지 많이 봤거든.”
+
+유하린이 이어서 말했다.
+
+“나는 염화.”
+
+손끝에서 불꽃이 피어올랐다.
+
+그 불은 단순한 화염이 아니었다. 형태를 바꾸며 칼이 되었다가 바람처럼 퍼졌다가 다시 응축되었다.
+
+“불과 관련된 건 거의 다 가능해.”
+
+“어릴 때부터 불 가지고 노는 거 좋아했어.”
+
+잠깐 웃었다.
+
+“생각해보면 그게 권능이랑 연결된 것 같기도 하고.”
+
+진우가 고개를 끄덕였다.
+
+“나도 비슷한 생각 했어.”
+
+잠시 정적이 흘렀다.
+
+도윤은 천천히 입을 열었다.
+
+“…나는.”
+
+두 사람의 시선이 다시 그에게 향했다.
+
+“어릴 때 만드는 걸 좋아했어.”
+
+손을 내려다봤다.
+
+“근데.”
+
+“…만드는 거랑 소환은 다른 거 아닌가?”
+
+유하린이 물었다.
+
+도윤은 바로 대답하지 않았다.
+
+잠시 생각한 뒤 낮게 말했다.
+
+“…모르겠네.”
+
+그리고 다시 창밖을 바라봤다.
+
+아래 세상은 아무 일도 없었다는 듯 평온했다.
+
+그게 더 이상하게 느껴졌다.
+
+—
+
+지하.
+
+어두운 회의실.
+
+긴 테이블 위로 자료들이 쌓여 있었다.
+
+인원은 10명 남짓.
+국방부 핵심 인사들과 각성자 분석관들이 함께 앉아 있었다.
+
+한 남자가 서류를 내려놓았다.
+
+“제주도 상황 보고입니다.”
+
+“정체불명의 세력.”
+
+“한라산이 소멸했습니다.”
+
+잠깐의 침묵.
+
+“그리고 34위 길드 [아스]가 전멸했습니다.”
+
+회의실이 술렁였다.
+
+“그게 말이 됩니까?”
+
+한 사람이 목소리를 높였다.
+
+“아무리 각성자라도 한라산을 날려버린다고요?”
+
+“증거 확보됐습니다.”
+
+서류가 넘어갔다.
+
+사진.
+
+그 위에는 있어야 할 산 대신, 거대한 구조물이 떠 있었다.
+
+“현재 구조물 분석 중입니다.”
+
+“인근 주민은 전원 대피 완료.”
+
+“문제는…”
+
+그가 말을 멈췄다.
+
+“…그 세력이 언제 다시 움직일지 모른다는 겁니다.”
+
+회의실이 다시 소란스러워졌다.
+
+그때였다.
+
+“조용.”
+
+낮고 단단한 목소리.
+
+모든 시선이 한 사람에게 향했다.
+
+테이블 끝.
+
+가장 높은 자리에 앉아 있던 남자였다.
+
+“국방부는 해당 세력을 제거하기 위해.”
+
+잠깐의 침묵.
+
+“지휘관급 각성자.”
+
+그는 서류를 내려다봤다.
+
+“…절단의 각성자 이도현을 투입한다.”
+
+—
+
+다시 천공의 요새.
+
+도윤은 창밖을 보고 있었다.
+
+진우가 옆에서 천천히 말했다.
+
+“각성자 등급은 한국 기준으로 5단계다.”
+
+“병사급.”
+
+“병장급.”
+
+“지휘관급.”
+
+“전설급.”
+
+“신화급.”
+
+유하린이 덧붙였다.
+
+“협회 기준이라 절대적인 건 아니야.”
+
+진우는 도윤을 바라봤다.
+
+그리고 아주 짧게 웃었다.
+
+“근데 문제는 그거야.”
+
+“우리 둘은 협회에서 이미 측정받았어.”
+
+잠깐의 침묵.
+
+그리고 마지막으로, 진우가 낮게 말했다.
+
+“…우리는—`},
+          5:{title:"5화 - 충전된 하늘",sub:"소환 포인트 · 이도현 · 절단의 권능",desc:"회복된 소환 포인트와 다시 다가오는 지휘관급 각성자.",date:"2026.05.01",raw:`천공의 요새는 여전히 하늘 위에 떠 있었다.
+
+전투 이후의 공기는 조금씩 가라앉고 있었고, 내부는 이상할 정도로 안정되어 있었다. 도윤은 요새 중심부에 앉아 있었다. 그의 손끝에는 보이지 않는 흐름이 느리게 돌아가고 있었다.
+
+소환 포인트.
+
+고갈되었던 힘이 아주 조금씩 회복되고 있었다.
+
+“……이 정도면.”
+
+도윤은 손을 바라보며 중얼거렸다.
+
+“다시 쓸 수 있겠네.”
+
+옆에서 백진우는 벽을 따라 걷고 있었고, 유하린은 요새 구조를 둘러보며 감탄 반, 경계 반의 표정을 짓고 있었다.
+
+“이거 진짜 말도 안 되는 공간인데.”
+
+진우가 벽을 툭 쳤다.
+
+“방어 구조가 그냥 개념 자체가 다르네.”
+
+그때였다.
+
+밖에서—
+
+소란이 느껴졌다.
+
+단순한 이동 소리가 아니었다.
+
+무게감 있는 군세의 압박.
+
+유하린이 먼저 고개를 들었다.
+
+“또 왔어.”
+
+진우의 표정이 바뀌었다.
+
+“이번 건 좀 크다.”
+
+도윤이 천천히 창가로 다가갔다.
+
+그리고 아래를 내려다봤다.
+
+“…많네.”
+
+한라산 사건 당시보다 최소 세 배 이상은 되어 보이는 병력.
+
+지면 전체를 덮을 정도의 군세였다.
+
+그리고 그 중심.
+
+한 사람.
+
+그는 다른 모든 것과 확연히 달랐다.
+
+공간 자체가 그를 중심으로 미세하게 흔들리고 있었다.
+
+“저게 지휘관급인가.”
+
+진우가 낮게 말했다.
+
+그 순간, 아래에서 목소리가 울렸다.
+
+“정체불명의 세력을 처단하라!”
+
+“사격 준비!”
+
+순식간에 수천 개의 총구가 동시에 요새를 향했다.
+
+“발사!”
+
+타다다다다다다다—
+
+B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
+
+하지만—
+
+요새는 미동도 하지 않았다.
+
+충격조차 흡수되지 않았다.
+
+유하린이 눈을 가늘게 떴다.
+
+“저거, 흠집도 안 나는데?”
+
+진우가 웃었다.
+
+“당연하지.”
+
+도윤은 창밖을 바라보며 무심하게 말했다.
+
+“…이게 소환 포인트 얼마짜린데.”
+
+잠깐의 정적.
+
+“고작 저딴 걸로?”
+
+그 말이 떨어지자, 유하린이 고개를 홱 돌렸다.
+
+“야, 우리가 가서 없애고 올게.”
+
+진우도 바로 이어 말했다.
+
+“이건 몸이 근질거리네.”
+
+도윤은 잠시 둘을 바라봤다.
+
+그리고 짧게 고개를 끄덕였다.
+
+두 사람은 동시에 요새 밖으로 뛰어내렸다.
+
+공중을 밟으며 내려가는 순간—
+
+진우의 발이 허공을 디뎠다.
+
+「무림의 권능」 「허공답보」
+
+공간이 계단처럼 펼쳐졌다.
+
+그는 그대로 적진 중심으로 돌진했다.
+
+「무림의 권능」 「극세척도」
+
+검이 스치자 공간이 찢어졌다.
+
+수십 명이 동시에 절단되며 쓰러졌다.
+
+유하린은 반대 방향으로 뛰었다.
+
+손끝에서 불꽃이 폭발했다.
+
+「염화의 권능」 「화력참」
+
+붉은 선이 지면을 갈라버렸다.
+
+「염화의 권능」 「화염풍」
+
+불꽃이 소용돌이처럼 퍼지며 병력을 삼켰다.
+
+「염화의 권능」 「화력난벽」
+
+불의 벽이 전장을 나누어버렸다.
+
+전장은 순식간에 혼란으로 바뀌었다.
+
+그 중심.
+
+남은 단 한 사람.
+
+지휘관급 각성자, 절단의 권능 사용자.
+
+그는 천천히 손을 들었다.
+
+「절단의 권능」 「섬」
+
+공기가 갈라졌다.
+
+보이지 않는 절단의 힘이 공간 자체를 찢었다.
+
+진우의 공격이 튕겨 나갔다.
+
+유하린의 화염이 중간에서 끊겼다.
+
+“이게 지휘관급인가.”
+
+진우가 이를 악물었다.
+
+그 순간—
+
+도윤이 요새에서 내려왔다.
+
+아무 말 없이.
+
+그는 둘을 지나쳤다.
+
+“걔는 내가 맡을게.”
+
+짧게 말했다.
+
+“너네는 나머지 잔당 처리해.”
+
+유하린이 뒤돌아보며 외쳤다.
+
+“소환 포인트는?!”
+
+도윤은 잠깐 멈췄다.
+
+그리고 말했다.
+
+“…조금 충전됐다.”
+
+그 말과 동시에—
+
+도윤이 손을 들어 올렸다.
+
+「소환의 권능」 「빛의 검 액스칼리버」
+
+거대한 빛의 검이 허공에서 생성됐다.
+
+지휘관급 각성자가 손을 휘둘렀다.
+
+「절단의 권능」 「절」
+
+공간이 다시 찢어졌다.
+
+하지만 도윤은 그대로 검을 휘둘렀다.
+
+검과 절단이 충돌했다.
+
+폭발적인 충격.
+
+그리고—
+
+도윤의 또 다른 손이 움직였다.
+
+「소환의 권능」 「주먹」
+
+허공이 찢어지며, 사람 크기의 거대한 주먹이 나타났다.
+
+콰아아앙—
+
+지휘관급 각성자가 그대로 밀려났다.
+
+지면을 가르며 뒤로 미끄러졌다.
+
+그 순간이었다.
+
+아직 전장에 남아 있던 국군 소환체들이 일제히 조준했다.
+
+타다다다다다다—
+
+탄환이 정확하게 하나의 목표를 향했다.
+
+지휘관급 각성자.
+
+“……!”
+
+그는 절단을 다시 펼치려 했지만 이미 늦었다.
+
+몸이 무너졌다.
+
+전장이 조용해졌다.
+
+도윤은 천천히 다가갔다.
+
+그리고 쓰러진 남자를 바라봤다.
+
+아무 말도 하지 않았다.
+
+잠시 후, 그는 직접 손으로 그를 끌어올렸다.
+
+요새 쪽으로.
+
+하늘 위의 구조물로.
+
+지휘관급 각성자는 저항하지 못한 채 끌려갔다.
+
+전장은 다시 조용해졌다.
+
+그리고 요새만이—
+
+하늘 위에 남아 있었다`},
+          6:{title:"6화 - 남겨진 것의 형태",sub:"특수 캡슐 · 이도현 · HG",desc:"도윤은 특수 캡슐을 완성하고, 쓰러진 이도현을 새로운 전력으로 재구성한다.",date:"2026.05.01",raw:`천공의 요새 내부는 이전보다 더 안정적으로 정리되어 있었다.
+
+전투 이후 흩어졌던 구조들이 자동적으로 복구되고 있었고, 도윤은 요새 내부 깊숙한 곳으로 내려가고 있었다.
+
+비밀실험실.
+
+요새 중심부보다도 더 깊은 곳에 숨겨진 공간이었다.
+
+금속과 빛이 교차하는 방.
+
+그리고 중앙에는 아직 비어 있는 거대한 원형 장치가 있었다.
+
+도윤은 잠시 그 장치를 바라봤다.
+
+그리고 손을 들었다.
+
+「소환의 권능」 「특수 캡슐」
+
+공간이 갈라지며 물체가 형성되기 시작했다.
+
+금속도, 유리도 아닌 애매한 물질.
+
+마치 “개념”이 물질화된 것처럼 보이는 캡슐이었다.
+
+완전히 닫힌 구조.
+
+그러나 내부에는 미세한 생명 유지 장치가 흐르고 있었다.
+
+도윤은 그것을 바라보며 낮게 중얼거렸다.
+
+“…이게 가능하다고?”
+
+설명은 단순했다.
+
+특수 캡슐.
+
+부패만 진행되지 않는다면, 죽은 육체조차 동일 구조로 복제되어 재구성된다.
+
+사실상 ‘죽음 이후의 재가동 장치’.
+
+그리고 핵심은 따로 있었다.
+
+자아.
+
+존재하지만, 외부 명령에 의해 아군에게 반발하지 않도록 조정할 수 있는 구조.
+
+도윤은 잠시 침묵했다.
+
+그리고 손을 더 깊이 내렸다.
+
+남아 있던 모든 소환 포인트가 빠져나갔다.
+
+공기가 순간적으로 무거워졌다.
+
+“……끝이다.”
+
+캡슐은 완성됐다.
+
+그 순간.
+
+도윤은 시선을 옮겼다.
+
+그리고 한 사람을 바라봤다.
+
+지휘관급 각성자, 이도현.
+
+아직 완전히 소멸되지 않은 존재.
+
+도윤은 아무 말 없이 캡슐을 열었다.
+
+그리고 그를 안으로 넣었다.
+
+닫히는 순간—
+
+캡슐 내부의 빛이 잠시 흔들렸다.
+
+그러나 곧 안정됐다.
+
+“새 식구네.”
+
+도윤은 그렇게 말하고 캡슐을 닫아둔 채 실험실에 그대로 남겨놨다.
+
+
+잠시 후.
+
+요새 내부 거실.
+
+도윤이 올라왔다.
+
+그의 옆에는 이도현이 있었다.
+
+정확히는 “완전히 재구성된 이도현”.
+
+캡슐 안의 본체는 비밀실험실에 그대로 남아 있었고, 이쪽은 외부로 출력된 전투 가능한 개체였다.
+
+진우가 먼저 반응했다.
+
+“야, 또 뭐 데리고 왔냐?”
+
+유하린도 눈을 가늘게 떴다.
+
+“이번 건 느낌이 좀 다른데.”
+
+도윤은 이도현을 한 번 힐끔 보고 말했다.
+
+“이거.”
+
+“아까 걔.”
+
+진우가 고개를 갸웃했다.
+
+“걔?“
+
+도윤은 짧게 말했다.
+
+“절단의 권능.”
+
+“움직이게 만든 거.”
+
+진우가 멈칫했다.
+
+“…그럼 진짜 사람 아냐?”
+
+도윤은 어깨를 으쓱했다.
+
+“비슷하지.”
+
+이도현이 먼저 입을 열었다.
+
+“야.”
+
+“이거 뭐냐.”
+
+진우가 눈을 크게 떴다.
+
+“오, 말한다.”
+
+이도현은 주변을 훑어보며 말했다.
+
+“나 살아있는 건 맞냐?”
+
+도윤이 바로 말했다.
+
+“맞긴 한데.”
+
+“본체는 따로 있어.”
+
+이도현이 잠깐 멈췄다.
+
+“…그게 무슨.”
+
+유하린이 팔짱을 꼈다.
+
+“너 지금 우리 편 맞는 거야?”
+
+이도현은 잠깐 생각했다.
+
+그리고 짧게 말했다.
+
+“일단은.”
+
+도윤이 이도현 쪽을 가볍게 가리켰다.
+
+“움직이기만 해.”
+
+“안 그러면 다시 죽인다.”
+
+이도현은 짧게 웃었다.
+
+“…알겠어.”
+
+
+지하.
+
+국방부 회의실.
+
+긴 테이블 위로 자료가 쌓여 있었다.
+
+긴장감이 이전보다 훨씬 무거웠다.
+
+국방부 장관이 입을 열었다.
+
+“절단의 권능 이도현도 당했다.”
+
+“아무래도 세력이 강한 모양이다.”
+
+회의실이 술렁였다.
+
+“지휘관급이 당한다고요?”
+
+“그게 정말 가능한—”
+
+장관이 손을 들어 말을 끊었다.
+
+“그럼 어떻게 해야 할까요? 장관님.”
+
+누군가 물었다.
+
+잠깐의 침묵.
+
+그리고 장관이 말했다.
+
+“아무래도 다른 길드에게 도움을 청해야 할 것 같다.”
+
+“서열 10위 [HG]에게 부탁할까요?”
+
+“좋다.”
+
+장관은 서류를 내려다봤다.
+
+“그곳의 길드장에게 전화해라.”
+
+잠깐 멈췄다가.
+
+“아무래도 도움이 필요할 것 같다.”`},
+          7:{title:"7화 - 해가 없는 나라",sub:"솔라리스 · 군단 체계 · 강세윤",desc:"도윤은 솔라리스라는 이름의 나라와 군단 체계를 세우기 시작한다.",date:"2026.05.01",raw:`천공의 요새 중앙 회의실.
+
+네 사람이 한 자리에 모여 있었다.
+
+도윤, 백진우, 유하린, 그리고 이도현.
+
+이전과 달리 분위기는 단순한 전투 준비가 아니었다.
+
+조금 더—
+
+구체적이었다.
+
+도윤이 먼저 입을 열었다.
+
+“이제 방향 정해야 해.”
+
+진우가 의자를 기울이며 물었다.
+
+“방향?”
+
+도윤이 천천히 말했다.
+
+“나라 만들자.”
+
+순간 공기가 멈췄다.
+
+유하린이 눈을 좁혔다.
+
+“진짜로?”
+
+도윤은 고개를 끄덕였다.
+
+“어차피 돌아갈 데 없잖아.”
+
+“그럼 우리가 만들면 돼.”
+
+짧은 정적.
+
+그리고—
+
+진우가 피식 웃었다.
+
+“하, 미쳤네.”
+
+이도현도 낮게 중얼거렸다.
+
+“…스케일 커졌네.”
+
+유하린은 잠깐 생각하다가 말했다.
+
+“이름은?”
+
+도윤은 이미 정해둔 듯 바로 말했다.
+
+“솔라리스.”
+
+“해가 없는 나라.”
+
+조용해졌다.
+
+이상하게—
+
+아무도 반대하지 않았다.
+
+진우가 팔짱을 꼈다.
+
+“그럼 구조도 짜야지.”
+
+도윤이 손가락으로 탁자를 두드렸다.
+
+“군대부터 만든다.”
+
+“군단 체계로.”
+
+그의 시선이 한 명씩 향했다.
+
+“제1군단.”
+
+유하린을 본다.
+
+“군단장.”
+
+유하린이 짧게 웃었다.
+
+“불로 밀어버리는 거네.”
+
+도윤이 고개를 끄덕였다.
+
+“제2군단.”
+
+진우를 본다.
+
+“군단장.”
+
+진우가 어깨를 풀었다.
+
+“그럼 내가 전방이네.”
+
+“좋아.”
+
+도윤의 시선이 마지막으로 향했다.
+
+“제3군단.”
+
+이도현.
+
+“…군단장.”
+
+이도현이 피식 웃었다.
+
+“나까지 쓰네.”
+
+도윤이 짧게 말했다.
+
+“쓸 수 있으니까.”
+
+그리고—
+
+도윤은 자신을 가리켰다.
+
+“국방부장관.”
+
+진우가 바로 웃었다.
+
+“야, 그건 좀 웃긴데.”
+
+도윤은 아무렇지 않게 말했다.
+
+“지휘는 내가 한다.”
+
+아무도 부정하지 않았다.
+
+—
+
+도윤이 손을 들어 올렸다.
+
+「소환의 권능」 「국군」
+
+빛이 흩어졌다.
+
+완전한 대규모는 아니었다.
+
+지금 남은 포인트로는 제한적이었다.
+
+하지만—
+
+분명히 ‘군대’였다.
+
+완전무장한 병력.
+
+진우가 감탄했다.
+
+“이거 진짜 군대네.”
+
+도윤이 말했다.
+
+“나눠.”
+
+각 군단으로 병력이 배분됐다.
+
+완전히 균등하지는 않았지만, 최소한의 전력은 갖춰졌다.
+
+유하린이 병력 쪽을 보며 말했다.
+
+“이 정도면 시작은 되겠네.”
+
+—
+
+네 사람은 요새 밖으로 나왔다.
+
+제주도.
+
+이미 절반 이상이 비어버린 땅.
+
+도윤이 말했다.
+
+“각자 위치 잡아.”
+
+“군단 주둔지.”
+
+포인트는 부족했다.
+
+그래서—
+
+최소한만.
+
+「소환의 권능」 「간단한 기지」
+
+각 지역에 단 하나의 건물이 소환됐다.
+
+단순한 구조.
+
+하지만 기능은 충분했다.
+
+진우는 북쪽으로.
+
+유하린은 동쪽.
+
+이도현은 서쪽.
+
+각자 흩어졌다.
+
+도윤은 마지막으로 말했다.
+
+“수도는 여기.”
+
+“요새.”
+
+“회의나 필요할 때만 모인다.”
+
+셋은 고개를 끄덕였다.
+
+그리고—
+
+각자의 방향으로 사라졌다.
+
+—
+
+지하.
+
+국방부.
+
+조용한 사무실.
+
+전화 연결음이 울렸다.
+
+“안녕하십니까. 대한민국 국방부장관입니다.”
+
+잠깐의 정적.
+
+“길드 [HG]의 길드장, 강세윤 님 맞으십니까?”
+
+잠시 후.
+
+“네, 맞습니다만. 무슨 일이시죠?”
+
+장관이 낮게 말했다.
+
+“현재 제주도에 정체불명의 세력이 출현했습니다.”
+
+“국가 단위 위협으로 판단됩니다.”
+
+“토벌 작전에 참여해 주실 수 있겠습니까?”
+
+짧은 침묵.
+
+그리고—
+
+“네. 참여하겠습니다.”
+
+장관의 눈빛이 가라앉았다.
+
+“감사합니다.”
+
+“‘검술의 권능’ 강세윤 님.”
+
+전화가 끊겼다.
+
+그리고—
+
+보이지 않는 전쟁이, 천천히 움직이기 시작했다.`},
+          8:{title:"8화 - 끊어지지 않는 선",sub:"군단 강화 · 캡슐 · 신화급 각성자",desc:"도윤은 각 군단을 강화하고, 캡슐을 이용한 새로운 생존 구조를 완성한다.",date:"2026.05.01",preview:true,cost:3,ownCost:5,raw:`10일.
+
+짧다면 짧고, 길다면 긴 시간이었다.
+
+그 시간 동안 도윤은 거의 움직이지 않았다.
+
+요새 내부.
+
+오직 소환 포인트 회복에만 집중했다.
+
+그리고—
+
+충분해졌다.
+
+“…이 정도면 되겠네.”
+
+도윤이 자리에서 일어났다.
+
+손을 들어 올렸다.
+
+그리고 공간을 찢었다.
+
+
+제1군단 주둔지.
+
+유하린이 건물 밖에서 병력들을 정리하고 있었다.
+
+그때—
+
+공간이 열렸다.
+
+도윤이 나타났다.
+
+“왔네.”
+
+유하린이 말했다.
+
+도윤은 대답 대신 손을 들었다.
+
+「소환의 권능」 「군단 기지」
+
+기존 건물이 그대로 뒤틀리며 재구성됐다.
+
+크기, 내구도, 내부 구조—
+
+모든 것이 한 단계 올라갔다.
+
+이어—
+
+「소환의 권능」 「국군」
+
+추가 병력이 배치됐다.
+
+그리고—
+
+「소환의 권능」 「전술 장비 세트」
+
+「소환의 권능」 「통신 장비」
+
+장비들이 쏟아지듯 배치됐다.
+
+유하린이 주변을 둘러보며 말했다.
+
+“…이제 좀 군대 같네.”
+
+도윤이 짧게 말했다.
+
+“쓸 만할 거야.”
+
+
+제2군단.
+
+진우 쪽도 동일했다.
+
+“야, 이건 진짜 제대로인데?”
+
+「소환의 권능」 「군단 기지」
+
+「소환의 권능」 「국군」
+
+「소환의 권능」 「전투 장비」
+
+진우가 웃었다.
+
+“이제 싸움 재밌어지겠네.”
+
+
+제3군단.
+
+이도현은 건물 앞에 서 있었다.
+
+도윤이 나타나자 바로 말했다.
+
+“이번엔 또 뭐냐.”
+
+도윤은 짧게 답했다.
+
+“강화.”
+
+「소환의 권능」 「군단 기지」
+
+「소환의 권능」 「국군」
+
+「소환의 권능」 「절단 보조 장비」
+
+이도현이 장비를 한 번 보고 말했다.
+
+“…이건 좀 쓸만하네.”
+
+
+모든 배치가 끝난 후.
+
+도윤은 요새로 돌아왔다.
+
+그리고 통신을 열었다.
+
+“다 올라와.”
+
+짧은 호출.
+
+세 사람은 바로 움직였다.
+
+
+천공의 요새.
+
+회의실.
+
+네 사람이 다시 모였다.
+
+도윤이 바로 본론으로 들어갔다.
+
+“하나 더 한다.”
+
+진우가 턱을 괴고 물었다.
+
+“뭔데.”
+
+도윤이 말했다.
+
+“캡슐.”
+
+유하린의 표정이 굳었다.
+
+“그거.”
+
+이도현은 아무 말도 하지 않았다.
+
+도윤이 계속 말했다.
+
+“산 사람도 쓸 수 있어.”
+
+“육체를 새로 만들어.”
+
+“본체만 안 부서지면 계속 살아난다.”
+
+정적.
+
+진우가 먼저 웃었다.
+
+“…그거면 끝 아니냐.”
+
+유하린도 천천히 말했다.
+
+“리스크는?”
+
+“없어.”
+
+그리고—
+
+진우가 먼저 말했다.
+
+“난 한다.”
+
+유하린도 고개를 끄덕였다.
+
+“나도.”
+
+
+비밀실험실.
+
+진우와 유하린이 각각 캡슐 안으로 들어갔다.
+
+문이 닫혔다.
+
+빛이 흐르기 시작했다.
+
+그리고—
+
+잠시 후.
+
+두 사람의 ‘외부 육체’가 형성되었다.
+
+완전히 동일한 형태.
+
+그러나—
+
+죽어도 다시 돌아오는 구조.
+
+진우가 손을 쥐었다 폈다.
+
+“…와.”
+
+유하린도 팔을 들어 올렸다.
+
+“…이거 느낌 이상하네.”
+
+도윤이 짧게 말했다.
+
+“익숙해질 거야.”
+
+
+잠시 후.
+
+도윤은 혼자 남았다.
+
+비밀실험실.
+
+캡슐 앞.
+
+그는 잠깐 멈췄다.
+
+“…나도 해야지.”
+
+문을 열었다.
+
+그리고—
+
+들어갔다.
+
+캡슐이 닫혔다.
+
+빛이 흘렀다.
+
+
+어둠.
+
+그리고—
+
+감각.
+
+처음엔 아무것도 없었다.
+
+그러다—
+
+뭔가 생겨났다.
+
+살.
+
+뼈.
+
+근육.
+
+하나하나 ‘만들어지는’ 느낌.
+
+찢어지는 게 아니라—
+
+조립되는 느낌.
+
+신경이 이어지고.
+
+감각이 연결되고.
+
+시야가 만들어진다.
+
+심장이—
+
+처음으로 뛴다.
+
+쿵.
+
+그리고—
+
+숨.
+
+“하…”
+
+도윤의 시야가 열렸다.
+
+완전히 동일한 몸.
+
+그러나—
+
+완전히 다른 위치.
+
+두 개의 자신.
+
+잠깐.
+
+그는 웃었다.
+
+“…이거 재밌네.”
+
+
+요새 내부.
+
+침대.
+
+도윤은 앉아 있었다.
+
+손에는 휴대기기가 들려 있었다.
+
+유튜브 화면.
+
+무심하게 넘기던 중—
+
+하나의 제목이 눈에 들어왔다.
+
+[한국의 2,3번째 신화급 각성자는 어디에 갔나?]
+
+도윤의 손가락이 멈췄다.`},
+          9:{title:"9화 - 모여드는 불씨",sub:"강세윤 · 한태민 · 한지훈",desc:"강세윤이 토벌 인원을 모집하고, 제주도의 군단 기지에는 새로운 접근 신호가 잡힌다.",date:"2026.05.01",preview:true,cost:3,ownCost:5,raw:`서울.
+
+광화문 광장.
+
+사람들이 모여 있었다.
+
+평소보다 훨씬 많은 인파.
+
+하지만 분위기는 무겁게 가라앉아 있었다.
+
+중앙.
+
+임시로 설치된 단상 위에 한 남자가 서 있었다.
+
+검을 허리에 찬 채, 단단한 눈빛으로 앞을 바라보고 있었다.
+
+강세윤.
+
+‘검술의 권능’ 사용자이자, 서열 10위 길드 [HG]의 길드장.
+
+그가 입을 열었다.
+
+“저희 [HG] 길드는.”
+
+“제주도의 테러 세력을 제거하기 위해 인원을 모집하고 있습니다.”
+
+목소리는 크지 않았지만, 광장 전체에 또렷하게 퍼졌다.
+
+“각성자든, 민간인이든 상관 없습니다.”
+
+“힘을 보태 주십시오.”
+
+“저희는 반드시 그 세력을 제거할 것입니다.”
+
+짧은 정적.
+
+그리고—
+
+사람들 사이에서 웅성거림이 퍼졌다.
+
+“야… 미친 거 아니냐.”
+
+“[아스] 길드도 전멸했다며.”
+
+“절단의 권능까지 당했다는데 우리가 뭘 하냐고…”
+
+“저건 그냥 자살이잖아…”
+
+누군가는 고개를 저었고, 누군가는 아예 자리를 떠나려 했다.
+
+공포.
+
+이미 퍼져 있었다.
+
+그때였다.
+
+사람들 사이에서 한 명이 앞으로 나왔다.
+
+천천히.
+
+하지만 망설임 없이.
+
+“제가 지원하도록 하겠습니다.”
+
+순간 시선이 모였다.
+
+강세윤이 그를 바라봤다.
+
+“신원을 밝혀주십시오.”
+
+남자는 담담하게 말했다.
+
+“저는 길드는 없습니다.”
+
+잠깐 멈췄다가.
+
+“번개의 권능, 한태민입니다.”
+
+순간 공기가 바뀌었다.
+
+각성자.
+
+그것도 권능 보유자.
+
+강세윤의 눈빛이 조금 달라졌다.
+
+그때—
+
+그 옆에 서 있던 또 다른 남자가 한 발 나섰다.
+
+“저도 지원하겠습니다.”
+
+시선이 다시 이동했다.
+
+그는 태민을 힐끔 보며 말했다.
+
+“망치의 권능, 한지훈입니다.”
+
+“저 녀석 동생입니다.”
+
+짧은 침묵.
+
+그리고—
+
+강세윤이 고개를 끄덕였다.
+
+“좋습니다.”
+
+“두 분 모두, 즉시 편성에 포함됩니다.”
+
+광장의 공기가 다시 흔들렸다.
+
+누군가는 놀랐고, 누군가는 여전히 망설였다.
+
+하지만—
+
+분명히.
+
+처음으로 “움직이는 사람”이 생겼다.
+
+
+제주도.
+
+솔라리스.
+
+제1군단.
+
+염화 군단 주둔지.
+
+유하린이 병력 배치를 점검하고 있었다.
+
+그때—
+
+기지 내부에서 경고음이 울렸다.
+
+삐— 삐— 삐—
+
+유하린의 시선이 돌아갔다.
+
+“뭐야.”
+
+장비 화면.
+
+파형이 잡히고 있었다.
+
+외부 접근 신호.
+
+유하린이 눈을 가늘게 떴다.
+
+“…누가 접근하고 있네.”
+
+
+동시에.
+
+제3군단.
+
+절단 군단 주둔지.
+
+이도현이 건물 외벽에 기대 서 있었다.
+
+그의 눈이 순간 움직였다.
+
+그리고—
+
+기지 내부.
+
+같은 경고음.
+
+삐— 삐— 삐—
+
+이도현이 피식 웃었다.
+
+“하.”
+
+“타이밍 좋네.”
+
+그가 천천히 몸을 일으켰다.
+
+“누가 온다.”
+
+
+보이지 않는 선.
+
+서로 다른 방향에서—
+
+무언가가 움직이고 있었다.`},
+          10:{title:"10화 - 모여드는 불씨 (2)",sub:"강세윤 · 한태민 · 한지훈 · 신화급",desc:"강세윤과 HG, 한태민과 한지훈이 솔라리스 군단 주둔지에 도착하고 전투가 시작된다.",date:"2026.05.02",preview:true,cost:3,ownCost:5,raw:`제주도.
+
+솔라리스.
+
+제1군단.
+
+염화 군단 주둔지 외곽.
+
+먼지가 일었다.
+
+군화 소리.
+
+그리고—
+
+질서정연하게 움직이는 병력.
+
+국군.
+
+그 뒤를 따르는 [HG] 길드원들.
+
+그리고 선두.
+
+강세윤.
+
+그의 옆에는 두 사람이 서 있었다.
+
+한태민.
+
+한지훈.
+
+“여기가 맞습니다.”
+
+누군가 말했다.
+
+유하린은 멀리서 그들을 내려다보고 있었다.
+
+“…생각보다 빨리 왔네.”
+
+그녀는 천천히 앞으로 걸어 나왔다.
+
+불꽃이 손끝에서 스며 나왔다.
+
+“돌아가.”
+
+짧게 말했다.
+
+“지금이면 살려줄 수 있어.”
+
+강세윤은 움직이지 않았다.
+
+그 순간—
+
+뒤쪽에서 두 사람이 동시에 튀어나왔다.
+
+“간다.”
+
+“맞춘다.”
+
+전장이 터졌다.
+
+
+한태민과 한지훈.
+
+두 사람의 움직임이 완벽하게 겹쳤다.
+
+「번개의 권능」 X 「망치의 권능」 「번개압력」
+
+망치가 내려찍히는 순간—
+
+전류가 압축되어 폭발했다.
+
+공기가 짓눌렸다.
+
+동시에—
+
+「번개의 권능」 X 「망치의 권능」 「번개분분」
+
+전류가 망치의 충격을 따라 갈라졌다.
+
+수십 갈래.
+
+지면과 공중을 동시에 뒤덮었다.
+
+유하린이 몸을 틀었다.
+
+불꽃이 튀었다.
+
+「염화의 권능」 「화력참」
+
+충돌.
+
+폭발.
+
+그리고—
+
+「번개의 권능」 X 「망치의 권능」 「번개난벽」
+
+전기의 벽이 형성되며 퇴로를 막았다.
+
+동시에—
+
+「번개의 권능」 X 「망치의 권능」 「번개분분」
+
+망치가 다시 한 번 떨어졌다.
+
+콰아아앙—
+
+전류가 증폭되며 폭발했다.
+
+유하린의 몸이 뒤로 밀렸다.
+
+발이 지면을 긁었다.
+
+“…하.”
+
+처음으로—
+
+밀리는 듯한 모습.
+
+두 사람은 멈추지 않았다.
+
+“더 간다!”
+
+“붙여!”
+
+호흡이 완벽하게 맞았다.
+
+협공.
+
+단 하나의 흐름.
+
+
+동시에.
+
+제3군단.
+
+절단 군단 주둔지.
+
+이도현이 검을 들어 올렸다.
+
+맞은편.
+
+강세윤.
+
+둘만의 공간.
+
+다른 개입은 없었다.
+
+그리고—
+
+부딪혔다.
+
+금속음.
+
+“쓸 만하네.”
+
+이도현이 낮게 말했다.
+
+강세윤은 대답하지 않았다.
+
+대신—
+
+검이 움직였다.
+
+「검술의 권능」 「쾌」
+
+보이지 않을 정도의 속도.
+
+이도현의 몸에 베임이 생겼다.
+
+“……!”
+
+「검술의 권능」 「환」
+
+검이 춤을 췄다.
+
+궤적이 보이지 않았다.
+
+「검술의 권능」 「강」
+
+강하게.
+
+무겁게.
+
+「절단의 권능」 「절」
+
+그리고—
+
+「검술의 권능」 「유」
+
+이도현의 반격이 흘려졌다.
+
+「검술의 권능」 「압」
+
+공간이 눌렸다.
+
+이도현의 몸이 내려앉았다.
+
+“…씨.”
+
+밀렸다.
+
+완전히.
+
+「검술의 권능」 「강」
+
+그 순간—
+
+「무림의 권능」 「호신강기」
+
+누군가가 공격을 몸으로 막았다.
+
+진우였다.
+
+“혼자 하려니까 힘들지?”
+
+그가 앞으로 나섰다.
+
+이도현은 뒤로 물러났다.
+
+“전설급이네.”
+
+진우가 웃었다.
+
+“좋네.”
+
+
+강세윤이 검을 들었다.
+
+「검술의 권능」 「쾌」
+
+진우가 뒤로 밀렸다.
+
+“둘이 와도 똑같다.”
+
+진우가 어깨를 풀었다.
+
+“…그래?”
+
+그 순간—
+
+스쳐 지나가는 기억.
+
+—
+
+천공의 요새.
+
+도윤은 창밖을 보고 있었다.
+
+진우가 옆에서 천천히 말했다.
+
+“각성자 등급은 한국 기준으로 5단계다.”
+
+“병사급.”
+
+“병장급.”
+
+“지휘관급.”
+
+“전설급.”
+
+“신화급.”
+
+유하린이 덧붙였다.
+
+“협회 기준이라 절대적인 건 아니야.”
+
+진우는 도윤을 바라봤다.
+
+그리고 아주 짧게 웃었다.
+
+“근데 문제는 그거야.”
+
+“우리 둘은 협회에서 이미 측정받았어.”
+
+잠깐의 침묵.
+
+그리고—
+
+“…우리는—”
+
+
+“…둘 다 신화급이야.”
+
+—
+
+현재.
+
+진우의 눈이 번뜩였다.
+
+그의 손이 올라갔다.
+
+「무림의 권능」 「천마신공」
+
+검은 기운이 터져 나왔다.
+
+공간이 뒤틀렸다.
+
+강세윤이 즉시 반응했다.
+
+「검술의 권능」 「유」
+
+흘린다.
+
+하지만—
+
+이번엔 다르다.
+
+검은 기운이 그대로 덮쳤다.
+
+“……!”
+
+강세윤의 몸이 뒤로 밀렸다.
+
+지면이 갈렸다.
+
+
+동시에.
+
+제1군단.
+
+유하린의 손이 들렸다.
+
+「염화의 권능」 「염화의 손」
+
+거대한 불꽃의 손.
+
+두 개.
+
+한태민과 한지훈을 동시에 움켜쥐었다.
+
+“……!”
+
+전기가 터졌지만—
+
+불은 꺼지지 않았다.
+
+망치가 휘둘러졌지만—
+
+부서지지 않았다.
+
+완전히—
+
+붙잡혔다.
+
+
+진우와 유하린이 동시에 말한다.
+
+“이제 시작이다.”`}
+        }
+      },
+      kill:{
+        id:"kill",
+        title:"킬 게이지 시스템",
+        author:"고쓰비",
+        firstEpisode:0,
+        type:"kill",
+        heroTitle:"킬 게이지<br>시스템",
+        heroDesc:"모든 인간의 시야에 시스템이 나타난 날. 사람들은 죽음이 곧 힘으로 이어지는 세계에서 살아남기 위해 움직이기 시작한다.",
+        badge:"고쓰비 · 시스템 판타지",
+        meta:["시스템","성장","차수 배틀","액션"],
+        summary:"킬 게이지가 활성화된 세계. 죽음 이후 남겨진 자들은 조금씩 강해지고, 살아남은 자들은 자신만의 차수와 힘을 각성한다.",
+        stats:["★ 0","조회 0","관심 0","총 2화 공개"],
+        aliases:["킬게이지","킬게이지시스템","킬 게이지 시스템","김서현","서현","차수","초강권","초강갑주","혈각","철쇄보","고쓰비","프롤로그","각성의시작"],
+        episodes:{
+          0:{title:"0화 - 프롤로그",sub:"세계의 변화 · 킬 게이지 시스템",desc:"모든 인간의 시야에 킬 게이지 시스템이 나타난 날, 세계는 조용히 무너지기 시작한다.",date:"2026.05.02",raw:`0. 세계의 변화
+
+그날은 특별한 날처럼 보이지 않았다.
+
+하늘은 평소처럼 흐렸고, 사람들은 각자의 하루를 살고 있었다.
+
+하지만 단 하나.
+
+모든 인간의 시야에 동시에 나타난 문장이 있었다.
+
+
+[킬 게이지 시스템 활성화]
+
+
+처음에는 아무도 진지하게 받아들이지 않았다.
+
+게임 광고라고 생각한 사람도 있었고, 집단 환각이라고 말하는 사람도 있었다.
+
+하지만 곧, 그 생각은 무너졌다.
+
+사람이 죽는 순간마다 “무언가”가 변했기 때문이다.
+
+그리고 살아남은 사람은 느꼈다.
+
+자신이 조금씩 강해지고 있다는 것을.`},
+          1:{title:"1화 - 각성의 시작",sub:"김서현 · 비각성 · 초강권",desc:"비 오는 골목에서 쓰러진 김서현은 생존 임계치에 도달하며 첫 각성을 맞이한다.",date:"2026.05.02",raw:`1화 — “각성의 시작”  1. 김서현 — 비각성
+
+서울 외곽 골목.
+
+비가 내리고 있었다.
+
+서현은 편의점 봉투를 들고 천천히 걷고 있었다.
+
+평범한 하루였다.
+
+적어도 몇 분 전까지는.
+
+
+“야.”
+
+뒤에서 들려온 목소리.
+
+서현은 천천히 뒤를 돌았다.
+
+
+세 명의 남자였다.
+
+표정에는 피곤함과 익숙한 폭력이 섞여 있었다.
+
+
+“돈 좀 있냐.”
+
+
+서현은 잠시 그들을 바라보다가 고개를 저었다.
+
+“없습니다.”
+
+짧고 무심한 대답이었다.
+
+그 말이 끝나자, 남자 중 하나가 웃었다.
+
+
+“요즘은 말투도 당당하네.”
+
+그리고 주먹이 날아왔다.
+
+
+2. 비각성의 끝
+
+충격은 생각보다 컸다.
+
+서현은 그대로 바닥에 쓰러졌다.
+
+숨이 한 번에 끊길 듯한 느낌이 들었다.
+
+비 오는 골목 바닥은 차갑고, 시야는 흐려졌다.
+
+
+“끝내.”
+
+누군가 말했다.
+
+발이 천천히 올라갔다.
+
+
+그 순간이었다.
+
+세상이 잠깐 멈춘 것처럼 느껴졌다.
+
+
+3. 각성
+
+서현의 시야 한가운데에 문장이 떠올랐다.
+
+
+[생존 임계치 도달]
+[각성 발동]
+
+
+몸이 뜨겁게 변했다.
+
+하지만 고통이 아니라, 이상한 “정렬” 같은 감각이었다.
+
+무너져 있던 무언가가 다시 맞춰지는 느낌.
+
+
+그리고 이어서 새로운 문장이 나타났다.
+
+
+[1차 개방 - 초강권]
+
+
+서현은 천천히 손을 쥐었다.
+
+자신의 몸이 이전과 다르다는 걸 본능적으로 알 수 있었다.
+
+
+4. 첫 전투
+
+서현은 다시 일어섰다.
+
+남자들이 잠깐 멈칫했다.
+
+분명 방금 전까지 쓰러져 있던 사람이었다.
+
+
+“뭐야, 이 새끼?”
+
+
+서현은 아무 말도 하지 않았다.
+
+그저 한 걸음 앞으로 나갔다.
+
+그리고 주먹을 휘둘렀다.
+
+
+한 명이 그대로 쓰러졌다.
+
+충격은 단순한 타격이 아니었다.
+
+마치 내부에서 무언가가 터진 듯한 반응이었다.
+
+
+남은 두 명의 표정이 바뀌었다.
+
+
+“각성자다.”
+
+“도망쳐.”
+
+
+둘 중 하나가 뒤로 물러났다.
+
+그리고 골목은 순식간에 조용해졌다.
+
+
+5. 세계의 규칙
+
+서현은 자신의 손을 바라봤다.
+
+아직 상황을 완전히 이해하지 못했다.
+
+하지만 하나는 분명했다.
+
+이건 단순한 힘이 아니었다.
+
+사람마다 완전히 다른 “무언가”가 존재한다는 감각.
+
+
+그때였다.
+
+멀리서 또 다른 존재가 나타났다.
+
+
+6. 첫 “조직”
+
+한 남자가 골목 끝에 서 있었다.
+
+옷은 단정했지만, 분위기는 그렇지 않았다.
+
+서현을 바라보는 눈이 익숙한 것처럼 차분했다.
+
+
+“각성했군.”
+
+남자가 말했다.
+
+
+서현은 천천히 물었다.
+
+“…당신은 누구죠.”
+
+
+“이 구역 사람들은 나를 따까리라고 부르지.”
+
+남자는 짧게 웃었다.
+
+
+서현은 그 말을 그대로 받아들이지 않았다.
+
+하지만 직감적으로 알 수 있었다.
+
+이 사람은 아까와는 다르다.
+
+
+7. 차수의 차이
+
+남자는 천천히 팔을 들어 올렸다.
+
+그리고 짧게 말했다.
+
+
+“(1차 - 혈각)”
+
+
+그 순간, 공기가 압축되듯 휘어졌다.
+
+피처럼 붉은 압력이 손끝에 모였다.
+
+그리고 그것이 터지듯 날아왔다.
+
+
+서현은 반응하지 못했다.
+
+몸이 뒤로 밀려 벽에 부딪혔다.
+
+
+남자는 천천히 걸어왔다.
+
+
+“각성했다고 해서 같은 출발선은 아니다.”
+
+“각자 가진 건 다르니까.”
+
+
+서현은 천천히 숨을 골랐다.
+
+그리고 다시 일어섰다.
+
+
+8. 동료
+
+그때였다.
+
+여자의 목소리가 들렸다.
+
+
+“혼자 상대할 생각이었어?”
+
+
+골목 입구.
+
+짧은 머리의 여자가 서 있었다.
+
+
+남자는 잠깐 그녀를 바라봤다.
+
+“둘인가.”
+
+
+여자는 짧게 한숨을 쉬었다.
+
+“운이 없네.”
+
+
+그리고 조용히 말했다.
+
+
+“(1차 - 철쇄보)”
+
+
+공기가 울렸다.
+
+보이지 않는 쇠사슬 같은 충격이 공간을 흔들었다.
+
+
+남자가 처음으로 뒤로 밀렸다.
+
+
+9. 협력
+
+서현은 잠시 멈췄다가 앞으로 나섰다.
+
+말은 없었다.
+
+하지만 움직임은 명확했다.
+
+
+여자가 짧게 말했다.
+
+“지금.”
+
+
+서현은 다시 손을 쥐었다.
+
+
+“(1차 - 초강권)”
+
+
+두 힘이 동시에 터졌다.
+
+
+남자가 쓰러졌다.
+
+
+10. 전투 이후
+
+잠시 침묵이 흘렀다.
+
+비는 여전히 내리고 있었다.
+
+
+여자는 손을 털며 말했다.
+
+“이게 이 구역의 하급이다.”
+
+
+서현은 천천히 물었다.
+
+“…위는 뭡니까.”
+
+
+여자는 잠깐 생각했다.
+
+그리고 말했다.
+
+
+“정예.”
+
+“간부.”
+
+“그리고 보스.”
+
+
+서현은 그 말을 조용히 받아들였다.
+
+
+“보스는?”
+
+
+여자는 대답하지 않았다.
+
+대신 고개를 저었다.
+
+
+“간부 몇 명이 와도 못 잡아.”
+
+
+11. 끝과 시작
+
+서현은 잠시 골목 끝을 바라봤다.
+
+아직 아무것도 시작되지 않았다는 걸 느꼈다.
+
+
+그리고 조용히 말했다.
+
+
+“가죠.”
+
+
+여자는 짧게 웃었다.
+
+“이제 시작이네.”`}
+        }
       }
-      return arr;
+    };
+
+    function escapeHtml(str){
+      return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
     }
 
-    function formatKRW(num){
-      const sign = num < 0 ? "-" : "";
-      let value = Math.abs(Math.floor(num));
-      if (value < 10000) return sign + value.toLocaleString('ko-KR') + "원";
-      let parts = [];
-      let unitIndex = 0;
-      while (value > 0 && unitIndex < UNIT_NAMES.length) {
-        const chunk = value % 10000;
-        if (chunk > 0) parts.unshift(chunk.toLocaleString('ko-KR') + UNIT_NAMES[unitIndex]);
-        value = Math.floor(value / 10000);
-        unitIndex++;
+    function rawToHtml(raw){
+      return String(raw||"").trim().split(/\n\s*\n/g).map(block=>block.trim()).filter(Boolean).map(block=>{
+        let text=escapeHtml(block).replace(/\n/g,"<br>");
+        text=text.replace(/「([^」]+)」/g,'<span class="skill">「$1」</span>');
+        text=text.replace(/(\(?[0-9]+차\s*(?:개방\s*)?[-–—]\s*[^)<br\]]+\)?)/g,'<span class="rank-skill">$1</span>');
+
+        if(block.trim().includes("[한국의 2,3번째 신화급 각성자는 어디에 갔나?]"))return`<div class="blue-system">${text}</div>`;
+        if(/^\[[\s\S]*\]$/.test(block.trim()))return`<div class="system">${text}</div>`;
+        if(block.trim()==="—")return`<div class="scene">—</div>`;
+        if(["마왕.","세계를 구했더니 버려졌다.","빛의 검 액스칼리버","“내가 버린다.”","소환 포인트."].includes(block.trim()))return`<p class="quote-strong">${text}</p>`;
+        return`<p>${text}</p>`;
+      }).join("\n");
+    }
+
+    function normalizeText(text){return String(text||"").replace(/\s+/g,"").toLowerCase()}
+
+    function ensureAccountShape(user){
+      if(!user)return;
+      if(!Array.isArray(user.recentWorks))user.recentWorks=[];
+      if(!Array.isArray(user.watchingWorks))user.watchingWorks=[];
+      if(!Array.isArray(user.readEpisodes))user.readEpisodes=[];
+      if(!Array.isArray(user.ownedEpisodes))user.ownedEpisodes=[];
+      if(typeof user.tickets!=="number")user.tickets=0;
+      if(typeof user.coins!=="number")user.coins=0;
+      if(typeof user.coinBank!=="number")user.coinBank=0;
+      if(typeof user.coinStartedAt!=="number")user.coinStartedAt=0;
+      if(!user.kind)user.kind="normal";
+      if(typeof user.isAuthor!=="boolean")user.isAuthor=false;
+      if(!user.avatar)user.avatar={color:user.isAuthor?"purple":"green",shape:"circle",photo:""};
+
+      if(user.isAuthor){
+        user.avatar.color="purple";
+        user.avatar.shape="circle";
+        user.avatar.photo="";
+      }else{
+        if(!AVATAR_COLORS.includes(user.avatar.color))user.avatar.color="green";
+        if(!AVATAR_SHAPES.includes(user.avatar.shape))user.avatar.shape="circle";
+        if(typeof user.avatar.photo!=="string")user.avatar.photo="";
       }
-      return sign + parts.join(' ') + "원";
     }
 
-    function formatSignedKRW(num){
-      const sign = num > 0 ? "+" : "";
-      return sign + formatKRW(num);
+    function getNormalAccount(){
+      const raw=localStorage.getItem(NORMAL_ACCOUNT_KEY);
+      return raw?JSON.parse(raw):null;
     }
 
-    function formatPercent(v){
-      const sign = v > 0 ? "+" : "";
-      return sign + (v * 100).toFixed(2) + "%";
+    function saveNormalAccount(user){
+      ensureAccountShape(user);
+      user.kind="normal";
+      user.isAuthor=false;
+      localStorage.setItem(NORMAL_ACCOUNT_KEY,JSON.stringify(user));
     }
 
-    function now(){ return Date.now(); }
-    function getStorageKey(name){ return STORAGE_PREFIX + name; }
+    function getAuthorAccount(){
+      const raw=localStorage.getItem(AUTHOR_ACCOUNT_KEY);
+      if(raw){
+        const user=JSON.parse(raw);
+        ensureAccountShape(user);
+        user.nickname=AUTHOR_NAME;
+        user.password=AUTHOR_PASSWORD;
+        user.kind="author";
+        user.isAuthor=true;
+        user.avatar={color:"purple",shape:"circle",photo:""};
+        localStorage.setItem(AUTHOR_ACCOUNT_KEY,JSON.stringify(user));
+        return user;
+      }
 
-    function saveState(){
-      if (!state.investorName) return;
-      const payload = {
-        investorName: state.investorName,
-        initialCash: state.initialCash,
-        cash: state.cash,
-        creditScore: state.creditScore,
-        loans: state.loans,
-        stocks: state.stocks.map(s => ({
-          key:s.key,
-          price:s.price,
-          lastPrice:s.lastPrice,
-          lastTickChange:s.lastTickChange,
-          dayOpen:s.dayOpen,
-          history:s.history,
-          eventBias:s.eventBias,
-          trendMemory:s.trendMemory
-        })),
-        portfolio: state.portfolio,
-        events: state.events,
-        selectedKey: state.selectedKey,
-        totalProfit: state.totalProfit,
-        lastNetWorth: state.lastNetWorth,
-        marketMood: state.marketMood,
-        savedAt: now()
+      const user={
+        nickname:AUTHOR_NAME,
+        password:AUTHOR_PASSWORD,
+        kind:"author",
+        isAuthor:true,
+        createdAt:new Date().toISOString(),
+        recentWorks:[],
+        watchingWorks:[],
+        readEpisodes:[],
+        ownedEpisodes:[],
+        tickets:0,
+        coins:0,
+        coinBank:0,
+        coinStartedAt:0,
+        avatar:{color:"purple",shape:"circle",photo:""}
       };
-      localStorage.setItem(getStorageKey(state.investorName), JSON.stringify(payload));
-      state.lastSaveAt = now();
+      localStorage.setItem(AUTHOR_ACCOUNT_KEY,JSON.stringify(user));
+      return user;
     }
 
-    function loadState(name){
-      const raw = localStorage.getItem(getStorageKey(name));
-      if (!raw) return false;
-      try{
-        const data = JSON.parse(raw);
-        state.investorName = data.investorName || name;
-        state.initialCash = data.initialCash ?? INITIAL_CASH;
-        state.cash = data.cash ?? INITIAL_CASH;
-        state.creditScore = data.creditScore ?? 100;
-        state.loans = Array.isArray(data.loans) ? data.loans : [];
-        state.portfolio = data.portfolio || {};
-        state.events = Array.isArray(data.events) ? data.events : [];
-        state.selectedKey = data.selectedKey || defaultStocks[0].key;
-        state.totalProfit = data.totalProfit || 0;
-        state.lastNetWorth = data.lastNetWorth || state.initialCash;
-        state.marketMood = data.marketMood || 0;
+    function saveAuthorAccount(user){
+      ensureAccountShape(user);
+      user.nickname=AUTHOR_NAME;
+      user.password=AUTHOR_PASSWORD;
+      user.kind="author";
+      user.isAuthor=true;
+      user.avatar={color:"purple",shape:"circle",photo:""};
+      localStorage.setItem(AUTHOR_ACCOUNT_KEY,JSON.stringify(user));
+    }
 
-        const base = cloneStocks();
-        base.forEach(stock => {
-          const saved = (data.stocks || []).find(x => x.key === stock.key);
-          if(saved){
-            stock.price = saved.price ?? stock.price;
-            stock.lastPrice = saved.lastPrice ?? stock.lastPrice;
-            stock.lastTickChange = saved.lastTickChange ?? 0;
-            stock.dayOpen = saved.dayOpen ?? stock.dayOpen;
-            stock.history = Array.isArray(saved.history) && saved.history.length ? saved.history.slice(-GRAPH_MAX_POINTS) : stock.history;
-            stock.eventBias = saved.eventBias ?? 0;
-            stock.trendMemory = saved.trendMemory ?? 0;
+    function getUserData(){
+      if(!currentUser)return null;
+      if(currentUser.kind==="author")return getAuthorAccount();
+      return getNormalAccount();
+    }
+
+    function saveUserData(user){
+      if(!currentUser||!user)return;
+      if(currentUser.kind==="author")saveAuthorAccount(user);
+      else saveNormalAccount(user);
+    }
+
+    function saveCurrentLogin(user){
+      if(!user){
+        localStorage.removeItem(CURRENT_LOGIN_KEY);
+        return;
+      }
+      localStorage.setItem(CURRENT_LOGIN_KEY,JSON.stringify({kind:user.kind,nickname:user.nickname}));
+    }
+
+    function applyAvatarToElement(el, avatar){
+      if(!el)return;
+      el.className="profile-img";
+      el.style.backgroundImage="";
+      el.style.backgroundSize="";
+      el.style.backgroundPosition="";
+      el.style.backgroundRepeat="";
+
+      const safeAvatar=avatar||{color:"green",shape:"circle",photo:""};
+
+      if(safeAvatar.photo){
+        el.classList.add("avatar-photo");
+        el.style.setProperty("background-image",`url("${safeAvatar.photo}")`,"important");
+        el.style.setProperty("background-size","cover","important");
+        el.style.setProperty("background-position","center","important");
+        el.style.setProperty("background-repeat","no-repeat","important");
+        return;
+      }
+
+      el.classList.add("avatar-"+safeAvatar.color);
+      if(safeAvatar.shape==="square")el.classList.add("avatar-square");
+      else if(safeAvatar.shape==="triangle")el.classList.add("avatar-triangle");
+      else if(safeAvatar.shape==="star")el.classList.add("avatar-star");
+    }
+
+    function updateAvatarChoices(){
+      document.querySelectorAll("#avatarColorGrid .avatar-choice").forEach(btn=>{
+        btn.classList.toggle("active",btn.dataset.color===avatarDraft.color);
+      });
+      document.querySelectorAll(".avatar-shape-grid .avatar-choice").forEach(btn=>{
+        btn.classList.toggle("active",btn.dataset.shape===avatarDraft.shape);
+      });
+    }
+
+    function refreshAvatarPreview(){
+      applyAvatarToElement(document.getElementById("avatarPreview"),avatarDraft);
+      updateAvatarChoices();
+    }
+
+    function openAvatarModal(){
+      if(!currentUser){openLogin();return}
+      const user=getUserData();
+      ensureAccountShape(user);
+
+      if(currentUser.isAuthor){
+        avatarDraft={color:"purple",shape:"circle",photo:""};
+        document.getElementById("avatarGuideText").textContent="작가 계정은 보라색 표지로 고정됩니다.";
+        document.getElementById("avatarColorGrid").style.display="none";
+      }else{
+        avatarDraft={...user.avatar};
+        document.getElementById("avatarGuideText").textContent="프로필 표지를 꾸밀 수 있습니다. 일반 계정은 보라색을 제외한 색만 사용할 수 있습니다.";
+        document.getElementById("avatarColorGrid").style.display="grid";
+      }
+
+      refreshAvatarPreview();
+      avatarModal.classList.add("open");
+    }
+
+    function closeAvatarModal(){avatarModal.classList.remove("open")}
+
+    function selectAvatarColor(color){
+      if(currentUser&&currentUser.isAuthor){
+        showToast("작가 계정은 보라색으로 고정됩니다.");
+        return;
+      }
+      if(!AVATAR_COLORS.includes(color))return;
+      avatarDraft.color=color;
+      avatarDraft.photo="";
+      refreshAvatarPreview();
+    }
+
+    function selectAvatarShape(shape){
+      if(!AVATAR_SHAPES.includes(shape))return;
+      avatarDraft.shape=shape;
+      avatarDraft.photo="";
+      refreshAvatarPreview();
+    }
+
+    function handleAvatarFile(event){
+      if(currentUser&&currentUser.isAuthor){
+        showToast("작가 계정은 표지를 변경할 수 없습니다.");
+        event.target.value="";
+        return;
+      }
+
+      const file=event.target.files&&event.target.files[0];
+      if(!file)return;
+
+      if(!file.type.startsWith("image/")){
+        showToast("이미지 파일만 선택할 수 있습니다.");
+        event.target.value="";
+        return;
+      }
+
+      const fileReader=new FileReader();
+      fileReader.onload=()=>{
+        const img=new Image();
+        img.onload=()=>{
+          const canvas=document.createElement("canvas");
+          const size=240;
+          canvas.width=size;
+          canvas.height=size;
+          const ctx=canvas.getContext("2d");
+          const minSide=Math.min(img.width,img.height);
+          const sx=(img.width-minSide)/2;
+          const sy=(img.height-minSide)/2;
+          ctx.drawImage(img,sx,sy,minSide,minSide,0,0,size,size);
+          avatarDraft.photo=canvas.toDataURL("image/jpeg",0.82);
+          refreshAvatarPreview();
+          showToast("사진이 선택되었습니다. 저장을 눌러 적용하세요.");
+        };
+        img.onerror=()=>{
+          avatarDraft.photo=String(fileReader.result||"");
+          refreshAvatarPreview();
+          showToast("사진이 선택되었습니다. 저장을 눌러 적용하세요.");
+        };
+        img.src=String(fileReader.result||"");
+      };
+      fileReader.readAsDataURL(file);
+      event.target.value="";
+    }
+
+    function removeAvatarPhoto(){
+      if(currentUser&&currentUser.isAuthor){
+        showToast("작가 계정은 보라색으로 고정됩니다.");
+        return;
+      }
+      avatarDraft.photo="";
+      refreshAvatarPreview();
+      showToast("사진을 제거했습니다.");
+    }
+
+    function saveAvatar(){
+      if(!currentUser)return;
+      const user=getUserData();
+      ensureAccountShape(user);
+
+      if(user.isAuthor){
+        user.avatar={color:"purple",shape:"circle",photo:""};
+        saveUserData(user);
+        closeAvatarModal();
+        updateProfileAvatar();
+        showToast("작가 계정은 보라색 표지로 고정됩니다.");
+        return;
+      }
+
+      if(!AVATAR_COLORS.includes(avatarDraft.color))avatarDraft.color="green";
+      if(!AVATAR_SHAPES.includes(avatarDraft.shape))avatarDraft.shape="circle";
+      user.avatar={...avatarDraft};
+      saveUserData(user);
+      closeAvatarModal();
+      updateProfileAvatar();
+      showToast("표지가 저장되었습니다.");
+    }
+
+    function updateProfileAvatar(){
+      const user=getUserData();
+      if(!user)return;
+      ensureAccountShape(user);
+      applyAvatarToElement(document.getElementById("profileAvatar"),user.avatar);
+    }
+
+    function prefillLogin(){
+      const normal=getNormalAccount();
+      const nicknameInput=document.getElementById("nicknameInput");
+      const passwordInput=document.getElementById("passwordInput");
+      const deleteBox=document.getElementById("deleteSavedAccountBox");
+      const guide=document.getElementById("loginGuideText");
+
+      if(normal){
+        nicknameInput.value=normal.nickname||"";
+        passwordInput.value=normal.password||"";
+        deleteBox.style.display="flex";
+        guide.textContent="저장된 일반 계정이 있습니다. 그대로 로그인하거나 기존 계정을 지운 뒤 새로 만들 수 있습니다.";
+      }else{
+        nicknameInput.value="";
+        passwordInput.value="";
+        deleteBox.style.display="none";
+        guide.textContent="닉네임과 비밀번호를 입력하세요. 일반 계정은 브라우저에 1개만 저장됩니다.";
+      }
+    }
+
+    function deleteNormalAccount(){
+      localStorage.removeItem(NORMAL_ACCOUNT_KEY);
+      const login=JSON.parse(localStorage.getItem(CURRENT_LOGIN_KEY)||"null");
+      if(login&&login.kind==="normal")localStorage.removeItem(CURRENT_LOGIN_KEY);
+      prefillLogin();
+      showToast("기존 일반 계정을 지웠습니다.");
+    }
+
+    function updateCoinBank(){
+      const user=getUserData();if(!user)return;
+      ensureAccountShape(user);
+
+      if(user.coinStartedAt&&user.coinBank<COIN_BANK_MAX){
+        const now=Date.now();
+        const elapsed=now-user.coinStartedAt;
+        const gained=Math.floor(elapsed/COIN_INTERVAL);
+
+        if(gained>0){
+          const add=Math.min(gained,COIN_BANK_MAX-user.coinBank);
+          user.coinBank+=add;
+          if(user.coinBank>=COIN_BANK_MAX)user.coinStartedAt=0;
+          else user.coinStartedAt+=gained*COIN_INTERVAL;
+          saveUserData(user);
+        }
+      }
+    }
+
+    function updateProfileCounts(){
+      if(!currentUser)return;
+      updateCoinBank();
+      const user=getUserData();if(!user)return;
+      ensureAccountShape(user);
+      const ticketEl=document.getElementById("profileTicketCount");
+      const coinEl=document.getElementById("profileCoinCount");
+      if(ticketEl)ticketEl.textContent=`보유 이용권 ${user.tickets}장`;
+      if(coinEl)coinEl.textContent=`보유 코인 ${user.coins}개`;
+      updateEpisodeBadges();
+    }
+
+    function updateEpisodeBadges(){
+      if(!currentUser)return;
+      const user=getUserData();if(!user)return;
+      ensureAccountShape(user);
+
+      Object.entries(works).forEach(([workId,work])=>{
+        Object.entries(work.episodes).forEach(([num,ep])=>{
+          const badge=document.getElementById(`episodeBadge-${workId}-${num}`);
+          if(!badge||!ep.preview)return;
+
+          if(currentUser.isAuthor||user.ownedEpisodes.includes(`${workId}-${num}`)){
+            badge.textContent="소장됨";
+            badge.classList.remove("preview");
+            badge.classList.add("owned");
+          }else{
+            badge.textContent="이용권";
+            badge.classList.add("preview");
+            badge.classList.remove("owned");
           }
         });
-        state.stocks = base;
-        return true;
-      }catch(err){
-        console.error(err);
+      });
+    }
+
+    function setActiveNav(navId){
+      navItems.forEach(id=>{
+        const el=document.getElementById(id);
+        if(el)el.classList.toggle("active",id===navId);
+      });
+    }
+
+    function showPage(pageId, navId){
+      if(!currentUser)return;
+      pages.forEach(id=>{
+        const page=document.getElementById(id);
+        if(page)page.classList.toggle("active",id===pageId);
+      });
+      setActiveNav(navId||"");
+      if(pageId==="workDetailPage")updateReadEpisodeStyles();
+      updateProfileCounts();
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+
+    function openTabPage(pageId, navId){
+      if(!currentUser){openLogin();return}
+      showPage(pageId,navId);
+    }
+
+    function showWeekday(day){
+      const map={
+        mon:["weekdayBtnMon","weekdayPanelMon"],
+        tue:["weekdayBtnTue","weekdayPanelTue"],
+        wed:["weekdayBtnWed","weekdayPanelWed"],
+        thu:["weekdayBtnThu","weekdayPanelThu"],
+        fri:["weekdayBtnFri","weekdayPanelFri"],
+        sat:["weekdayBtnSat","weekdayPanelSat"],
+        sun:["weekdayBtnSun","weekdayPanelSun"],
+        daily:["weekdayBtnDaily","weekdayPanelDaily"]
+      };
+
+      Object.values(map).forEach(([btnId,panelId])=>{
+        const btn=document.getElementById(btnId);
+        const panel=document.getElementById(panelId);
+        if(btn)btn.classList.remove("active");
+        if(panel)panel.classList.remove("active");
+      });
+
+      const target=map[day];
+      if(!target)return;
+
+      document.getElementById(target[0]).classList.add("active");
+      document.getElementById(target[1]).classList.add("active");
+    }
+
+    function updateAccountButton(){
+      if(!currentUser){
+        document.body.classList.remove("logged-in");
+        accountBtn.textContent="로그인";
+        accountBtn.classList.remove("logged","author");
+        return;
+      }
+
+      document.body.classList.add("logged-in");
+      accountBtn.textContent=currentUser.nickname;
+      accountBtn.classList.add("logged");
+      if(currentUser.isAuthor)accountBtn.classList.add("author");
+      else accountBtn.classList.remove("author");
+    }
+
+    function openLogin(){
+      prefillLogin();
+      loginModal.classList.add("open");
+      setTimeout(()=>{const input=document.getElementById("nicknameInput");if(input)input.focus()},50);
+    }
+
+    function closeLogin(){loginModal.classList.remove("open")}
+
+    function openProfileEditModal(){
+      if(!currentUser){openLogin();return}
+      const user=getUserData();
+      ensureAccountShape(user);
+      document.getElementById("newNicknameInput").value=user.nickname||"";
+      document.getElementById("oldPasswordInput").value="";
+      document.getElementById("newPasswordInput").value="";
+      showProfileEditPanel("nickname");
+      profileEditModal.classList.add("open");
+    }
+
+    function closeProfileEditModal(){
+      profileEditModal.classList.remove("open");
+      document.getElementById("newNicknameInput").value="";
+      document.getElementById("oldPasswordInput").value="";
+      document.getElementById("newPasswordInput").value="";
+    }
+
+    function showProfileEditPanel(type){
+      const nickTab=document.getElementById("editNicknameTab");
+      const passTab=document.getElementById("editPasswordTab");
+      const nickPanel=document.getElementById("editNicknamePanel");
+      const passPanel=document.getElementById("editPasswordPanel");
+      nickTab.classList.toggle("active",type==="nickname");
+      passTab.classList.toggle("active",type==="password");
+      nickPanel.classList.toggle("active",type==="nickname");
+      passPanel.classList.toggle("active",type==="password");
+    }
+
+    function changeNickname(){
+      if(!currentUser)return;
+      const user=getUserData();
+      ensureAccountShape(user);
+
+      if(user.isAuthor){
+        showToast("작가 계정은 닉네임을 변경할 수 없습니다.");
+        return;
+      }
+
+      const newNickname=document.getElementById("newNicknameInput").value.trim();
+      if(!newNickname){showToast("새 닉네임을 입력하세요.");return}
+      if(newNickname===AUTHOR_NAME){showToast("이 닉네임은 사용할 수 없습니다.");return}
+
+      user.nickname=newNickname;
+      saveNormalAccount(user);
+      currentUser={nickname:user.nickname,kind:"normal",isAuthor:false};
+      saveCurrentLogin(currentUser);
+      updateAccountButton();
+      renderHome();
+      openProfile();
+      closeProfileEditModal();
+      showToast("닉네임이 변경되었습니다.");
+    }
+
+    function changePassword(){
+      if(!currentUser)return;
+      const user=getUserData();
+      ensureAccountShape(user);
+      const oldPw=document.getElementById("oldPasswordInput").value.trim();
+      const newPw=document.getElementById("newPasswordInput").value.trim();
+      if(!oldPw){showToast("현재 비밀번호를 입력하세요.");return}
+      if(!newPw){showToast("새 비밀번호를 입력하세요.");return}
+
+      if(user.isAuthor){
+        if(oldPw!==AUTHOR_PASSWORD){showToast("현재 비밀번호가 다릅니다.");return}
+        showToast("작가 계정 비밀번호는 고정입니다.");
+        return;
+      }
+
+      if(user.password!==oldPw){showToast("현재 비밀번호가 다릅니다.");return}
+      user.password=newPw;
+      saveNormalAccount(user);
+      closeProfileEditModal();
+      showToast("비밀번호가 변경되었습니다.");
+    }
+
+    function openTicketModal(){
+      if(!currentUser){openLogin();return}
+      updateTicketModal();
+      ticketModal.classList.add("open");
+    }
+
+    function closeTicketModal(){ticketModal.classList.remove("open")}
+    function closeNeedTicketModal(){needTicketModal.classList.remove("open")}
+    function goTicketFromNeed(){closeNeedTicketModal();closePaidEpisodeModal();openTicketModal()}
+    function closeFreeTicketModal(){freeTicketModal.classList.remove("open")}
+    function closePaidEpisodeModal(){paidEpisodeModal.classList.remove("open");pendingEpisodeNumber=null;pendingWorkId=null}
+
+    function maybeShowFreeTicketModal(){
+      if(!currentUser||currentUser.isAuthor)return;
+      const already=localStorage.getItem(FREE_TICKET_KEY);
+      if(!already)setTimeout(()=>freeTicketModal.classList.add("open"),500);
+    }
+
+    function claimFreeTickets(){
+      if(!currentUser){closeFreeTicketModal();openLogin();return}
+      if(localStorage.getItem(FREE_TICKET_KEY)){
+        showToast("이미 이 브라우저에서 무료 이용권을 받았습니다.");
+        closeFreeTicketModal();
+        return;
+      }
+      const user=getUserData();
+      ensureAccountShape(user);
+      user.tickets+=3;
+      saveUserData(user);
+      localStorage.setItem(FREE_TICKET_KEY,"1");
+      closeFreeTicketModal();
+      updateProfileCounts();
+      showToast("무료 이용권 3장을 받았습니다.");
+    }
+
+    function formatTime(ms){
+      const total=Math.max(0,Math.ceil(ms/1000));
+      const m=Math.floor(total/60);
+      const s=total%60;
+      return `${m}분 ${String(s).padStart(2,"0")}초`;
+    }
+
+    function updateTicketModal(){
+      if(!currentUser)return;
+      updateCoinBank();
+      const user=getUserData();
+      if(!user)return;
+      ensureAccountShape(user);
+      document.getElementById("ticketStatusText").textContent=`현재 ${currentUser.nickname}님의 이용권 수는 ${user.tickets}개입니다.`;
+      document.getElementById("coinStatusText").textContent=`현재 ${currentUser.nickname}님의 코인수는 ${user.coins}개입니다.`;
+      document.getElementById("coinBankText").textContent=`쌓인 코인: ${user.coinBank}개 / 최대 ${COIN_BANK_MAX}개`;
+
+      let timerText="코인 생성 대기 중";
+      if(user.coinBank>=COIN_BANK_MAX)timerText=`코인이 ${COIN_BANK_MAX}개까지 쌓였습니다. 회수해야 다시 쌓입니다.`;
+      else if(user.coinStartedAt){
+        const next=user.coinStartedAt+COIN_INTERVAL-Date.now();
+        timerText=`다음 코인까지 ${formatTime(next)}`;
+      }else{
+        timerText="코인 얻기를 누르면 45분마다 코인이 쌓입니다.";
+      }
+
+      document.getElementById("coinTimerText").textContent=timerText;
+      updateProfileCounts();
+    }
+
+    function startCoinGenerator(){
+      if(!currentUser)return;
+      const user=getUserData();
+      ensureAccountShape(user);
+      updateCoinBank();
+
+      if(user.coinBank>=COIN_BANK_MAX){
+        showToast(`코인이 이미 ${COIN_BANK_MAX}개까지 쌓였습니다. 먼저 회수하세요.`);
+        updateTicketModal();
+        return;
+      }
+
+      if(!user.coinStartedAt){
+        user.coinStartedAt=Date.now();
+        saveUserData(user);
+        showToast("코인 생성이 시작되었습니다.");
+      }else{
+        showToast("이미 코인이 생성되고 있습니다.");
+      }
+      updateTicketModal();
+    }
+
+    function collectCoins(){
+      if(!currentUser)return;
+      updateCoinBank();
+      const user=getUserData();
+      ensureAccountShape(user);
+
+      if(user.coinBank<=0){
+        showToast("회수할 코인이 없습니다.");
+        return;
+      }
+
+      user.coins+=user.coinBank;
+      const got=user.coinBank;
+      user.coinBank=0;
+      if(!user.coinStartedAt)user.coinStartedAt=Date.now();
+      saveUserData(user);
+      showToast(`코인 ${got}개를 회수했습니다.`);
+      updateTicketModal();
+    }
+
+    function buyTickets(count){
+      if(!currentUser)return;
+      const user=getUserData();
+      ensureAccountShape(user);
+      const price=count*3;
+
+      if(user.coins<price){
+        showToast(`코인이 부족합니다. 이용권 ${count}장 구매에는 코인 ${price}개가 필요합니다.`);
+        return;
+      }
+
+      user.coins-=price;
+      user.tickets+=count;
+      saveUserData(user);
+      showToast(`코인 ${price}개로 이용권 ${count}장을 구매했습니다.`);
+      updateTicketModal();
+    }
+
+    function confirmLogin(){
+      const nicknameInput=document.getElementById("nicknameInput");
+      const passwordInput=document.getElementById("passwordInput");
+      const nickname=nicknameInput.value.trim();
+      const password=passwordInput.value.trim();
+
+      if(!nickname){showToast("닉네임을 입력하세요.");return}
+      if(!password){showToast("비밀번호를 입력하세요.");return}
+
+      if(nickname===AUTHOR_NAME){
+        if(password!==AUTHOR_PASSWORD){
+          showToast("고쓰비 계정의 비밀번호가 다릅니다.");
+          return;
+        }
+        const user=getAuthorAccount();
+        currentUser={nickname:user.nickname,kind:"author",isAuthor:true};
+        saveCurrentLogin(currentUser);
+        closeLogin();
+        updateAccountButton();
+        renderHome();
+        showPage("homePage","navHome");
+        showToast("작가 계정으로 로그인되었습니다.");
+        return;
+      }
+
+      const saved=getNormalAccount();
+
+      if(saved){
+        if(saved.nickname!==nickname){
+          localStorage.removeItem(NORMAL_ACCOUNT_KEY);
+          const newUser={
+            nickname,
+            password,
+            kind:"normal",
+            isAuthor:false,
+            createdAt:new Date().toISOString(),
+            recentWorks:[],
+            watchingWorks:[],
+            readEpisodes:[],
+            ownedEpisodes:[],
+            tickets:0,
+            coins:0,
+            coinBank:0,
+            coinStartedAt:0,
+            avatar:{color:"green",shape:"circle",photo:""}
+          };
+          saveNormalAccount(newUser);
+          currentUser={nickname:newUser.nickname,kind:"normal",isAuthor:false};
+          saveCurrentLogin(currentUser);
+          closeLogin();
+          updateAccountButton();
+          renderHome();
+          showPage("homePage","navHome");
+          maybeShowFreeTicketModal();
+          showToast("기존 일반 계정을 지우고 새 계정으로 시작했습니다.");
+          return;
+        }
+
+        if(saved.password!==password){
+          showToast("비밀번호가 다릅니다.");
+          return;
+        }
+
+        currentUser={nickname:saved.nickname,kind:"normal",isAuthor:false};
+        saveCurrentLogin(currentUser);
+      }else{
+        const newUser={
+          nickname,
+          password,
+          kind:"normal",
+          isAuthor:false,
+          createdAt:new Date().toISOString(),
+          recentWorks:[],
+          watchingWorks:[],
+          readEpisodes:[],
+          ownedEpisodes:[],
+          tickets:0,
+          coins:0,
+          coinBank:0,
+          coinStartedAt:0,
+          avatar:{color:"green",shape:"circle",photo:""}
+        };
+        saveNormalAccount(newUser);
+        currentUser={nickname:newUser.nickname,kind:"normal",isAuthor:false};
+        saveCurrentLogin(currentUser);
+      }
+
+      nicknameInput.value="";
+      passwordInput.value="";
+      closeLogin();
+      updateAccountButton();
+      renderHome();
+      showPage("homePage","navHome");
+      maybeShowFreeTicketModal();
+      showToast("로그인되었습니다.");
+    }
+
+    function restoreLogin(){
+      const raw=localStorage.getItem(CURRENT_LOGIN_KEY);
+      if(!raw)return false;
+      const login=JSON.parse(raw);
+
+      if(login.kind==="author"){
+        const user=getAuthorAccount();
+        currentUser={nickname:user.nickname,kind:"author",isAuthor:true};
+      }else{
+        const user=getNormalAccount();
+        if(!user)return false;
+        ensureAccountShape(user);
+        saveNormalAccount(user);
+        currentUser={nickname:user.nickname,kind:"normal",isAuthor:false};
+      }
+
+      updateAccountButton();
+      renderHome();
+      showPage("homePage","navHome");
+      return true;
+    }
+
+    function logout(){
+      currentUser=null;
+      saveCurrentLogin(null);
+      reader.classList.remove("open");
+      document.body.style.overflow="";
+      updateAccountButton();
+      pages.forEach(id=>{
+        const page=document.getElementById(id);
+        if(page)page.classList.remove("active");
+      });
+      setActiveNav("navHome");
+      searchInput.value="";
+      showToast("로그아웃되었습니다.");
+    }
+
+    function handleAccountButton(){
+      if(!currentUser)openLogin();
+      else openProfile();
+    }
+
+    function goHome(){
+      if(!currentUser){openLogin();return}
+      searchInput.value="";
+      renderHome();
+      showPage("homePage","navHome");
+    }
+
+    function cleanWorkIds(arr){
+      return (arr||[]).filter(id=>works[id]);
+    }
+
+    function renderHome(){
+      const user=getUserData();
+      ensureAccountShape(user);
+      user.recentWorks=cleanWorkIds(user.recentWorks);
+      user.watchingWorks=cleanWorkIds(user.watchingWorks);
+      saveUserData(user);
+
+      document.getElementById("homeGreeting").textContent=currentUser.nickname+"님의 홈";
+      const recentWorksBox=document.getElementById("recentWorksBox");
+      const recentWorks=user.recentWorks||[];
+      document.getElementById("recentCountText").textContent=recentWorks.length+"개";
+
+      if(recentWorks.length){
+        recentWorksBox.innerHTML=recentWorks.map(id=>workRowHtml(id,"이어보기")).join("");
+      }else{
+        recentWorksBox.innerHTML=`<div class="empty-box">아직 최근 본 작품이 없습니다.</div>`;
+      }
+
+      updateProfileCounts();
+      updateProfileAvatar();
+    }
+
+    function workRowHtml(id,badgeText="바"){
+      const work=works[id];
+      if(!work)return "";
+      const coverClass=id==="kill"?"mini-cover kill":"mini-cover";
+      return `
+        <div class="work-row" onclick="openWorkDetail('${id}')">
+          <div class="${coverClass}"></div>
+          <div class="work-row-info">
+            <h3>${work.title}</h3>
+            <p>작가 ${work.author} · ${work.summary}</p>
+          </div>
+          <div class="work-row-badge">${badgeText}</div>
+        </div>
+      `;
+    }
+
+    function openProfile(){
+      if(!currentUser){openLogin();return}
+      updateCoinBank();
+      const user=getUserData();
+      ensureAccountShape(user);
+
+      document.getElementById("profileNickname").textContent=currentUser.nickname;
+      const profileRole=document.getElementById("profileRole");
+      profileRole.textContent=currentUser.isAuthor?"작가 계정":"일반 계정";
+      profileRole.classList.toggle("author",currentUser.isAuthor);
+      document.getElementById("authorWorksSection").style.display=currentUser.isAuthor?"block":"none";
+
+      const watchingWorksBox=document.getElementById("watchingWorksBox");
+      user.watchingWorks=cleanWorkIds(user.watchingWorks);
+      saveUserData(user);
+      const watching=user.watchingWorks||[];
+
+      if(watching.length){
+        watchingWorksBox.innerHTML=watching.map(id=>workRowHtml(id,"보기")).join("");
+      }else{
+        watchingWorksBox.innerHTML=`<div class="empty-box">${currentUser.nickname}님은 아직 본 작품이 없습니다.</div>`;
+      }
+
+      updateProfileCounts();
+      updateProfileAvatar();
+      showPage("profilePage","");
+    }
+
+    function openWorkDetail(id="world"){
+      if(!currentUser){openLogin();return}
+      currentWorkId=id;
+      const work=works[id];
+
+      const hero=document.getElementById("workHero");
+      const badge=document.getElementById("workBadge");
+      const cover=document.getElementById("workCover");
+      const readBtn=document.getElementById("workReadButton");
+      const firstBtn=document.getElementById("firstReadBtn");
+
+      hero.className="hero";
+      badge.className="badge";
+      cover.className="cover";
+      readBtn.className="main-btn";
+      firstBtn.className="main-btn";
+
+      if(id==="kill"){
+        hero.classList.add("kill-hero");
+        badge.classList.add("red");
+        cover.classList.add("kill-cover");
+        readBtn.classList.add("red");
+        firstBtn.classList.add("red");
+      }
+
+      badge.textContent=work.badge;
+      document.getElementById("workHeroTitle").innerHTML=work.heroTitle;
+      document.getElementById("workHeroDesc").textContent=work.heroDesc;
+      document.getElementById("workInfoAuthor").textContent=`작가 · ${work.author}`;
+      document.getElementById("workTitle").textContent=work.title;
+      document.getElementById("workSummary").textContent=work.summary;
+      document.getElementById("workMeta").innerHTML=work.meta.map(m=>`<span class="chip">${m}</span>`).join("");
+      document.getElementById("workStats").innerHTML=work.stats.map(s=>`<span>${s}</span>`).join("");
+      document.getElementById("episodeCountText").textContent=`총 ${Object.keys(work.episodes).length}화 공개`;
+
+      renderEpisodeList(id);
+      showPage("workDetailPage","");
+    }
+
+    function renderEpisodeList(id){
+      const work=works[id];
+      const list=document.getElementById("episodeList");
+      list.innerHTML=Object.entries(work.episodes).map(([num,ep])=>{
+        const thumbClass=id==="kill"?"thumb kill":"thumb";
+        const badge=ep.preview
+          ? `<div class="work-row-badge preview" id="episodeBadge-${id}-${num}">이용권</div>`
+          : `<div class="ep-date">${ep.date}</div>`;
+
+        return `
+          <div class="episode" data-work="${id}" data-episode="${num}" onclick="openReader(${Number(num)},'${id}')">
+            <div class="${thumbClass}" data-ep="${num}화"></div>
+            <div>
+              <div class="ep-title">${ep.title}</div>
+              <div class="ep-desc">${ep.desc}</div>
+            </div>
+            ${badge}
+          </div>
+        `;
+      }).join("");
+
+      updateReadEpisodeStyles();
+      updateEpisodeBadges();
+    }
+
+    function openFirstEpisode(){
+      const work=works[currentWorkId];
+      openReader(work.firstEpisode,currentWorkId);
+    }
+
+    function hasReadPreviousPaidRequired(workId,num){
+      if(workId!=="world")return true;
+      if(num<8)return true;
+      if(currentUser&&currentUser.isAuthor)return true;
+      const user=getUserData();
+      ensureAccountShape(user);
+      return user.readEpisodes.includes(`world-${num-1}`);
+    }
+
+    function requestPaidEpisode(workId,num){
+      pendingWorkId=workId;
+      pendingEpisodeNumber=num;
+      const ep=works[workId].episodes[num];
+      document.getElementById("paidEpisodeTitle").textContent=ep.title;
+      document.getElementById("paidEpisodeMessage").textContent=`이용권 ${ep.cost}장이 소모됩니다. 보시겠습니까?`;
+      paidEpisodeModal.classList.add("open");
+    }
+
+    function confirmPaidView(){
+      if(pendingEpisodeNumber===null||!pendingWorkId)return;
+      const num=pendingEpisodeNumber;
+      const ep=works[pendingWorkId].episodes[num];
+      const user=getUserData();
+      ensureAccountShape(user);
+
+      if(user.tickets<(ep.cost||3)){
+        closePaidEpisodeModal();
+        needTicketModal.classList.add("open");
+        return;
+      }
+
+      user.tickets-=ep.cost||3;
+      saveUserData(user);
+      const workId=pendingWorkId;
+      closePaidEpisodeModal();
+      updateProfileCounts();
+      showToast(`이용권 ${ep.cost||3}장을 사용했습니다.`);
+      actuallyOpenReader(num,workId);
+    }
+
+    function confirmOwnEpisode(){
+      if(pendingEpisodeNumber===null||!pendingWorkId)return;
+      const num=pendingEpisodeNumber;
+      const workId=pendingWorkId;
+      const ep=works[workId].episodes[num];
+      const key=`${workId}-${num}`;
+      const user=getUserData();
+      ensureAccountShape(user);
+      const ownCost=ep.ownCost||5;
+
+      if(user.ownedEpisodes.includes(key)){
+        closePaidEpisodeModal();
+        actuallyOpenReader(num,workId);
+        return;
+      }
+
+      if(user.tickets<ownCost){
+        closePaidEpisodeModal();
+        needTicketModal.classList.add("open");
+        return;
+      }
+
+      user.tickets-=ownCost;
+      user.ownedEpisodes.push(key);
+      saveUserData(user);
+      closePaidEpisodeModal();
+      updateProfileCounts();
+      showToast(`이용권 ${ownCost}장으로 ${ep.title}을 소장했습니다.`);
+      actuallyOpenReader(num,workId);
+    }
+
+    function checkEpisodeAccess(workId,num){
+      const ep=works[workId].episodes[num];
+      if(!ep)return false;
+      if(currentUser&&currentUser.isAuthor)return true;
+
+      if(!hasReadPreviousPaidRequired(workId,num)){
+        showToast(`${num-1}화를 먼저 읽어야 볼 수 있습니다.`);
         return false;
       }
+
+      if(!ep.preview)return true;
+
+      const user=getUserData();
+      ensureAccountShape(user);
+      if(user.ownedEpisodes.includes(`${workId}-${num}`))return true;
+
+      requestPaidEpisode(workId,num);
+      return false;
     }
 
-    function startNew(name){
-      state.investorName = name;
-      state.initialCash = INITIAL_CASH;
-      state.cash = INITIAL_CASH;
-      state.creditScore = 100;
-      state.loans = [];
-      state.portfolio = {};
-      state.events = [];
-      state.selectedKey = defaultStocks[0].key;
-      state.totalProfit = 0;
-      state.lastNetWorth = INITIAL_CASH;
-      state.marketMood = 0;
-      state.stocks = cloneStocks();
-      saveState();
+    function addViewedWork(workId,episodeNumber){
+      const user=getUserData();
+      ensureAccountShape(user);
+      user.recentWorks=cleanWorkIds(user.recentWorks);
+      user.watchingWorks=cleanWorkIds(user.watchingWorks);
+      user.recentWorks=user.recentWorks.filter(id=>id!==workId);
+      user.recentWorks.unshift(workId);
+      if(!user.watchingWorks.includes(workId))user.watchingWorks.push(workId);
+      const key=`${workId}-${episodeNumber}`;
+      if(!user.readEpisodes.includes(key))user.readEpisodes.push(key);
+      saveUserData(user);
     }
 
-    function applyDailyResetIfNeeded(){
-      const d = new Date();
-      const key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-      if(state.dailyAnchorDay === key) return;
-      state.dailyAnchorDay = key;
-      state.stocks.forEach(s => {
-        s.dayOpen = s.price;
-      });
-    }
+    function updateReadEpisodeStyles(){
+      if(!currentUser)return;
+      const user=getUserData();
+      ensureAccountShape(user);
+      const readEpisodes=user.readEpisodes||[];
 
-    function gaussian(){
-      let u=0,v=0;
-      while(u===0) u=Math.random();
-      while(v===0) v=Math.random();
-      return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
-    }
-
-    function getLocalHour(){
-      return new Date().getHours() + new Date().getMinutes()/60;
-    }
-
-    function marketIntensity(){
-      const h = getLocalHour();
-      if(h >= 9 && h <= 15.5) return 1.25;
-      if(h >= 18 && h <= 23) return 0.85;
-      return 0.55;
-    }
-
-    function isParkJihunNick(name){
-      const compact = String(name || "").replace(/\s+/g, "");
-      return /박.*지.*훈/.test(compact);
-    }
-
-    function updateStocks(){
-      applyDailyResetIfNeeded();
-      const intensity = marketIntensity();
-      state.marketMood *= 0.96;
-
-      state.stocks.forEach(stock => {
-        stock.lastPrice = stock.price;
-
-        const intrinsicBase = stock.dayOpen || stock.price;
-        const valuationGap = (intrinsicBase - stock.price) / Math.max(1, intrinsicBase);
-        const meanReversion = valuationGap * 0.035;
-        const clockWave = Math.sin(Date.now()/180000 + stock.fundamentals*5) * 0.0007;
-        const randomShock = gaussian() * stock.baseVol * 0.22 * intensity;
-        const moodEffect = state.marketMood * 0.0012;
-
-        stock.trendMemory = stock.trendMemory * 0.65 + gaussian() * 0.08;
-        stock.eventBias *= 0.88;
-
-        let change =
-          (stock.drift * 0.18 * intensity)
-          + meanReversion
-          + clockWave
-          + moodEffect
-          + stock.eventBias
-          + stock.trendMemory * stock.baseVol * 0.08
-          + randomShock;
-
-        if(stock.key === "parkjihun"){
-          change += isParkJihunNick(state.investorName) ? 0.0001 : -0.0001;
-        }
-
-        const band = stock.baseVol * 2.8;
-        change = Math.max(-band, Math.min(band, change));
-
-        let next = Math.round(stock.price * (1 + change));
-        next = Math.max(100, next);
-
-        stock.price = next;
-        stock.lastTickChange = (stock.price - stock.lastPrice) / Math.max(1, stock.lastPrice);
-        stock.history.push(next);
-        if(stock.history.length > GRAPH_MAX_POINTS) stock.history = stock.history.slice(-GRAPH_MAX_POINTS);
+      document.querySelectorAll(".episode[data-work][data-episode]").forEach(el=>{
+        const workId=el.dataset.work;
+        const num=Number(el.dataset.episode);
+        el.classList.toggle("read",readEpisodes.includes(`${workId}-${num}`));
       });
 
-      renderAll();
+      updateEpisodeBadges();
     }
 
-    function maybeTriggerEvent(){
-      const chance = 0.36;
-      if(Math.random() > chance) return;
-      const ev = structuredClone(eventTemplates[Math.floor(Math.random()*eventTemplates.length)]);
-      ev.id = Math.random().toString(36).slice(2);
-      ev.time = new Date().toLocaleString('ko-KR');
-      ev.effectsApplied = [];
+    function searchWorks(){
+      if(!currentUser){openLogin();return}
+      const rawQuery=searchInput.value.trim();
+      const query=normalizeText(rawQuery);
 
-      for(const stock of state.stocks){
-        const factor = ev.effects[stock.sector];
-        if(typeof factor === 'number'){
-          stock.lastPrice = stock.price;
-          const personal = factor * (0.88 + Math.random()*0.24);
-          stock.price = Math.max(100, Math.round(stock.price * (1 + personal)));
-          stock.lastTickChange = (stock.price - stock.lastPrice) / Math.max(1, stock.lastPrice);
-          stock.eventBias += personal * 0.11;
-          stock.history.push(stock.price);
-          if(stock.history.length > GRAPH_MAX_POINTS) stock.history = stock.history.slice(-GRAPH_MAX_POINTS);
-          ev.effectsApplied.push(`${stock.name} ${personal > 0 ? '+' : ''}${(personal*100).toFixed(1)}%`);
-        }
-      }
-
-      state.marketMood += (Math.random()-0.5)*0.35;
-      state.events.unshift(ev);
-      state.events = state.events.slice(0, 30);
-      pushTicker(`${ev.title} — ${ev.text}`);
-      renderAll();
-      flashNotice(els.tradeNotice, `중대사건 발생: ${ev.title}`, 'good');
-    }
-
-    function pushTicker(message){
-      state.tickerMessages.unshift(message);
-      state.tickerMessages = state.tickerMessages.slice(0, 12);
-      els.tickerInner.textContent = state.tickerMessages.join('   ◆   ') || '시장 뉴스 대기 중';
-    }
-
-    function getStock(key){ return state.stocks.find(s => s.key === key); }
-    function getPosition(key){ return state.portfolio[key] || { qty:0, avgPrice:0 }; }
-
-    function getHoldingValue(){
-      return Object.entries(state.portfolio).reduce((sum,[key,pos]) => {
-        const stock = getStock(key);
-        if(!stock) return sum;
-        return sum + stock.price * pos.qty;
-      }, 0);
-    }
-
-    function applyLoanLifecycle(){
-      let changed = false;
-
-      state.loans.forEach(loan => {
-        const current = now();
-
-        const elapsedForCompound = current - loan.lastCompoundAt;
-        const intervals = Math.floor(elapsedForCompound / LOAN_COMPOUND_INTERVAL_MS);
-        if(intervals > 0){
-          loan.amount = Math.round(loan.amount * Math.pow(1 + LOAN_COMPOUND_RATE, intervals));
-          loan.lastCompoundAt += intervals * LOAN_COMPOUND_INTERVAL_MS;
-          changed = true;
-        }
-
-        if(!loan.day1CreditApplied && current - loan.borrowedAt >= LOAN_DAILY_CREDIT_DELAY_MS){
-          state.creditScore -= loan.day1CreditPenalty;
-          loan.day1CreditApplied = true;
-          changed = true;
-        }
-
-        if(!loan.overdueApplied && current - loan.borrowedAt >= LOAN_OVERDUE_MS){
-          state.cash -= loan.amount;
-          state.creditScore -= loan.overdueCreditPenalty;
-          loan.overdueApplied = true;
-          changed = true;
-          flashNotice(
-            els.bankNotice,
-            `대출 연체 7일 경과! ${formatKRW(loan.amount)} 강제 차감 / 신용점수 크게 하락`,
-            'bad'
-          );
-          pushTicker(`은행 강제 회수 발생 — ${formatKRW(loan.amount)} 차감 / 신용점수 ${loan.overdueCreditPenalty}점 하락`);
-        }
+      const results=Object.values(works).filter(work=>{
+        const title=normalizeText(work.title);
+        const author=normalizeText(work.author);
+        const aliases=work.aliases.map(normalizeText);
+        return query&&(
+          title.includes(query)||
+          author.includes(query)||
+          aliases.some(alias=>alias.includes(query)||query.includes(alias))
+        );
       });
 
-      state.loans = state.loans.filter(loan => loan.amount > 0);
-
-      if(changed) renderAll();
+      document.getElementById("searchTitle").textContent=rawQuery?`"${rawQuery}" 검색 결과`:"검색 결과";
+      document.getElementById("searchFoundSection").style.display=results.length?"block":"none";
+      document.getElementById("searchEmptyPage").style.display=results.length?"none":"flex";
+      document.getElementById("searchResultsBox").innerHTML=results.map(work=>workRowHtml(work.id,"바")).join("");
+      showPage("searchPage","");
     }
 
-    function getTotalLoan(){
-      applyLoanLifecycle();
-      return state.loans.reduce((sum,loan)=>sum+loan.amount,0);
+    function handleSearchKey(event){
+      if(event.key==="Enter")searchWorks();
     }
 
-    function getCurrentEarning(){
-      let total = 0;
-      Object.entries(state.portfolio).forEach(([key,pos]) => {
-        const stock = getStock(key);
-        if(!stock || pos.qty <= 0) return;
-        total += (stock.price - pos.avgPrice) * pos.qty;
+    function openReader(episodeNumber,workId=currentWorkId){
+      if(!currentUser){openLogin();return}
+      if(!works[workId]||!works[workId].episodes[episodeNumber]){
+        showToast("아직 공개되지 않은 회차입니다.");
+        return;
+      }
+      if(!checkEpisodeAccess(workId,episodeNumber))return;
+      actuallyOpenReader(episodeNumber,workId);
+    }
+
+    function actuallyOpenReader(episodeNumber,workId=currentWorkId){
+      addViewedWork(workId,episodeNumber);
+      currentWorkId=workId;
+      currentEpisode=episodeNumber;
+      const work=works[workId];
+      const ep=work.episodes[episodeNumber];
+
+      readerMiniTitle.textContent=ep.title;
+      readerSeriesMini.textContent=work.title;
+      readerSeriesName.textContent=work.title;
+      readerSeriesName.classList.toggle("kill-name",workId==="kill");
+      readerTitle.textContent=ep.title;
+      readerSub.textContent=ep.sub;
+      novelBody.innerHTML=rawToHtml(ep.raw);
+
+      prevBtn.disabled=!work.episodes[currentEpisode-1];
+      nextBtn.disabled=!work.episodes[currentEpisode+1];
+
+      reader.classList.add("open");
+      document.body.style.overflow="hidden";
+      readerScroll.scrollTo({top:0,behavior:"instant"});
+      updateReadEpisodeStyles();
+    }
+
+    function closeReader(){
+      reader.classList.remove("open");
+      document.body.style.overflow="";
+      openWorkDetail(currentWorkId);
+    }
+
+    function moveEpisode(direction){
+      const work=works[currentWorkId];
+      const target=currentEpisode+direction;
+      if(!work.episodes[target]){
+        showToast("아직 공개되지 않은 회차입니다.");
+        return;
+      }
+      openReader(target,currentWorkId);
+    }
+
+    function scrollToEpisodes(){
+      if(!currentUser)return;
+      document.getElementById("episodes").scrollIntoView({behavior:"smooth",block:"start"});
+    }
+
+    function showToast(message){
+      toast.textContent=message;
+      toast.style.display="block";
+      clearTimeout(window.toastTimer);
+      window.toastTimer=setTimeout(()=>{toast.style.display="none"},1800);
+    }
+
+    function initLoggedOut(){
+      currentUser=null;
+      updateAccountButton();
+      pages.forEach(id=>{
+        const page=document.getElementById(id);
+        if(page)page.classList.remove("active");
       });
-      return total;
+      document.body.classList.remove("logged-in");
+      setActiveNav("navHome");
+      searchInput.value="";
     }
 
-    function borrowMoney(){
-      applyLoanLifecycle();
-
-      if(state.creditScore <= CREDIT_MIN){
-        flashNotice(els.bankNotice, '신용점수 -100점 이하라 더 이상 대출 불가', 'bad');
-        return;
+    document.addEventListener("keydown",e=>{
+      if(e.key==="Escape"){
+        if(reader.classList.contains("open"))closeReader();
+        if(loginModal.classList.contains("open"))closeLogin();
+        if(profileEditModal.classList.contains("open"))closeProfileEditModal();
+        if(avatarModal.classList.contains("open"))closeAvatarModal();
+        if(ticketModal.classList.contains("open"))closeTicketModal();
+        if(needTicketModal.classList.contains("open"))closeNeedTicketModal();
+        if(freeTicketModal.classList.contains("open"))closeFreeTicketModal();
+        if(paidEpisodeModal.classList.contains("open"))closePaidEpisodeModal();
       }
+    });
 
-      let principal = Math.floor(Number(els.loanInput.value));
-      if(!Number.isFinite(principal) || principal < 1000){
-        flashNotice(els.bankNotice, '대출 금액은 최소 1,000원', 'bad');
-        return;
+    loginModal.addEventListener("click",e=>{if(e.target===loginModal)closeLogin()});
+    profileEditModal.addEventListener("click",e=>{if(e.target===profileEditModal)closeProfileEditModal()});
+    avatarModal.addEventListener("click",e=>{if(e.target===avatarModal)closeAvatarModal()});
+    ticketModal.addEventListener("click",e=>{if(e.target===ticketModal)closeTicketModal()});
+    needTicketModal.addEventListener("click",e=>{if(e.target===needTicketModal)closeNeedTicketModal()});
+    freeTicketModal.addEventListener("click",e=>{if(e.target===freeTicketModal)closeFreeTicketModal()});
+    paidEpisodeModal.addEventListener("click",e=>{if(e.target===paidEpisodeModal)closePaidEpisodeModal()});
+
+    setInterval(()=>{
+      if(currentUser){
+        updateCoinBank();
+        updateTicketModal();
+        updateProfileCounts();
       }
-      if(principal > LOAN_MAX_PER_BORROW){
-        flashNotice(els.bankNotice, '한 번에 빌릴 수 있는 최대 금액은 100만 원', 'bad');
-        return;
-      }
+    },1000);
 
-      const immediateFee = Math.round(principal * LOAN_IMMEDIATE_RATE);
-      const loanAmount = principal + immediateFee;
-
-      const day1Penalty = Math.max(4, Math.floor(principal / 200000) * 2);
-      const overduePenalty = Math.max(25, Math.floor(principal / 100000) * 4);
-
-      state.cash += principal;
-      state.loans.push({
-        id: Math.random().toString(36).slice(2),
-        principal,
-        amount: loanAmount,
-        borrowedAt: now(),
-        lastCompoundAt: now(),
-        immediateFee,
-        day1CreditPenalty: day1Penalty,
-        overdueCreditPenalty: overduePenalty,
-        day1CreditApplied: false,
-        overdueApplied: false
-      });
-
-      flashNotice(
-        els.bankNotice,
-        `${formatKRW(principal)} 대출 완료 / 즉시 이자 1%(${formatKRW(immediateFee)}) 반영`,
-        'good'
-      );
-      pushTicker(`은행 대출 실행 — 원금 ${formatKRW(principal)} / 즉시 이자 ${formatKRW(immediateFee)} 부과`);
-      renderAll();
+    if(!restoreLogin()){
+      initLoggedOut();
     }
-
-    function repayMoney(){
-      applyLoanLifecycle();
-
-      let amount = Math.floor(Number(els.repayInput.value));
-      if(!Number.isFinite(amount) || amount < 1000){
-        flashNotice(els.bankNotice, '상환 금액은 최소 1,000원', 'bad');
-        return;
-      }
-      if(state.loans.length === 0){
-        flashNotice(els.bankNotice, '상환할 대출이 없음', 'bad');
-        return;
-      }
-      if(state.cash < amount){
-        flashNotice(els.bankNotice, '현금 부족으로 상환 불가', 'bad');
-        return;
-      }
-
-      state.cash -= amount;
-      state.loans.sort((a,b)=>a.borrowedAt-b.borrowedAt);
-
-      let remain = amount;
-      for(const loan of state.loans){
-        if(remain <= 0) break;
-        const used = Math.min(loan.amount, remain);
-        loan.amount -= used;
-        remain -= used;
-      }
-
-      state.loans = state.loans.filter(loan => loan.amount > 0);
-
-      flashNotice(els.bankNotice, `${formatKRW(amount - remain)} 상환 완료`, 'good');
-      pushTicker(`은행 상환 처리 — ${formatKRW(amount - remain)}`);
-      renderAll();
-    }
-
-    function buyStock(){
-      const stock = getStock(state.selectedKey);
-      if(!stock) return;
-
-      let qty = Math.floor(Number(els.quantityInput.value));
-      if(!Number.isFinite(qty) || qty < 1) qty = 1;
-
-      const cost = stock.price * qty;
-      if(cost > state.cash){
-        flashNotice(els.tradeNotice, `현금 부족: 필요 ${formatKRW(cost)}`, 'bad');
-        return;
-      }
-
-      const pos = getPosition(stock.key);
-      const newQty = pos.qty + qty;
-      const newAvg = Math.round(((pos.avgPrice * pos.qty) + (stock.price * qty)) / newQty);
-
-      state.portfolio[stock.key] = { qty:newQty, avgPrice:newAvg };
-      state.cash -= cost;
-
-      flashNotice(els.tradeNotice, `${stock.name} ${qty.toLocaleString('ko-KR')}주 매수 완료`, 'good');
-      pushTicker(`${state.investorName} 님이 ${stock.name} ${qty}주 매수`);
-      renderAll();
-    }
-
-    function sellStock(qtyOverride){
-      const stock = getStock(state.selectedKey);
-      if(!stock) return;
-
-      const pos = getPosition(stock.key);
-      let qty = qtyOverride ?? Math.floor(Number(els.quantityInput.value));
-      if(!Number.isFinite(qty) || qty < 1) qty = 1;
-
-      if(pos.qty < qty){
-        flashNotice(els.tradeNotice, `보유 수량 부족: 현재 ${pos.qty.toLocaleString('ko-KR')}주`, 'bad');
-        return;
-      }
-
-      const revenue = stock.price * qty;
-      pos.qty -= qty;
-      if(pos.qty <= 0) delete state.portfolio[stock.key];
-      else state.portfolio[stock.key] = pos;
-
-      state.cash += revenue;
-
-      flashNotice(els.tradeNotice, `${stock.name} ${qty.toLocaleString('ko-KR')}주 매도 완료`, 'good');
-      pushTicker(`${state.investorName} 님이 ${stock.name} ${qty}주 매도`);
-      renderAll();
-    }
-
-    function maxAffordableQty(stock){
-      return Math.max(0, Math.floor(state.cash / stock.price));
-    }
-
-    function flashNotice(el, text, cls){
-      el.textContent = text;
-      el.className = 'notice ' + (cls || '');
-    }
-
-    function renderStockList(){
-      els.stockList.innerHTML = '';
-      state.stocks.forEach(stock => {
-        const ch = stock.lastTickChange || 0;
-        const item = document.createElement('div');
-        item.className = 'stock-item' + (stock.key === state.selectedKey ? ' selected' : '');
-        item.innerHTML = `
-          <div>
-            <div class="stock-name">${stock.name}</div>
-            <div class="stock-meta">${stock.sector} · 보유 ${getPosition(stock.key).qty.toLocaleString('ko-KR')}주</div>
-          </div>
-          <div>
-            <div class="stock-price">${formatKRW(stock.price)}</div>
-            <div class="stock-change ${ch >= 0 ? 'good' : 'bad'}">${formatPercent(ch)}</div>
-          </div>
-        `;
-        item.onclick = () => {
-          state.selectedKey = stock.key;
-          renderAll();
-        };
-        els.stockList.appendChild(item);
-      });
-    }
-
-    function renderSelected(){
-      const stock = getStock(state.selectedKey);
-      if(!stock){
-        els.selectedStockTitle.textContent = '종목 선택';
-        return;
-      }
-
-      const pos = getPosition(stock.key);
-      const ch = stock.lastTickChange || 0;
-
-      els.selectedStockTitle.textContent = stock.name;
-      els.selectedStockMeta.textContent =
-        `${stock.sector} · 기본 변동성 ${(stock.baseVol*100).toFixed(1)}% · 펀더멘털 ${(stock.fundamentals*100).toFixed(0)}점`;
-
-      els.selectedStockPrice.textContent = formatKRW(stock.price);
-      els.detailPrice.textContent = formatKRW(stock.price);
-      els.detailChange.innerHTML = `<span class="${ch >= 0 ? 'good' : 'bad'}">${formatPercent(ch)}</span>`;
-      els.detailOwned.textContent = `${pos.qty.toLocaleString('ko-KR')}주`;
-      els.detailHoldingValue.textContent = formatKRW(pos.qty * stock.price);
-
-      drawChart(stock);
-    }
-
-    function drawChart(stock){
-      const canvas = els.chartCanvas;
-      const w = canvas.width;
-      const h = canvas.height;
-
-      ctx.clearRect(0,0,w,h);
-      ctx.fillStyle = '#08111d';
-      ctx.fillRect(0,0,w,h);
-
-      const pad = {l:58,r:22,t:18,b:34};
-      const windowSize = CHART_WINDOWS[state.chartWindow] || CHART_WINDOWS.mid;
-      const data = stock.history.slice(-windowSize);
-      const min = Math.min(...data);
-      const max = Math.max(...data);
-      const range = Math.max(1, max - min);
-
-      ctx.strokeStyle = 'rgba(148,163,184,.15)';
-      ctx.lineWidth = 1;
-      for(let i=0;i<5;i++){
-        const y = pad.t + ((h - pad.t - pad.b) * i / 4);
-        ctx.beginPath();
-        ctx.moveTo(pad.l, y);
-        ctx.lineTo(w - pad.r, y);
-        ctx.stroke();
-      }
-
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '12px Malgun Gothic';
-      for(let i=0;i<5;i++){
-        const ratio = 1 - i/4;
-        const value = Math.round(min + range * ratio);
-        const y = pad.t + ((h - pad.t - pad.b) * i / 4);
-        ctx.fillText(formatKRW(value), 8, y + 4);
-      }
-
-      const change = data[data.length-1] - data[0];
-      const lineColor = change >= 0 ? '#ef4444' : '#38bdf8';
-
-      const grad = ctx.createLinearGradient(0,pad.t,0,h-pad.b);
-      grad.addColorStop(0, change >= 0 ? 'rgba(239,68,68,.28)' : 'rgba(56,189,248,.28)');
-      grad.addColorStop(1, 'rgba(15,23,42,0)');
-
-      ctx.beginPath();
-      data.forEach((price, i) => {
-        const x = pad.l + (w - pad.l - pad.r) * (i / (data.length - 1 || 1));
-        const y = pad.t + (h - pad.t - pad.b) * (1 - (price - min) / range);
-        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-      });
-      const lastX = pad.l + (w - pad.l - pad.r);
-      const firstX = pad.l;
-      ctx.lineTo(lastX, h-pad.b);
-      ctx.lineTo(firstX, h-pad.b);
-      ctx.closePath();
-      ctx.fillStyle = grad;
-      ctx.fill();
-
-      ctx.beginPath();
-      data.forEach((price, i) => {
-        const x = pad.l + (w - pad.l - pad.r) * (i / (data.length - 1 || 1));
-        const y = pad.t + (h - pad.t - pad.b) * (1 - (price - min) / range);
-        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-      });
-      ctx.strokeStyle = lineColor;
-      ctx.lineWidth = 2.5;
-      ctx.stroke();
-
-      const lastPrice = data[data.length-1];
-      const lx = pad.l + (w - pad.l - pad.r);
-      const ly = pad.t + (h - pad.t - pad.b) * (1 - (lastPrice - min) / range);
-      ctx.beginPath();
-      ctx.arc(lx, ly, 4, 0, Math.PI*2);
-      ctx.fillStyle = lineColor;
-      ctx.fill();
-
-      ctx.fillStyle = '#cbd5e1';
-      ctx.font = '13px Malgun Gothic';
-      const label = state.chartWindow === 'short' ? '짧게' : state.chartWindow === 'mid' ? '중간' : '길게';
-      ctx.fillText(`최근 ${label} 구간`, pad.l, h - 8);
-      ctx.fillText(`현재가 ${formatKRW(stock.price)}`, w - 180, h - 8);
-    }
-
-    function renderPortfolio(){
-      els.portfolioList.innerHTML = '';
-      const entries = Object.entries(state.portfolio).filter(([,pos]) => pos.qty > 0);
-
-      if(entries.length === 0){
-        els.portfolioList.innerHTML = '<div class="lineitem"><div class="desc">아직 보유 중인 종목이 없어.</div></div>';
-        return;
-      }
-
-      entries.forEach(([key,pos]) => {
-        const stock = getStock(key);
-        if(!stock) return;
-        const value = stock.price * pos.qty;
-        const pl = (stock.price - pos.avgPrice) * pos.qty;
-
-        const item = document.createElement('div');
-        item.className = 'lineitem';
-        item.innerHTML = `
-          <div class="top">
-            <div>
-              <div class="name">${stock.name} · ${pos.qty.toLocaleString('ko-KR')}주</div>
-              <div class="desc">평균단가 ${formatKRW(pos.avgPrice)} / 평가금액 ${formatKRW(value)}</div>
-            </div>
-            <div class="${pl >= 0 ? 'good' : 'bad'}" style="font-weight:900;">${formatSignedKRW(pl)}</div>
-          </div>
-        `;
-        item.onclick = () => {
-          state.selectedKey = key;
-          renderAll();
-        };
-        els.portfolioList.appendChild(item);
-      });
-    }
-
-    function renderLoans(){
-      els.loanList.innerHTML = '';
-
-      if(state.loans.length === 0){
-        els.loanList.innerHTML = '<div class="lineitem"><div class="desc">현재 대출 없음</div></div>';
-        return;
-      }
-
-      state.loans.forEach(loan => {
-        const elapsed = now() - loan.borrowedAt;
-        const overdueLeft = Math.max(0, LOAN_OVERDUE_MS - elapsed);
-        const d = Math.floor(overdueLeft / (24*60*60*1000));
-        const h = Math.floor((overdueLeft % (24*60*60*1000)) / (60*60*1000));
-
-        const day1Status = loan.day1CreditApplied
-          ? `1일 신용감점 반영됨 (-${loan.day1CreditPenalty}점)`
-          : `1일 후 신용감점 예정 (-${loan.day1CreditPenalty}점)`;
-
-        const item = document.createElement('div');
-        item.className = 'lineitem';
-        item.innerHTML = `
-          <div class="top">
-            <div>
-              <div class="name">대출 ${formatKRW(loan.amount)}</div>
-              <div class="desc">
-                원금 ${formatKRW(loan.principal)} / 즉시이자 ${formatKRW(loan.immediateFee)}<br>
-                강제 회수까지 ${d}일 ${h}시간 / 2일마다 1% 복리<br>
-                ${day1Status}
-              </div>
-            </div>
-            <div class="${loan.overdueApplied ? 'bad' : 'blue'}" style="font-weight:900;">
-              ${loan.overdueApplied ? '연체처리' : '진행중'}
-            </div>
-          </div>
-        `;
-        els.loanList.appendChild(item);
-      });
-    }
-
-    function renderEvents(){
-      els.eventList.innerHTML = '';
-      if(state.events.length === 0){
-        els.eventList.innerHTML = '<div class="lineitem"><div class="desc">아직 발생한 중대사건이 없어.</div></div>';
-        return;
-      }
-
-      state.events.slice(0,8).forEach(ev => {
-        const item = document.createElement('div');
-        item.className = 'lineitem';
-        item.innerHTML = `
-          <div class="top">
-            <div>
-              <div class="name">${ev.title}</div>
-              <div class="desc">${ev.text}<br>${(ev.effectsApplied || []).join(' / ')}</div>
-            </div>
-            <div class="small">${ev.time}</div>
-          </div>
-        `;
-        els.eventList.appendChild(item);
-      });
-    }
-
-    function renderSummary(){
-      const holding = getHoldingValue();
-      const loanTotal = getTotalLoan();
-      const netWorth = state.cash + holding - loanTotal;
-      const profit = netWorth - state.initialCash;
-      state.totalProfit = profit;
-
-      els.investorName.textContent = state.investorName || '-';
-      els.clockText.textContent = new Date().toLocaleString('ko-KR');
-      els.cashText.textContent = formatKRW(state.cash);
-      els.loanTotalText.textContent = formatKRW(loanTotal);
-      els.netWorthText.textContent = formatKRW(netWorth);
-      els.profitText.innerHTML = `<span class="${profit >= 0 ? 'good' : 'bad'}">${formatSignedKRW(profit)}</span>`;
-      els.initialCapitalText.textContent = formatKRW(state.initialCash);
-      els.creditText.innerHTML = `<span class="${state.creditScore <= -50 ? 'bad' : state.creditScore < 30 ? 'gold' : 'good'}">${state.creditScore}점</span>`;
-      els.holdingTotalText.textContent = formatKRW(holding);
-
-      const earning = getCurrentEarning();
-      els.earningText.innerHTML = `<span class="${earning >= 0 ? 'good' : 'bad'}">${formatSignedKRW(earning)}</span>`;
-
-      if(els.chartShortBtn && els.chartMidBtn && els.chartLongBtn){
-        els.chartShortBtn.style.outline = state.chartWindow === 'short' ? '2px solid rgba(255,255,255,.25)' : 'none';
-        els.chartMidBtn.style.outline = state.chartWindow === 'mid' ? '2px solid rgba(255,255,255,.25)' : 'none';
-        els.chartLongBtn.style.outline = state.chartWindow === 'long' ? '2px solid rgba(255,255,255,.25)' : 'none';
-      }
-    }
-
-    function renderAll(){
-      renderSummary();
-      renderStockList();
-      renderSelected();
-      renderPortfolio();
-      renderLoans();
-      renderEvents();
-      if(now() - state.lastSaveAt > SAVE_MS) saveState();
-    }
-
-    function handleQuickSelect(){
-      const stock = getStock(state.selectedKey);
-      if(!stock) return;
-      const v = els.quickSelect.value;
-      if(v === 'max') els.quantityInput.value = maxAffordableQty(stock) || 1;
-      else els.quantityInput.value = v;
-    }
-
-    function bindEvents(){
-      els.startBtn.onclick = () => {
-        const name = els.nicknameInput.value.trim();
-        if(name.length < 2){
-          els.nicknameNotice.textContent = '투자자 이름은 2글자 이상으로 해줘.';
-          els.nicknameNotice.className = 'notice bad';
-          return;
-        }
-        const loaded = loadState(name);
-        if(!loaded) startNew(name);
-        els.nicknameOverlay.style.display = 'none';
-        pushTicker(`투자자 ${name} 입장 — 초기 자본 ${formatKRW(state.initialCash)}`);
-        renderAll();
-      };
-
-      els.nicknameInput.addEventListener('keydown', e => {
-        if(e.key === 'Enter') els.startBtn.click();
-      });
-
-      els.quickSelect.onchange = handleQuickSelect;
-      els.buyBtn.onclick = buyStock;
-      els.sellBtn.onclick = () => sellStock();
-
-      els.buyHalfBtn.onclick = () => {
-        const stock = getStock(state.selectedKey);
-        if(!stock) return;
-        const qty = Math.floor((state.cash * 0.5) / stock.price);
-        if(qty < 1){
-          flashNotice(els.tradeNotice, '가능금액 50%로는 1주도 못 삼', 'bad');
-          return;
-        }
-        els.quantityInput.value = qty;
-        buyStock();
-      };
-
-      els.sellAllBtn.onclick = () => {
-        const stock = getStock(state.selectedKey);
-        if(!stock) return;
-        const pos = getPosition(stock.key);
-        if(pos.qty <= 0){
-          flashNotice(els.tradeNotice, '전량 매도할 보유 수량이 없음', 'bad');
-          return;
-        }
-        sellStock(pos.qty);
-      };
-
-      els.loanBtn.onclick = borrowMoney;
-      els.repayBtn.onclick = repayMoney;
-
-      if(els.chartShortBtn) els.chartShortBtn.onclick = () => { state.chartWindow = 'short'; renderAll(); };
-      if(els.chartMidBtn) els.chartMidBtn.onclick = () => { state.chartWindow = 'mid'; renderAll(); };
-      if(els.chartLongBtn) els.chartLongBtn.onclick = () => { state.chartWindow = 'long'; renderAll(); };
-
-      window.addEventListener('beforeunload', saveState);
-    }
-
-    function boot(){
-      bindEvents();
-      state.stocks = cloneStocks();
-      state.selectedKey = defaultStocks[0].key;
-      renderAll();
-
-      setInterval(() => {
-        els.clockText.textContent = new Date().toLocaleString('ko-KR');
-        applyLoanLifecycle();
-        renderSummary();
-      }, 1000);
-
-      setInterval(updateStocks, PRICE_TICK_MS);
-      setInterval(maybeTriggerEvent, EVENT_CHECK_MS);
-      setInterval(saveState, SAVE_MS + 1000);
-    }
-
-    boot();
   </script>
 </body>
 </html>
