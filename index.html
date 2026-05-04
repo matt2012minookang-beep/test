@@ -1,743 +1,632 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>chat웹</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --green:#00c73c;--green-dark:#00a832;--bg:#050505;--text:#111;--muted:#777;--line:#e5e5e5;
-      --novel-bg:#fff;--yellow-skill:#9a7600;
-      --red-system-bg:#4c0b0b;--red-system-text:#ffe3e3;--red-system-line:#d92d2d;
-      --blue-system-bg:#e7f1ff;--blue-system-text:#064a9b;--blue-system-line:#2b7cff;
-      --rank-red:#c40000;
-    }
-    body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;background:var(--bg);color:var(--text)}
-    button,input{font-family:inherit}
-    a{color:inherit;text-decoration:none}
-
-    .top-header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
-    .top-inner{max-width:1100px;margin:0 auto;min-height:58px;display:flex;align-items:center;gap:18px;padding:10px 16px}
-    .logo{font-size:24px;font-weight:900;color:var(--green);letter-spacing:-1px;white-space:nowrap;cursor:pointer}
-    .search-area{flex:1;max-width:520px;display:flex;gap:8px}
-    .search-box{width:100%;height:38px;border:2px solid var(--green);border-radius:20px;padding:0 15px;color:#111;font-size:14px;outline:none;background:#fff;font-weight:700}
-    .search-box::placeholder{color:#999;font-weight:500}
-    .search-btn{border:none;background:var(--green);color:#fff;border-radius:20px;padding:0 16px;font-weight:900;cursor:pointer;white-space:nowrap}
-    .account-btn{border:1px solid #ddd;background:#fff;border-radius:18px;padding:8px 14px;font-size:13px;font-weight:800;white-space:nowrap;cursor:pointer}
-    .account-btn.logged{background:#111;color:#fff;border-color:#111}
-    .account-btn.author{background:#3b1168;color:#fff;border-color:#3b1168}
-
-    .nav-bar{background:var(--green);color:#fff}
-    .nav-inner{max-width:1100px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:0 10px}
-    .nav-item{padding:13px 16px;font-weight:800;font-size:15px;white-space:nowrap;opacity:.9;cursor:pointer}
-    .nav-item.active{background:var(--green-dark);opacity:1}
-
-    .locked-home{min-height:calc(100vh - 104px);background:#000;color:#fff;display:flex;align-items:center;justify-content:center;padding:40px 18px;text-align:center}
-    .locked-box{max-width:520px;width:100%;border:1px solid rgba(255,255,255,.12);background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border-radius:22px;padding:38px 24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
-    .locked-box h1{font-size:30px;margin-bottom:14px;letter-spacing:-1px}
-    .locked-box p{color:rgba(255,255,255,.72);line-height:1.7;margin-bottom:24px}
-    .locked-box button{border:none;background:var(--green);color:#fff;border-radius:12px;padding:13px 22px;font-size:16px;font-weight:900;cursor:pointer}
-
-    .page{display:none;max-width:1100px;margin:0 auto;padding:18px 14px 80px}
-    body.logged-in .locked-home{display:none}
-    body.logged-in .page.active{display:block}
-    .dashboard-title{color:#fff;font-size:26px;font-weight:900;margin:10px 0 18px;letter-spacing:-1px}
-    .section{margin-top:24px;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
-    .section:first-child{margin-top:0}
-    .section-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
-    .section-head h2{font-size:19px;letter-spacing:-.5px}
-    .section-head span{color:var(--muted);font-size:13px;font-weight:700}
-    .empty-box{padding:22px 18px;color:#777;font-weight:800;line-height:1.6}
-
-    .work-row{display:flex;align-items:center;gap:14px;padding:14px 18px;border-top:1px solid var(--line);cursor:pointer;transition:background .15s}
-    .work-row:first-of-type{border-top:none}
-    .work-row:hover{background:#f8fff9}
-    .mini-cover{width:72px;height:92px;border-radius:10px;flex-shrink:0;background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.05)),radial-gradient(circle at 70% 20%,#7048ff,transparent 30%),radial-gradient(circle at 25% 70%,#101927,#080910 55%);position:relative;overflow:hidden}
-    .mini-cover::after{content:"세계를";position:absolute;left:8px;bottom:8px;color:#fff;font-size:13px;font-weight:900;letter-spacing:-.5px}
-    .mini-cover.kill{background:linear-gradient(to top,rgba(0,0,0,.95),rgba(60,0,0,.15)),radial-gradient(circle at 75% 20%,#ff2222,transparent 28%),radial-gradient(circle at 22% 78%,#ff8a00,transparent 32%),linear-gradient(135deg,#210303,#050505 60%,#160000)}
-    .mini-cover.kill::before{content:"";position:absolute;inset:10px;border:1px solid rgba(255,60,60,.48);border-radius:8px;box-shadow:0 0 18px rgba(255,0,0,.38)}
-    .mini-cover.kill::after{content:"킬 게이지"}
-
-    .work-row-info{min-width:0;flex:1}
-    .work-row-info h3{font-size:18px;margin-bottom:5px;letter-spacing:-.5px}
-    .work-row-info p{font-size:13px;color:#777;line-height:1.5}
-    .work-row-badge{background:#f1f3f5;color:#555;padding:7px 9px;border-radius:999px;font-size:12px;font-weight:900;white-space:nowrap}
-    .work-row-badge.preview{background:#fff4d6;color:#9a6500;border:1px solid #ffd36b}
-    .work-row-badge.owned{background:#e8fff0;color:#008f2b;border:1px solid #7be49a}
-    .work-row-badge.free{background:#eef4ff;color:#0f63ff;border:1px solid #8fb8ff}
-
-    .weekday-tabs{display:flex;gap:8px;overflow-x:auto;padding:14px 18px;background:#fff;border-bottom:1px solid var(--line)}
-    .weekday-tab-btn{border:1px solid #ddd;background:#fff;color:#333;border-radius:999px;padding:10px 17px;font-size:14px;font-weight:900;cursor:pointer;white-space:nowrap}
-    .weekday-tab-btn.active{background:var(--green);color:#fff;border-color:var(--green)}
-    .weekday-panel{display:none;background:#fff;padding:0}
-    .weekday-panel.active{display:block}
-    .weekday-empty-wrap{padding:48px 18px;text-align:center;color:#999;font-weight:900}
-    .weekday-work-row{display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;border-top:1px solid var(--line)}
-    .weekday-work-row:first-child{border-top:none}
-    .weekday-cover{width:82px;height:104px;border-radius:12px;background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.05)),radial-gradient(circle at 70% 20%,#7048ff,transparent 30%),radial-gradient(circle at 25% 70%,#101927,#080910 55%);position:relative;overflow:hidden;flex-shrink:0}
-    .weekday-cover::after{content:"세계를";position:absolute;left:9px;bottom:9px;color:#fff;font-size:14px;font-weight:900}
-    .weekday-cover.kill{background:linear-gradient(to top,rgba(0,0,0,.95),rgba(60,0,0,.15)),radial-gradient(circle at 75% 20%,#ff2222,transparent 28%),radial-gradient(circle at 22% 78%,#ff8a00,transparent 32%),linear-gradient(135deg,#210303,#050505 60%,#160000)}
-    .weekday-cover.kill::before{content:"";position:absolute;inset:10px;border:1px solid rgba(255,60,60,.48);border-radius:8px;box-shadow:0 0 18px rgba(255,0,0,.38)}
-    .weekday-cover.kill::after{content:"킬 게이지"}
-    .weekday-work-info h3{font-size:18px;margin-bottom:6px;letter-spacing:-.5px}
-    .weekday-work-info p{font-size:13px;color:#777;font-weight:800}
-    .rank-row{display:flex;align-items:center;gap:14px;padding:16px 18px;border-top:1px solid var(--line);cursor:pointer}
-    .rank-num{width:38px;height:38px;border-radius:12px;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;flex-shrink:0}
-
-    .search-empty-page{min-height:calc(100vh - 150px);background:#fff;border-radius:18px;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px 18px;margin-top:18px}
-    .search-empty-page strong{color:#e00000;font-size:24px;font-weight:900}
-    .search-result-title{color:#fff;font-size:24px;font-weight:900;margin-bottom:18px}
-
-    .profile-card{background:#fff;border-radius:18px;overflow:hidden;border:1px solid var(--line);margin-top:18px}
-    .profile-top{padding:30px 18px;text-align:center;border-bottom:1px solid var(--line);background:linear-gradient(135deg,#f8fff9,#fff)}
-    .profile-img{width:92px;height:92px;margin:0 auto 12px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#fff,transparent 16%),linear-gradient(135deg,#00c73c,#151515);box-shadow:0 8px 24px rgba(0,0,0,.16);border:4px solid #fff;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
-    .profile-img::before{content:"";display:block;width:62%;height:62%;background:rgba(255,255,255,.86);border-radius:50%;box-shadow:0 7px 18px rgba(0,0,0,.12)}
-    .profile-img.avatar-square::before{border-radius:14px}
-    .profile-img.avatar-triangle::before{width:0;height:0;background:transparent;border-left:30px solid transparent;border-right:30px solid transparent;border-bottom:56px solid rgba(255,255,255,.88);border-radius:0;box-shadow:none}
-    .profile-img.avatar-star::before{content:"★";background:transparent;width:auto;height:auto;color:rgba(255,255,255,.92);font-size:64px;line-height:1;box-shadow:none}
-    .profile-img.avatar-photo::before{display:none!important}
-    .profile-img.avatar-photo{background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}
-    .avatar-red{background:linear-gradient(135deg,#ff4d4d,#8b0000)!important}
-    .avatar-orange{background:linear-gradient(135deg,#ff9f1c,#c85c00)!important}
-    .avatar-yellow{background:linear-gradient(135deg,#ffd93d,#d6a400)!important}
-    .avatar-green{background:linear-gradient(135deg,#00c73c,#006b2a)!important}
-    .avatar-blue{background:linear-gradient(135deg,#3d8bff,#003c9e)!important}
-    .avatar-pink{background:linear-gradient(135deg,#ff6fb2,#b80063)!important}
-    .avatar-white{background:linear-gradient(135deg,#fff,#d8d8d8)!important}
-    .avatar-purple{background:linear-gradient(135deg,#8e44ff,#3b1168)!important}
-
-    .profile-name{font-size:24px;font-weight:900;letter-spacing:-1px;margin-bottom:6px}
-    .profile-role{display:inline-block;padding:6px 10px;border-radius:999px;background:#f1f3f5;color:#555;font-size:12px;font-weight:900}
-    .profile-role.author{background:#f2e8ff;color:#5a1a92}
-    .profile-buttons{margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-    .logout-btn,.edit-profile-btn,.ticket-btn,.avatar-edit-btn{border:none;background:#111;color:#fff;border-radius:999px;padding:9px 16px;font-size:13px;font-weight:900;cursor:pointer}
-    .edit-profile-btn{background:#3b1168}
-    .ticket-btn{background:#00a832}
-    .avatar-edit-btn{background:#0f63ff}
-    .profile-ticket-info{margin-top:12px;color:#555;font-size:13px;font-weight:900;display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
-    .profile-sections{display:grid;grid-template-columns:1fr 1fr;gap:0}
-    .profile-section{padding:18px;border-bottom:1px solid var(--line)}
-    .profile-section:first-child{border-right:1px solid var(--line)}
-    .profile-section h2{font-size:18px;margin-bottom:12px;letter-spacing:-.5px}
-
-    .hero{background:linear-gradient(135deg,#111827,#191b2a 45%,#2b1246);border-radius:18px;min-height:260px;color:#fff;overflow:hidden;position:relative;box-shadow:0 12px 30px rgba(0,0,0,.18)}
-    .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 78% 18%,rgba(138,92,255,.42),transparent 28%),radial-gradient(circle at 15% 85%,rgba(0,199,60,.18),transparent 35%),linear-gradient(90deg,rgba(0,0,0,.75),rgba(0,0,0,.2))}
-    .hero::after{content:"天 空 要 塞";position:absolute;right:24px;bottom:22px;color:rgba(255,255,255,.08);font-size:74px;font-weight:900;letter-spacing:-8px;transform:rotate(-6deg)}
-    .hero.kill-hero{background:linear-gradient(135deg,#160000,#250404 44%,#050505)}
-    .hero.kill-hero::before{background:radial-gradient(circle at 78% 18%,rgba(255,0,0,.35),transparent 30%),radial-gradient(circle at 20% 82%,rgba(255,130,0,.22),transparent 35%),linear-gradient(90deg,rgba(0,0,0,.8),rgba(0,0,0,.18))}
-    .hero.kill-hero::after{content:"KILL GAUGE";font-size:64px;letter-spacing:-4px;color:rgba(255,70,70,.13);transform:rotate(-4deg)}
-    .hero-content{position:relative;z-index:2;padding:32px 30px;max-width:620px}
-    .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,199,60,.16);border:1px solid rgba(0,199,60,.5);color:#7cff9e;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;margin-bottom:13px}
-    .badge.red{background:rgba(255,0,0,.14);border-color:rgba(255,80,80,.55);color:#ff9b9b}
-    .hero h1{font-size:clamp(30px,5vw,52px);line-height:1.08;letter-spacing:-2.4px;margin-bottom:12px}
-    .hero p{color:rgba(255,255,255,.82);line-height:1.65;font-size:15px;max-width:560px}
-    .hero-actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
-    .main-btn{border:none;background:var(--green);color:#fff;font-weight:900;border-radius:10px;padding:12px 18px;cursor:pointer;font-size:15px}
-    .main-btn.red{background:#d20000}
-    .sub-btn{border:1px solid rgba(255,255,255,.34);background:rgba(255,255,255,.1);color:#fff;font-weight:800;border-radius:10px;padding:12px 18px;cursor:pointer;font-size:15px}
-
-    .work-card{display:grid;grid-template-columns:160px 1fr;gap:18px;padding:18px}
-    .cover{height:220px;border-radius:12px;background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.05)),radial-gradient(circle at 70% 20%,#7048ff,transparent 28%),radial-gradient(circle at 25% 70%,#101927,#080910 55%);position:relative;overflow:hidden;box-shadow:inset 0 0 45px rgba(255,255,255,.04);cursor:pointer}
-    .cover::before{content:"";position:absolute;width:110px;height:110px;border:2px solid rgba(150,120,255,.7);border-radius:50%;right:-16px;top:22px;box-shadow:0 0 30px rgba(150,120,255,.75)}
-    .cover::after{content:"세계를\A구하고,\A버려졌다";white-space:pre;position:absolute;left:14px;bottom:14px;color:#fff;font-size:24px;line-height:1.08;font-weight:900;letter-spacing:-1.2px}
-    .cover.kill-cover{background:linear-gradient(to top,rgba(0,0,0,.96),rgba(50,0,0,.18)),radial-gradient(circle at 72% 18%,#ff2222,transparent 29%),radial-gradient(circle at 20% 76%,#ff8a00,transparent 36%),linear-gradient(135deg,#230303,#050505 58%,#160000)}
-    .cover.kill-cover::before{width:auto;height:auto;inset:14px;border:1px solid rgba(255,65,65,.55);border-radius:10px;right:14px;top:14px;box-shadow:0 0 34px rgba(255,0,0,.36),inset 0 0 20px rgba(255,0,0,.12)}
-    .cover.kill-cover::after{content:"킬 게이지\A시스템";color:#fff;text-shadow:0 0 14px rgba(255,0,0,.7)}
-
-    .work-info h3{font-size:26px;margin-bottom:8px;letter-spacing:-1px}
-    .meta{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
-    .chip{background:#f1f3f5;color:#555;font-size:12px;font-weight:800;padding:6px 9px;border-radius:999px}
-    .summary{color:#444;line-height:1.7;font-size:14px;max-width:700px;margin-bottom:18px}
-    .stats{display:flex;gap:18px;color:#777;font-size:13px;font-weight:700;margin-bottom:18px;flex-wrap:wrap}
-
-    .episode-list{background:#fff}
-    .episode{display:grid;grid-template-columns:86px 1fr auto;gap:14px;align-items:center;padding:14px 18px;border-top:1px solid var(--line);cursor:pointer;transition:background .15s,opacity .15s}
-    .episode:hover{background:#f8fff9}
-    .episode.read{background:#f1f1f1;opacity:.78}
-    .episode.read:hover{background:#e8e8e8}
-    .episode.read .ep-title::after{content:"  읽음";color:#999;font-size:12px;font-weight:800}
-    .thumb{width:86px;height:58px;border-radius:8px;background:linear-gradient(to top,rgba(0,0,0,.75),transparent),radial-gradient(circle at 72% 25%,#8c6dff,#131522 48%,#07080c);position:relative;overflow:hidden}
-    .thumb.kill{background:linear-gradient(to top,rgba(0,0,0,.85),rgba(80,0,0,.1)),radial-gradient(circle at 72% 25%,#ff2b2b,#1c0505 45%,#060606)}
-    .thumb::after{content:attr(data-ep);position:absolute;left:8px;bottom:6px;color:#fff;font-weight:900;font-size:13px}
-    .ep-title{font-weight:900;margin-bottom:4px;font-size:15px}
-    .ep-desc{color:#777;font-size:13px}
-    .ep-date{color:#999;font-size:12px;white-space:nowrap}
-
-    .reader{position:fixed;inset:0;background:#fff;z-index:200;display:none;flex-direction:column}
-    .reader.open{display:flex}
-    .reader-top{height:54px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:#fff;position:sticky;top:0;z-index:5}
-    .reader-title-mini{min-width:0}
-    .reader-title-mini strong{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .reader-title-mini span{display:block;font-size:12px;color:#888;margin-top:2px}
-    .close-btn{border:none;background:#111;color:#fff;border-radius:999px;padding:8px 13px;font-weight:900;cursor:pointer}
-    .reader-scroll{overflow-y:auto;flex:1;background:var(--novel-bg)}
-    .novel-wrap{max-width:760px;margin:0 auto;padding:34px 18px 120px}
-    .novel-header{border-bottom:2px solid #222;padding-bottom:18px;margin-bottom:28px}
-    .novel-header .series-name{color:var(--green);font-weight:900;font-size:14px;margin-bottom:8px}
-    .novel-header .series-name.kill-name{color:#d20000}
-    .novel-header h1{font-size:clamp(26px,5vw,40px);letter-spacing:-1.4px;margin-bottom:10px}
-    .novel-header .novel-sub{color:#777;font-size:13px;font-weight:700}
-    .novel-body{font-family:"Nanum Myeongjo","Noto Serif KR","Batang",serif;font-size:19px;line-height:2.15;color:#151515;word-break:keep-all;white-space:normal}
-    .novel-body p{margin:0 0 22px}
-    .scene{text-align:center;color:#888;letter-spacing:8px;margin:36px 0;font-family:inherit}
-    .system{font-family:"Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:var(--red-system-bg);color:var(--red-system-text);border-left:4px solid var(--red-system-line);padding:12px 14px;border-radius:8px;line-height:1.8;font-size:16px;margin:22px 0;font-weight:800}
-    .blue-system{font-family:"Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:var(--blue-system-bg);color:var(--blue-system-text);border-left:4px solid var(--blue-system-line);padding:12px 14px;border-radius:8px;line-height:1.8;font-size:16px;margin:22px 0;font-weight:900}
-    .skill{color:var(--yellow-skill);font-weight:900;white-space:nowrap}
-    .rank-skill{color:var(--rank-red);font-weight:900;white-space:nowrap}
-    .quote-strong{font-weight:900;color:#000}
-    .bottom-nav{max-width:760px;margin:30px auto 0;display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid #ddd;border-radius:12px;overflow:hidden;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif}
-    .bottom-nav button{border:none;background:#fff;padding:16px 8px;font-size:15px;font-weight:900;cursor:pointer;border-right:1px solid #ddd}
-    .bottom-nav button:last-child{border-right:none}
-    .bottom-nav button:hover:not(:disabled){background:#f4fff6;color:var(--green)}
-    .bottom-nav button:disabled{color:#bbb;background:#fafafa;cursor:not-allowed}
-
-    .login-modal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;display:none;align-items:center;justify-content:center;padding:18px}
-    .login-modal.open{display:flex}
-    .login-panel{width:min(440px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,.35)}
-    .login-panel h2{font-size:24px;margin-bottom:8px;letter-spacing:-1px}
-    .login-panel p{color:#777;line-height:1.6;font-size:14px;margin-bottom:18px}
-    .login-field{margin-bottom:13px}
-    .login-field label{display:block;font-size:14px;font-weight:900;margin-bottom:7px}
-    .login-field input{width:100%;height:44px;border:1px solid #ddd;border-radius:10px;padding:0 12px;outline:none;font-size:15px;font-weight:700}
-    .login-field input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,199,60,.12)}
-    .login-actions{display:flex;gap:8px;margin-top:18px}
-    .login-actions button{flex:1;border:none;border-radius:10px;padding:13px 10px;font-weight:900;cursor:pointer;font-size:15px}
-    .confirm-login{background:var(--green);color:#fff}
-    .cancel-login{background:#eee;color:#111}
-    .danger-login{background:#d93025!important;color:#fff!important}
-    .profile-edit-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
-    .profile-edit-tabs button{border:1px solid #ddd;background:#fff;border-radius:10px;padding:11px;font-weight:900;cursor:pointer}
-    .profile-edit-tabs button.active{background:#111;color:#fff;border-color:#111}
-    .edit-panel{display:none}.edit-panel.active{display:block}
-    .avatar-preview-box{display:flex;align-items:center;gap:14px;background:#fafafa;border:1px solid #eee;border-radius:14px;padding:14px;margin:12px 0}
-    .avatar-preview-box .profile-img{margin:0;width:76px;height:76px;border-width:3px;flex-shrink:0}
-    .avatar-preview-text{font-size:13px;color:#555;font-weight:800;line-height:1.6}
-    .avatar-option-title{font-weight:900;font-size:14px;margin:14px 0 8px}
-    .avatar-color-grid,.avatar-shape-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
-    .avatar-choice{border:1px solid #ddd;background:#fff;border-radius:12px;padding:10px 6px;font-size:13px;font-weight:900;cursor:pointer;text-align:center}
-    .avatar-choice.active{border-color:#111;box-shadow:0 0 0 2px #111 inset}
-    .avatar-color-dot{width:26px;height:26px;border-radius:50%;display:block;margin:0 auto 6px;border:1px solid rgba(0,0,0,.15)}
-    .file-btn{display:block;background:#0f63ff;color:#fff;text-align:center;border-radius:12px;padding:12px;font-weight:900;cursor:pointer;margin-top:8px}
-    .file-btn input{display:none}
-    .ticket-box{border:1px solid #eee;background:#fafafa;border-radius:14px;padding:14px;margin:12px 0}
-    .ticket-box strong{display:block;margin-bottom:6px}
-    .ticket-box p{margin:4px 0;color:#555;font-weight:800}
-    .ticket-shop{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
-    .ticket-shop button,.collect-btn,.start-coin-btn,.go-ticket-btn,.own-btn,.view-once-btn{border:none;background:var(--green);color:#fff;border-radius:10px;padding:12px;font-weight:900;cursor:pointer}
-    .collect-btn{background:#111}
-    .go-ticket-btn{background:#3b1168;margin-top:10px;width:100%}
-    .own-btn{background:#3b1168}
-    .view-once-btn{background:#00a832}
-    .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:rgba(0,0,0,.82);color:#fff;padding:10px 14px;border-radius:999px;font-size:13px;display:none;z-index:600;font-weight:800}
-
-    @media(max-width:720px){
-      .top-inner{height:auto;padding:10px 12px;flex-wrap:wrap}.logo{width:100%}.search-area{order:3;width:100%;max-width:none}.account-btn{position:absolute;right:12px;top:10px}.dashboard-title{font-size:22px}.profile-sections{grid-template-columns:1fr}.profile-section:first-child{border-right:none}.hero-content{padding:26px 20px}.work-card{grid-template-columns:112px 1fr;gap:13px;padding:14px}.cover{height:160px}.cover::after{font-size:18px}.work-info h3{font-size:21px}.summary{font-size:13px;line-height:1.55}.stats{gap:10px}.episode{grid-template-columns:76px 1fr}.thumb{width:76px;height:52px}.ep-date{display:none}.novel-body{font-size:17px;line-height:2.05}.bottom-nav{border-radius:0;position:sticky;bottom:0;z-index:10}.avatar-color-grid,.avatar-shape-grid{grid-template-columns:repeat(2,1fr)}
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>chat웹</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--green:#00c73c;--green-dark:#00a832;--bg:#050505;--line:#e5e5e5;--muted:#777;--rank-red:#c40000;--yellow:#9a7600}
+body{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif;background:var(--bg);color:#111}
+button,input{font-family:inherit}
+a{text-decoration:none;color:inherit}
+.top-header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
+.top-inner{max-width:1100px;margin:0 auto;min-height:58px;display:flex;align-items:center;gap:18px;padding:10px 16px}
+.logo{font-size:24px;font-weight:900;color:var(--green);cursor:pointer;letter-spacing:-1px}
+.search-area{flex:1;max-width:520px;display:flex;gap:8px}
+.search-box{width:100%;height:38px;border:2px solid var(--green);border-radius:20px;padding:0 15px;font-size:14px;font-weight:700;outline:none}
+.search-btn{border:none;background:var(--green);color:#fff;border-radius:20px;padding:0 16px;font-weight:900;cursor:pointer;white-space:nowrap}
+.account-btn{border:1px solid #ddd;background:#fff;border-radius:18px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap}
+.account-btn.logged{background:#111;color:#fff;border-color:#111}
+.account-btn.author{background:#3b1168;color:#fff;border-color:#3b1168}
+.nav-bar{background:var(--green);color:#fff}
+.nav-inner{max-width:1100px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:0 10px}
+.nav-item{padding:13px 16px;font-weight:800;font-size:15px;white-space:nowrap;cursor:pointer}
+.nav-item.active{background:var(--green-dark)}
+.locked-home{min-height:calc(100vh - 104px);background:#000;color:#fff;display:flex;align-items:center;justify-content:center;padding:40px 18px;text-align:center}
+.locked-box{max-width:520px;width:100%;border:1px solid rgba(255,255,255,.12);background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border-radius:22px;padding:38px 24px}
+.locked-box h1{font-size:30px;margin-bottom:14px;letter-spacing:-1px}
+.locked-box p{color:rgba(255,255,255,.72);line-height:1.7;margin-bottom:24px}
+.locked-box button{border:none;background:var(--green);color:#fff;border-radius:12px;padding:13px 22px;font-size:16px;font-weight:900;cursor:pointer}
+.page{display:none;max-width:1100px;margin:0 auto;padding:18px 14px 80px}
+body.logged-in .locked-home{display:none}
+body.logged-in .page.active{display:block}
+.dashboard-title{color:#fff;font-size:26px;font-weight:900;margin:10px 0 18px;letter-spacing:-1px}
+.section{margin-top:24px;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.section:first-child{margin-top:0}
+.section-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+.section-head h2{font-size:19px;letter-spacing:-.5px}
+.section-head span{color:var(--muted);font-size:13px;font-weight:700}
+.empty-box{padding:22px 18px;color:#777;font-weight:800;line-height:1.6}
+.work-row,.weekday-work-row,.rank-row{display:flex;align-items:center;gap:14px;padding:14px 18px;border-top:1px solid var(--line);cursor:pointer}
+.work-row:hover,.weekday-work-row:hover,.rank-row:hover{background:#f8fff9}
+.mini-cover,.weekday-cover{width:72px;height:92px;border-radius:10px;flex-shrink:0;background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.05)),radial-gradient(circle at 70% 20%,#7048ff,transparent 30%),radial-gradient(circle at 25% 70%,#101927,#080910 55%);position:relative;overflow:hidden}
+.mini-cover::after,.weekday-cover::after{content:"세계를";position:absolute;left:8px;bottom:8px;color:#fff;font-size:13px;font-weight:900}
+.mini-cover.kill,.weekday-cover.kill{background:linear-gradient(to top,rgba(0,0,0,.95),rgba(60,0,0,.15)),radial-gradient(circle at 75% 20%,#ff2222,transparent 28%),linear-gradient(135deg,#210303,#050505 60%,#160000)}
+.mini-cover.kill::after,.weekday-cover.kill::after{content:"킬 게이지"}
+.work-row-info{flex:1;min-width:0}
+.work-row-info h3{font-size:18px;margin-bottom:5px;letter-spacing:-.5px}
+.work-row-info p{font-size:13px;color:#777;line-height:1.5}
+.work-row-badge{background:#f1f3f5;color:#555;padding:7px 9px;border-radius:999px;font-size:12px;font-weight:900;white-space:nowrap}
+.work-row-badge.preview{background:#fff4d6;color:#9a6500;border:1px solid #ffd36b}
+.work-row-badge.owned{background:#e8fff0;color:#008f2b;border:1px solid #7be49a}
+.weekday-tabs{display:flex;gap:8px;overflow-x:auto;padding:14px 18px;background:#fff;border-bottom:1px solid var(--line)}
+.weekday-tab-btn{border:1px solid #ddd;background:#fff;border-radius:999px;padding:10px 17px;font-size:14px;font-weight:900;cursor:pointer}
+.weekday-tab-btn.active{background:var(--green);color:#fff;border-color:var(--green)}
+.weekday-panel{display:none}
+.weekday-panel.active{display:block}
+.weekday-empty-wrap{padding:48px 18px;text-align:center;color:#999;font-weight:900}
+.weekday-cover{width:82px;height:104px}
+.rank-num{width:38px;height:38px;border-radius:12px;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px}
+.search-empty-page{min-height:calc(100vh - 150px);background:#fff;border-radius:18px;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px 18px;margin-top:18px}
+.search-empty-page strong{color:#e00000;font-size:24px;font-weight:900}
+.search-result-title{color:#fff;font-size:24px;font-weight:900;margin-bottom:18px}
+.profile-card{background:#fff;border-radius:18px;overflow:hidden;border:1px solid var(--line);margin-top:18px}
+.profile-top{padding:30px 18px;text-align:center;border-bottom:1px solid var(--line);background:linear-gradient(135deg,#f8fff9,#fff)}
+.profile-img{width:92px;height:92px;margin:0 auto 12px;border-radius:50%;background:linear-gradient(135deg,#00c73c,#151515);box-shadow:0 8px 24px rgba(0,0,0,.16);border:4px solid #fff;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.profile-img::before{content:"";display:block;width:62%;height:62%;background:rgba(255,255,255,.86);border-radius:50%}
+.profile-img.avatar-square::before{border-radius:14px}
+.profile-img.avatar-triangle::before{width:0;height:0;background:transparent;border-left:30px solid transparent;border-right:30px solid transparent;border-bottom:56px solid rgba(255,255,255,.88);border-radius:0}
+.profile-img.avatar-star::before{content:"★";background:transparent;width:auto;height:auto;color:#fff;font-size:64px}
+.profile-img.avatar-photo::before{display:none!important}
+.profile-img.avatar-photo{background-size:cover!important;background-position:center!important}
+.avatar-red{background:linear-gradient(135deg,#ff4d4d,#8b0000)!important}
+.avatar-orange{background:linear-gradient(135deg,#ff9f1c,#c85c00)!important}
+.avatar-yellow{background:linear-gradient(135deg,#ffd93d,#d6a400)!important}
+.avatar-green{background:linear-gradient(135deg,#00c73c,#006b2a)!important}
+.avatar-blue{background:linear-gradient(135deg,#3d8bff,#003c9e)!important}
+.avatar-pink{background:linear-gradient(135deg,#ff6fb2,#b80063)!important}
+.avatar-white{background:linear-gradient(135deg,#fff,#d8d8d8)!important}
+.avatar-purple{background:linear-gradient(135deg,#8e44ff,#3b1168)!important}
+.profile-name{font-size:24px;font-weight:900;margin-bottom:6px}
+.profile-role{display:inline-block;padding:6px 10px;border-radius:999px;background:#f1f3f5;color:#555;font-size:12px;font-weight:900}
+.profile-role.author{background:#f2e8ff;color:#5a1a92}
+.profile-buttons{margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.logout-btn,.edit-profile-btn,.ticket-btn,.avatar-edit-btn{border:none;background:#111;color:#fff;border-radius:999px;padding:9px 16px;font-size:13px;font-weight:900;cursor:pointer}
+.edit-profile-btn{background:#3b1168}
+.ticket-btn{background:#00a832}
+.avatar-edit-btn{background:#0f63ff}
+.profile-ticket-info{margin-top:12px;color:#555;font-size:13px;font-weight:900;display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+.profile-sections{display:grid;grid-template-columns:1fr 1fr}
+.profile-section{padding:18px;border-bottom:1px solid var(--line)}
+.profile-section:first-child{border-right:1px solid var(--line)}
+.profile-section h2{font-size:18px;margin-bottom:12px}
+.hero{background:linear-gradient(135deg,#111827,#191b2a 45%,#2b1246);border-radius:18px;min-height:260px;color:#fff;overflow:hidden;position:relative}
+.hero.kill-hero{background:linear-gradient(135deg,#160000,#250404 44%,#050505)}
+.hero-content{position:relative;padding:32px 30px;max-width:620px}
+.badge{display:inline-flex;background:rgba(0,199,60,.16);border:1px solid rgba(0,199,60,.5);color:#7cff9e;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;margin-bottom:13px}
+.badge.red{background:rgba(255,0,0,.14);border-color:rgba(255,80,80,.55);color:#ff9b9b}
+.hero h1{font-size:clamp(30px,5vw,52px);line-height:1.08;margin-bottom:12px}
+.hero p{color:rgba(255,255,255,.82);line-height:1.65;font-size:15px}
+.hero-actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.main-btn{border:none;background:var(--green);color:#fff;font-weight:900;border-radius:10px;padding:12px 18px;cursor:pointer;font-size:15px}
+.main-btn.red{background:#d20000}
+.sub-btn{border:1px solid rgba(255,255,255,.34);background:rgba(255,255,255,.1);color:#fff;font-weight:800;border-radius:10px;padding:12px 18px;cursor:pointer}
+.work-card{display:grid;grid-template-columns:160px 1fr;gap:18px;padding:18px}
+.cover{height:220px;border-radius:12px;background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.05)),radial-gradient(circle at 70% 20%,#7048ff,transparent 28%),radial-gradient(circle at 25% 70%,#101927,#080910 55%);position:relative;overflow:hidden;cursor:pointer}
+.cover::after{content:"세계를\A구하고,\A버려졌다";white-space:pre;position:absolute;left:14px;bottom:14px;color:#fff;font-size:24px;line-height:1.08;font-weight:900}
+.cover.kill-cover{background:linear-gradient(to top,rgba(0,0,0,.96),rgba(50,0,0,.18)),radial-gradient(circle at 72% 18%,#ff2222,transparent 29%),linear-gradient(135deg,#230303,#050505 58%,#160000)}
+.cover.kill-cover::after{content:"킬 게이지\A시스템"}
+.work-info h3{font-size:26px;margin-bottom:8px}
+.meta{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+.chip{background:#f1f3f5;color:#555;font-size:12px;font-weight:800;padding:6px 9px;border-radius:999px}
+.summary{color:#444;line-height:1.7;font-size:14px;max-width:700px;margin-bottom:18px}
+.stats{display:flex;gap:18px;color:#777;font-size:13px;font-weight:700;margin-bottom:18px;flex-wrap:wrap}
+.episode{display:grid;grid-template-columns:86px 1fr auto;gap:14px;align-items:center;padding:14px 18px;border-top:1px solid var(--line);cursor:pointer}
+.episode:hover{background:#f8fff9}
+.episode.read{background:#f1f1f1;opacity:.78}
+.episode.read .ep-title::after{content:"  읽음";color:#999;font-size:12px}
+.thumb{width:86px;height:58px;border-radius:8px;background:linear-gradient(to top,rgba(0,0,0,.75),transparent),radial-gradient(circle at 72% 25%,#8c6dff,#131522 48%,#07080c);position:relative;overflow:hidden}
+.thumb.kill{background:linear-gradient(to top,rgba(0,0,0,.85),rgba(80,0,0,.1)),radial-gradient(circle at 72% 25%,#ff2b2b,#1c0505 45%,#060606)}
+.thumb::after{content:attr(data-ep);position:absolute;left:8px;bottom:6px;color:#fff;font-weight:900;font-size:13px}
+.ep-title{font-weight:900;margin-bottom:4px}
+.ep-desc{color:#777;font-size:13px}
+.ep-date{color:#999;font-size:12px;white-space:nowrap}
+.reader{position:fixed;inset:0;background:#fff;z-index:200;display:none;flex-direction:column}
+.reader.open{display:flex}
+.reader-top{height:54px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:#fff}
+.reader-title-mini strong{display:block;font-size:15px}
+.reader-title-mini span{display:block;font-size:12px;color:#888;margin-top:2px}
+.close-btn{border:none;background:#111;color:#fff;border-radius:999px;padding:8px 13px;font-weight:900;cursor:pointer}
+.reader-scroll{overflow-y:auto;flex:1}
+.novel-wrap{max-width:760px;margin:0 auto;padding:34px 18px 120px}
+.novel-header{border-bottom:2px solid #222;padding-bottom:18px;margin-bottom:28px}
+.series-name{color:var(--green);font-weight:900;font-size:14px;margin-bottom:8px}
+.series-name.kill-name{color:#d20000}
+.novel-header h1{font-size:clamp(26px,5vw,40px);margin-bottom:10px}
+.novel-sub{color:#777;font-size:13px;font-weight:700}
+.novel-body{font-family:"Nanum Myeongjo","Noto Serif KR","Batang",serif;font-size:19px;line-height:2.15;color:#151515;word-break:keep-all}
+.novel-body p{margin:0 0 22px}
+.scene{text-align:center;color:#888;letter-spacing:8px;margin:36px 0}
+.system{background:#4c0b0b;color:#ffe3e3;border-left:4px solid #d92d2d;padding:12px 14px;border-radius:8px;line-height:1.8;font-size:16px;margin:22px 0;font-weight:800}
+.blue-system{background:#e7f1ff;color:#064a9b;border-left:4px solid #2b7cff;padding:12px 14px;border-radius:8px;line-height:1.8;font-size:16px;margin:22px 0;font-weight:900}
+.skill{color:var(--yellow);font-weight:900}
+.rank-skill{color:var(--rank-red);font-weight:900}
+.quote-strong{font-weight:900;color:#000}
+.bottom-nav{max-width:760px;margin:30px auto 0;display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid #ddd;border-radius:12px;overflow:hidden}
+.bottom-nav button{border:none;background:#fff;padding:16px 8px;font-size:15px;font-weight:900;cursor:pointer;border-right:1px solid #ddd}
+.bottom-nav button:last-child{border-right:none}
+.bottom-nav button:disabled{color:#bbb;background:#fafafa}
+.login-modal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;display:none;align-items:center;justify-content:center;padding:18px}
+.login-modal.open{display:flex}
+.login-panel{width:min(440px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:24px}
+.login-panel h2{font-size:24px;margin-bottom:8px}
+.login-panel p{color:#777;line-height:1.6;font-size:14px;margin-bottom:18px}
+.login-field{margin-bottom:13px}
+.login-field label{display:block;font-size:14px;font-weight:900;margin-bottom:7px}
+.login-field input{width:100%;height:44px;border:1px solid #ddd;border-radius:10px;padding:0 12px;outline:none;font-size:15px;font-weight:700}
+.login-actions{display:flex;gap:8px;margin-top:18px}
+.login-actions button{flex:1;border:none;border-radius:10px;padding:13px 10px;font-weight:900;cursor:pointer;font-size:15px}
+.confirm-login{background:var(--green);color:#fff}
+.cancel-login{background:#eee;color:#111}
+.danger-login{background:#d93025!important;color:#fff!important}
+.profile-edit-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.profile-edit-tabs button{border:1px solid #ddd;background:#fff;border-radius:10px;padding:11px;font-weight:900;cursor:pointer}
+.profile-edit-tabs button.active{background:#111;color:#fff}
+.edit-panel{display:none}
+.edit-panel.active{display:block}
+.avatar-preview-box{display:flex;align-items:center;gap:14px;background:#fafafa;border:1px solid #eee;border-radius:14px;padding:14px;margin:12px 0}
+.avatar-preview-box .profile-img{margin:0;width:76px;height:76px;border-width:3px}
+.avatar-color-grid,.avatar-shape-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.avatar-choice{border:1px solid #ddd;background:#fff;border-radius:12px;padding:10px 6px;font-size:13px;font-weight:900;cursor:pointer;text-align:center}
+.avatar-choice.active{border-color:#111;box-shadow:0 0 0 2px #111 inset}
+.avatar-color-dot{width:26px;height:26px;border-radius:50%;display:block;margin:0 auto 6px}
+.file-btn{display:block;background:#0f63ff;color:#fff;text-align:center;border-radius:12px;padding:12px;font-weight:900;cursor:pointer;margin-top:8px}
+.file-btn input{display:none}
+.ticket-box{border:1px solid #eee;background:#fafafa;border-radius:14px;padding:14px;margin:12px 0}
+.ticket-box strong{display:block;margin-bottom:6px}
+.ticket-box p{margin:4px 0;color:#555;font-weight:800}
+.ticket-shop{display:grid;gap:8px;margin-top:10px}
+.ticket-shop button,.collect-btn,.start-coin-btn,.go-ticket-btn,.own-btn,.view-once-btn{border:none;background:var(--green);color:#fff;border-radius:10px;padding:12px;font-weight:900;cursor:pointer}
+.collect-btn{background:#111}
+.go-ticket-btn{background:#3b1168;margin-top:10px;width:100%}
+.own-btn{background:#3b1168}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:rgba(0,0,0,.82);color:#fff;padding:10px 14px;border-radius:999px;font-size:13px;display:none;z-index:600;font-weight:800}
+@media(max-width:720px){.top-inner{height:auto;padding:10px 12px;flex-wrap:wrap}.logo{width:100%}.search-area{order:3;width:100%;max-width:none}.account-btn{position:absolute;right:12px;top:10px}.profile-sections{grid-template-columns:1fr}.work-card{grid-template-columns:112px 1fr}.cover{height:160px}.episode{grid-template-columns:76px 1fr}.thumb{width:76px;height:52px}.ep-date{display:none}.novel-body{font-size:17px}.avatar-color-grid,.avatar-shape-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
 </head>
+
 <body>
-  <header class="top-header">
-    <div class="top-inner">
-      <div class="logo" onclick="goHome()">chat웹</div>
-      <div class="search-area">
-        <input class="search-box" id="searchInput" type="text" placeholder="작품명, 작가명 검색" onkeydown="handleSearchKey(event)" />
-        <button class="search-btn" onclick="searchWorks()">검색</button>
-      </div>
-      <button class="account-btn" id="accountBtn" onclick="handleAccountButton()">로그인</button>
+<header class="top-header">
+  <div class="top-inner">
+    <div class="logo" onclick="goHome()">chat웹</div>
+    <div class="search-area">
+      <input class="search-box" id="searchInput" type="text" placeholder="작품명, 작가명 검색" onkeydown="handleSearchKey(event)">
+      <button class="search-btn" onclick="searchWorks()">검색</button>
     </div>
-    <nav class="nav-bar">
-      <div class="nav-inner">
-        <a class="nav-item active" id="navHome" onclick="goHome()">홈</a>
-        <a class="nav-item" id="navWeekday" onclick="openTabPage('weekdayPage','navWeekday')">요일별</a>
-        <a class="nav-item" id="navFantasy" onclick="openTabPage('fantasyPage','navFantasy')">판타지</a>
-        <a class="nav-item" id="navAction" onclick="openTabPage('actionPage','navAction')">액션</a>
-        <a class="nav-item" id="navNew" onclick="openTabPage('newPage','navNew')">신작</a>
-        <a class="nav-item" id="navRanking" onclick="openTabPage('rankingPage','navRanking')">랭킹</a>
-        <a class="nav-item" id="navComplete" onclick="openTabPage('completePage','navComplete')">완결</a>
-      </div>
-    </nav>
-  </header>
+    <button class="account-btn" id="accountBtn" onclick="handleAccountButton()">로그인</button>
+  </div>
+  <nav class="nav-bar">
+    <div class="nav-inner">
+      <a class="nav-item active" id="navHome" onclick="goHome()">홈</a>
+      <a class="nav-item" id="navWeekday" onclick="openTabPage('weekdayPage','navWeekday')">요일별</a>
+      <a class="nav-item" id="navFantasy" onclick="openTabPage('fantasyPage','navFantasy')">판타지</a>
+      <a class="nav-item" id="navAction" onclick="openTabPage('actionPage','navAction')">액션</a>
+      <a class="nav-item" id="navNew" onclick="openTabPage('newPage','navNew')">신작</a>
+      <a class="nav-item" id="navRanking" onclick="openTabPage('rankingPage','navRanking')">랭킹</a>
+      <a class="nav-item" id="navComplete" onclick="openTabPage('completePage','navComplete')">완결</a>
+    </div>
+  </nav>
+</header>
 
-  <section class="locked-home" id="lockedHome">
-    <div class="locked-box">
-      <h1>로그인 하시면 보실수 있습니다.</h1>
-      <p>chat웹의 작품 목록과 회차는 로그인 후 이용할 수 있습니다.<br>새로고침해도 마지막 계정으로 자동 로그인됩니다.</p>
-      <button onclick="openLogin()">로그인</button>
+<section class="locked-home" id="lockedHome">
+  <div class="locked-box">
+    <h1>로그인 하시면 보실수 있습니다.</h1>
+    <p>chat웹의 작품 목록과 회차는 로그인 후 이용할 수 있습니다.<br>새로고침해도 마지막 계정으로 자동 로그인됩니다.</p>
+    <button onclick="openLogin()">로그인</button>
+  </div>
+</section>
+
+<main class="page" id="homePage">
+  <h1 class="dashboard-title" id="homeGreeting">홈</h1>
+  <section class="section">
+    <div class="section-head"><h2>최근 본 작품</h2><span id="recentCountText">0개</span></div>
+    <div id="recentWorksBox"></div>
+  </section>
+  <section class="section">
+    <div class="section-head"><h2>추천 작품</h2><span>판타지 · 액션</span></div>
+    <div class="work-row" onclick="openWorkDetail('world')">
+      <div class="mini-cover"></div>
+      <div class="work-row-info">
+        <h3>세계를 구하고, 버려졌다</h3>
+        <p>작가 고쓰비 · 세계를 구한 용사, 자신의 세계에서 버려지다.</p>
+      </div>
+      <div class="work-row-badge">11화 공개</div>
+    </div>
+    <div class="work-row" onclick="openWorkDetail('kill')">
+      <div class="mini-cover kill"></div>
+      <div class="work-row-info">
+        <h3>킬 게이지 시스템</h3>
+        <p>작가 고쓰비 · 죽음의 시대, 살아남은 자만 강해지는 시스템.</p>
+      </div>
+      <div class="work-row-badge">2화 공개</div>
     </div>
   </section>
+</main>
 
-  <main class="page" id="homePage">
-    <h1 class="dashboard-title" id="homeGreeting">홈</h1>
-    <section class="section">
-      <div class="section-head"><h2>최근 본 작품</h2><span id="recentCountText">0개</span></div>
-      <div id="recentWorksBox"></div>
-    </section>
-    <section class="section">
-      <div class="section-head"><h2>추천 작품</h2><span>판타지 · 액션</span></div>
-      <div class="work-row" onclick="openWorkDetail('world')">
-        <div class="mini-cover"></div>
-        <div class="work-row-info">
-          <h3>세계를 구하고, 버려졌다</h3>
-          <p>작가 고쓰비 · 세계를 구한 용사, 자신의 세계에서 버려지다.</p>
-        </div>
-        <div class="work-row-badge">10화 공개</div>
-      </div>
-      <div class="work-row" onclick="openWorkDetail('kill')">
-        <div class="mini-cover kill"></div>
-        <div class="work-row-info">
-          <h3>킬 게이지 시스템</h3>
-          <p>작가 고쓰비 · 죽음의 시대, 살아남은 자만 강해지는 시스템.</p>
-        </div>
-        <div class="work-row-badge">1화 공개</div>
-      </div>
-    </section>
-  </main>
-
-  <main class="page" id="weekdayPage">
-    <h1 class="dashboard-title">요일별</h1>
-    <section class="section">
-      <div class="section-head"><h2>요일별 작품</h2><span>네웹식 요일 탭</span></div>
-      <div class="weekday-tabs">
-        <button class="weekday-tab-btn active" id="weekdayBtnMon" onclick="showWeekday('mon')">월</button>
-        <button class="weekday-tab-btn" id="weekdayBtnTue" onclick="showWeekday('tue')">화</button>
-        <button class="weekday-tab-btn" id="weekdayBtnWed" onclick="showWeekday('wed')">수</button>
-        <button class="weekday-tab-btn" id="weekdayBtnThu" onclick="showWeekday('thu')">목</button>
-        <button class="weekday-tab-btn" id="weekdayBtnFri" onclick="showWeekday('fri')">금</button>
-        <button class="weekday-tab-btn" id="weekdayBtnSat" onclick="showWeekday('sat')">토</button>
-        <button class="weekday-tab-btn" id="weekdayBtnSun" onclick="showWeekday('sun')">일</button>
-        <button class="weekday-tab-btn" id="weekdayBtnDaily" onclick="showWeekday('daily')">매일+</button>
-      </div>
-      <div class="weekday-panel active" id="weekdayPanelMon"><div class="weekday-empty-wrap">월요일 작품은 아직 없습니다.</div></div>
-      <div class="weekday-panel" id="weekdayPanelTue"><div class="weekday-empty-wrap">화요일 작품은 아직 없습니다.</div></div>
-      <div class="weekday-panel" id="weekdayPanelWed"><div class="weekday-empty-wrap">수요일 작품은 아직 없습니다.</div></div>
-      <div class="weekday-panel" id="weekdayPanelThu"><div class="weekday-empty-wrap">목요일 작품은 아직 없습니다.</div></div>
-      <div class="weekday-panel" id="weekdayPanelFri"><div class="weekday-empty-wrap">금요일 작품은 아직 없습니다.</div></div>
-      <div class="weekday-panel" id="weekdayPanelSat"><div class="weekday-empty-wrap">토요일 작품은 아직 없습니다.</div></div>
-      <div class="weekday-panel" id="weekdayPanelSun"><div class="weekday-empty-wrap">일요일 작품은 아직 없습니다.</div></div>
-      <div class="weekday-panel" id="weekdayPanelDaily">
-        <div class="weekday-work-row" onclick="openWorkDetail('world')">
-          <div class="weekday-cover"></div>
-          <div class="weekday-work-info">
-            <h3>세계를 구하고, 버려졌다</h3>
-            <p>작가 고쓰비 · 매일+ 연재</p>
-          </div>
-          <div class="work-row-badge">바</div>
-        </div>
-        <div class="weekday-work-row" onclick="openWorkDetail('kill')">
-          <div class="weekday-cover kill"></div>
-          <div class="weekday-work-info">
-            <h3>킬 게이지 시스템</h3>
-            <p>작가 고쓰비 · 매일+ 연재</p>
-          </div>
-          <div class="work-row-badge">바</div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <main class="page" id="fantasyPage">
-    <h1 class="dashboard-title">판타지</h1>
-    <section class="section">
-      <div class="section-head"><h2>판타지 작품</h2><span>2개</span></div>
-      <div class="work-row" onclick="openWorkDetail('world')">
-        <div class="mini-cover"></div>
-        <div class="work-row-info"><h3>세계를 구하고, 버려졌다</h3><p>작가 고쓰비 · 다크 판타지</p></div>
-        <div class="work-row-badge">바</div>
-      </div>
-      <div class="work-row" onclick="openWorkDetail('kill')">
-        <div class="mini-cover kill"></div>
-        <div class="work-row-info"><h3>킬 게이지 시스템</h3><p>작가 고쓰비 · 시스템 판타지</p></div>
-        <div class="work-row-badge">바</div>
-      </div>
-    </section>
-  </main>
-
-  <main class="page" id="actionPage">
-    <h1 class="dashboard-title">액션</h1>
-    <section class="section">
-      <div class="section-head"><h2>액션 작품</h2><span>2개</span></div>
-      <div class="work-row" onclick="openWorkDetail('world')">
-        <div class="mini-cover"></div>
-        <div class="work-row-info"><h3>세계를 구하고, 버려졌다</h3><p>작가 고쓰비 · 권능 액션</p></div>
-        <div class="work-row-badge">바</div>
-      </div>
-      <div class="work-row" onclick="openWorkDetail('kill')">
-        <div class="mini-cover kill"></div>
-        <div class="work-row-info"><h3>킬 게이지 시스템</h3><p>작가 고쓰비 · 차수 배틀 액션</p></div>
-        <div class="work-row-badge">바</div>
-      </div>
-    </section>
-  </main>
-
-  <main class="page" id="newPage">
-    <h1 class="dashboard-title">신작</h1>
-    <section class="section">
-      <div class="section-head"><h2>신작 작품</h2><span>1개</span></div>
-      <div class="work-row" onclick="openWorkDetail('kill')">
-        <div class="mini-cover kill"></div>
-        <div class="work-row-info"><h3>킬 게이지 시스템</h3><p>작가 고쓰비 · 신작 · 1화 공개</p></div>
-        <div class="work-row-badge">바</div>
-      </div>
-    </section>
-  </main>
-
-  <main class="page" id="rankingPage">
-    <h1 class="dashboard-title">랭킹</h1>
-    <section class="section">
-      <div class="section-head"><h2>실시간 랭킹</h2><span>TOP 3</span></div>
-      <div class="rank-row" onclick="openWorkDetail('world')">
-        <div class="rank-num">1</div>
-        <div class="mini-cover"></div>
-        <div class="work-row-info"><h3>세계를 구하고, 버려졌다</h3><p>작가 고쓰비 · 랭킹 1위</p></div>
-        <div class="work-row-badge">바</div>
-      </div>
-      <div class="rank-row" onclick="openWorkDetail('kill')">
-        <div class="rank-num">2</div>
-        <div class="mini-cover kill"></div>
-        <div class="work-row-info"><h3>킬 게이지 시스템</h3><p>작가 고쓰비 · 신작 랭킹</p></div>
-        <div class="work-row-badge">바</div>
-      </div>
-      <div class="empty-box">3위 작품은 아직 없습니다.</div>
-    </section>
-  </main>
-
-  <main class="page" id="completePage">
-    <h1 class="dashboard-title">완결</h1>
-    <section class="section">
-      <div class="section-head"><h2>완결작</h2><span>0개</span></div>
-      <div class="empty-box">아직 완결작이 없습니다.</div>
-    </section>
-  </main>
-
-  <main class="page" id="searchPage">
-    <h1 class="search-result-title" id="searchTitle">검색 결과</h1>
-    <section class="section" id="searchFoundSection">
-      <div class="section-head"><h2>작품</h2><span>검색 결과</span></div>
-      <div id="searchResultsBox"></div>
-    </section>
-    <section class="search-empty-page" id="searchEmptyPage"><strong>검색하신 작품이 없습니다.</strong></section>
-  </main>
-
-  <main class="page" id="profilePage">
-    <div class="profile-card">
-      <div class="profile-top">
-        <div class="profile-img" id="profileAvatar"></div>
-        <div class="profile-name" id="profileNickname">닉네임</div>
-        <div class="profile-role" id="profileRole">일반 계정</div>
-        <div class="profile-buttons">
-          <button class="logout-btn" onclick="logout()">로그아웃</button>
-          <button class="edit-profile-btn" onclick="openProfileEditModal()">프로필 편집</button>
-          <button class="avatar-edit-btn" onclick="openAvatarModal()">표지 편집</button>
-          <button class="ticket-btn" onclick="openTicketModal()">내 이용권</button>
-        </div>
-        <div class="profile-ticket-info">
-          <span id="profileTicketCount">보유 이용권 0장</span>
-          <span id="profileCoinCount">보유 코인 0개</span>
-        </div>
-      </div>
-      <div class="profile-sections">
-        <div class="profile-section" id="authorWorksSection">
-          <h2>제작중인 작품</h2>
-          <div class="work-row" onclick="openWorkDetail('world')">
-            <div class="mini-cover"></div>
-            <div class="work-row-info"><h3>세계를 구하고, 버려졌다</h3><p>작가 고쓰비 · 제작중</p></div>
-            <div class="work-row-badge">작가</div>
-          </div>
-          <div class="work-row" onclick="openWorkDetail('kill')">
-            <div class="mini-cover kill"></div>
-            <div class="work-row-info"><h3>킬 게이지 시스템</h3><p>작가 고쓰비 · 제작중</p></div>
-            <div class="work-row-badge">신작</div>
-          </div>
-        </div>
-        <div class="profile-section">
-          <h2>보고있는 작품</h2>
-          <div id="watchingWorksBox"></div>
-        </div>
-      </div>
+<main class="page" id="weekdayPage">
+  <h1 class="dashboard-title">요일별</h1>
+  <section class="section">
+    <div class="section-head"><h2>요일별 작품</h2><span>네웹식 요일 탭</span></div>
+    <div class="weekday-tabs">
+      <button class="weekday-tab-btn active" id="weekdayBtnMon" onclick="showWeekday('mon')">월</button>
+      <button class="weekday-tab-btn" id="weekdayBtnTue" onclick="showWeekday('tue')">화</button>
+      <button class="weekday-tab-btn" id="weekdayBtnWed" onclick="showWeekday('wed')">수</button>
+      <button class="weekday-tab-btn" id="weekdayBtnThu" onclick="showWeekday('thu')">목</button>
+      <button class="weekday-tab-btn" id="weekdayBtnFri" onclick="showWeekday('fri')">금</button>
+      <button class="weekday-tab-btn" id="weekdayBtnSat" onclick="showWeekday('sat')">토</button>
+      <button class="weekday-tab-btn" id="weekdayBtnSun" onclick="showWeekday('sun')">일</button>
+      <button class="weekday-tab-btn" id="weekdayBtnDaily" onclick="showWeekday('daily')">매일+</button>
     </div>
-  </main>
-
-  <main class="page" id="workDetailPage">
-    <section class="hero" id="workHero">
-      <div class="hero-content">
-        <div class="badge" id="workBadge">고쓰비 · 다크 판타지</div>
-        <h1 id="workHeroTitle">세계를 구하고,<br>버려졌다</h1>
-        <p id="workHeroDesc">마왕을 쓰러뜨리고 돌아온 소년. 하지만 그를 기다리던 것은 가족의 죽음, 사라진 자리, 그리고 아무도 받아주지 않는 세계였다.</p>
-        <div class="hero-actions">
-          <button class="main-btn" id="firstReadBtn" onclick="openFirstEpisode()">첫 화 바로 읽기</button>
-          <button class="sub-btn" onclick="scrollToEpisodes()">회차 목록 보기</button>
-        </div>
+    <div class="weekday-panel active" id="weekdayPanelMon"><div class="weekday-empty-wrap">월요일 작품은 아직 없습니다.</div></div>
+    <div class="weekday-panel" id="weekdayPanelTue"><div class="weekday-empty-wrap">화요일 작품은 아직 없습니다.</div></div>
+    <div class="weekday-panel" id="weekdayPanelWed"><div class="weekday-empty-wrap">수요일 작품은 아직 없습니다.</div></div>
+    <div class="weekday-panel" id="weekdayPanelThu"><div class="weekday-empty-wrap">목요일 작품은 아직 없습니다.</div></div>
+    <div class="weekday-panel" id="weekdayPanelFri"><div class="weekday-empty-wrap">금요일 작품은 아직 없습니다.</div></div>
+    <div class="weekday-panel" id="weekdayPanelSat"><div class="weekday-empty-wrap">토요일 작품은 아직 없습니다.</div></div>
+    <div class="weekday-panel" id="weekdayPanelSun"><div class="weekday-empty-wrap">일요일 작품은 아직 없습니다.</div></div>
+    <div class="weekday-panel" id="weekdayPanelDaily">
+      <div class="weekday-work-row" onclick="openWorkDetail('world')">
+        <div class="weekday-cover"></div>
+        <div class="work-row-info"><h3>세계를 구하고, 버려졌다</h3><p>작가 고쓰비 · 매일+ 연재</p></div>
+        <div class="work-row-badge">바</div>
       </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head"><h2>작품 정보</h2><span id="workInfoAuthor">작가 · 고쓰비</span></div>
-      <div class="work-card">
-        <div class="cover" id="workCover" onclick="openFirstEpisode()" title="작품 보기"></div>
-        <div class="work-info">
-          <h3 id="workTitle">세계를 구하고, 버려졌다</h3>
-          <div class="meta" id="workMeta"></div>
-          <p class="summary" id="workSummary"></p>
-          <div class="stats" id="workStats"></div>
-          <button class="main-btn" id="workReadButton" onclick="openFirstEpisode()">첫 화 보기</button>
-        </div>
+      <div class="weekday-work-row" onclick="openWorkDetail('kill')">
+        <div class="weekday-cover kill"></div>
+        <div class="work-row-info"><h3>킬 게이지 시스템</h3><p>작가 고쓰비 · 매일+ 연재</p></div>
+        <div class="work-row-badge">바</div>
       </div>
-    </section>
-
-    <section class="section" id="episodes">
-      <div class="section-head"><h2>회차 목록</h2><span id="episodeCountText">총 0화 공개</span></div>
-      <div class="episode-list" id="episodeList"></div>
-    </section>
-  </main>
-
-  <section class="reader" id="reader">
-    <div class="reader-top">
-      <div class="reader-title-mini">
-        <strong id="readerMiniTitle">1화 - 귀환</strong>
-        <span id="readerSeriesMini">세계를 구하고, 버려졌다</span>
-      </div>
-      <button class="close-btn" onclick="closeReader()">닫기</button>
-    </div>
-    <div class="reader-scroll" id="readerScroll">
-      <article class="novel-wrap">
-        <header class="novel-header">
-          <div class="series-name" id="readerSeriesName">세계를 구하고, 버려졌다</div>
-          <h1 id="readerTitle">1화 - 귀환</h1>
-          <div class="novel-sub" id="readerSub">강도윤 · 소환의 권능 · 귀환</div>
-        </header>
-        <div class="novel-body" id="novelBody"></div>
-        <div class="bottom-nav">
-          <button id="prevBtn" onclick="moveEpisode(-1)">&lt;- 이전화</button>
-          <button onclick="closeReader()">목록</button>
-          <button id="nextBtn" onclick="moveEpisode(1)">다음화 -&gt;</button>
-        </div>
-      </article>
     </div>
   </section>
+</main>
 
-  <section class="login-modal" id="loginModal">
-    <div class="login-panel">
-      <h2>chat웹 로그인</h2>
-      <p id="loginGuideText">닉네임과 비밀번호를 입력하세요. 일반 계정은 브라우저에 1개만 저장됩니다.</p>
-      <div class="login-field"><label for="nicknameInput">1. 닉네임 입력</label><input id="nicknameInput" type="text" placeholder="닉네임" autocomplete="username"></div>
-      <div class="login-field"><label for="passwordInput">2. 비밀번호 입력</label><input id="passwordInput" type="password" placeholder="비밀번호" autocomplete="current-password"></div>
+<main class="page" id="fantasyPage">
+  <h1 class="dashboard-title">판타지</h1>
+  <section class="section">
+    <div class="section-head"><h2>판타지 작품</h2><span>2개</span></div>
+    <div class="work-row" onclick="openWorkDetail('world')">
+      <div class="mini-cover"></div>
+      <div class="work-row-info"><h3>세계를 구하고, 버려졌다</h3><p>작가 고쓰비 · 다크 판타지</p></div>
+      <div class="work-row-badge">바</div>
+    </div>
+    <div class="work-row" onclick="openWorkDetail('kill')">
+      <div class="mini-cover kill"></div>
+      <div class="work-row-info"><h3>킬 게이지 시스템</h3><p>작가 고쓰비 · 시스템 판타지</p></div>
+      <div class="work-row-badge">바</div>
+    </div>
+  </section>
+</main>
+
+<main class="page" id="actionPage">
+  <h1 class="dashboard-title">액션</h1>
+  <section class="section">
+    <div class="section-head"><h2>액션 작품</h2><span>2개</span></div>
+    <div class="work-row" onclick="openWorkDetail('world')">
+      <div class="mini-cover"></div>
+      <div class="work-row-info"><h3>세계를 구하고, 버려졌다</h3><p>작가 고쓰비 · 권능 액션</p></div>
+      <div class="work-row-badge">바</div>
+    </div>
+    <div class="work-row" onclick="openWorkDetail('kill')">
+      <div class="mini-cover kill"></div>
+      <div class="work-row-info"><h3>킬 게이지 시스템</h3><p>작가 고쓰비 · 차수 배틀 액션</p></div>
+      <div class="work-row-badge">바</div>
+    </div>
+  </section>
+</main>
+
+<main class="page" id="newPage">
+  <h1 class="dashboard-title">신작</h1>
+  <section class="section">
+    <div class="section-head"><h2>신작 작품</h2><span>1개</span></div>
+    <div class="work-row" onclick="openWorkDetail('kill')">
+      <div class="mini-cover kill"></div>
+      <div class="work-row-info"><h3>킬 게이지 시스템</h3><p>작가 고쓰비 · 신작 · 2화 공개</p></div>
+      <div class="work-row-badge">바</div>
+    </div>
+  </section>
+</main>
+
+<main class="page" id="rankingPage">
+  <h1 class="dashboard-title">랭킹</h1>
+  <section class="section">
+    <div class="section-head"><h2>실시간 랭킹</h2><span>TOP 3</span></div>
+    <div class="rank-row" onclick="openWorkDetail('world')">
+      <div class="rank-num">1</div>
+      <div class="mini-cover"></div>
+      <div class="work-row-info"><h3>세계를 구하고, 버려졌다</h3><p>작가 고쓰비 · 랭킹 1위</p></div>
+      <div class="work-row-badge">바</div>
+    </div>
+    <div class="rank-row" onclick="openWorkDetail('kill')">
+      <div class="rank-num">2</div>
+      <div class="mini-cover kill"></div>
+      <div class="work-row-info"><h3>킬 게이지 시스템</h3><p>작가 고쓰비 · 신작 랭킹</p></div>
+      <div class="work-row-badge">바</div>
+    </div>
+    <div class="empty-box">3위 작품은 아직 없습니다.</div>
+  </section>
+</main>
+
+<main class="page" id="completePage">
+  <h1 class="dashboard-title">완결</h1>
+  <section class="section">
+    <div class="section-head"><h2>완결작</h2><span>0개</span></div>
+    <div class="empty-box">아직 완결작이 없습니다.</div>
+  </section>
+</main>
+
+<main class="page" id="searchPage">
+  <h1 class="search-result-title" id="searchTitle">검색 결과</h1>
+  <section class="section" id="searchFoundSection">
+    <div class="section-head"><h2>작품</h2><span>검색 결과</span></div>
+    <div id="searchResultsBox"></div>
+  </section>
+  <section class="search-empty-page" id="searchEmptyPage"><strong>검색하신 작품이 없습니다.</strong></section>
+</main>
+
+<main class="page" id="profilePage">
+  <div class="profile-card">
+    <div class="profile-top">
+      <div class="profile-img" id="profileAvatar"></div>
+      <div class="profile-name" id="profileNickname">닉네임</div>
+      <div class="profile-role" id="profileRole">일반 계정</div>
+      <div class="profile-buttons">
+        <button class="logout-btn" onclick="logout()">로그아웃</button>
+        <button class="edit-profile-btn" onclick="openProfileEditModal()">프로필 편집</button>
+        <button class="avatar-edit-btn" onclick="openAvatarModal()">표지 편집</button>
+        <button class="ticket-btn" onclick="openTicketModal()">내 이용권</button>
+      </div>
+      <div class="profile-ticket-info">
+        <span id="profileTicketCount">보유 이용권 0장</span>
+        <span id="profileCoinCount">보유 코인 0개</span>
+      </div>
+    </div>
+    <div class="profile-sections">
+      <div class="profile-section" id="authorWorksSection">
+        <h2>제작중인 작품</h2>
+        <div class="work-row" onclick="openWorkDetail('world')">
+          <div class="mini-cover"></div>
+          <div class="work-row-info"><h3>세계를 구하고, 버려졌다</h3><p>작가 고쓰비 · 제작중</p></div>
+          <div class="work-row-badge">작가</div>
+        </div>
+        <div class="work-row" onclick="openWorkDetail('kill')">
+          <div class="mini-cover kill"></div>
+          <div class="work-row-info"><h3>킬 게이지 시스템</h3><p>작가 고쓰비 · 제작중</p></div>
+          <div class="work-row-badge">신작</div>
+        </div>
+      </div>
+      <div class="profile-section">
+        <h2>보고있는 작품</h2>
+        <div id="watchingWorksBox"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<main class="page" id="workDetailPage">
+  <section class="hero" id="workHero">
+    <div class="hero-content">
+      <div class="badge" id="workBadge">고쓰비 · 다크 판타지</div>
+      <h1 id="workHeroTitle">세계를 구하고,<br>버려졌다</h1>
+      <p id="workHeroDesc">마왕을 쓰러뜨리고 돌아온 소년. 하지만 그를 기다리던 것은 가족의 죽음, 사라진 자리, 그리고 아무도 받아주지 않는 세계였다.</p>
+      <div class="hero-actions">
+        <button class="main-btn" id="firstReadBtn" onclick="openFirstEpisode()">첫 화 바로 읽기</button>
+        <button class="sub-btn" onclick="scrollToEpisodes()">회차 목록 보기</button>
+      </div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-head"><h2>작품 정보</h2><span id="workInfoAuthor">작가 · 고쓰비</span></div>
+    <div class="work-card">
+      <div class="cover" id="workCover" onclick="openFirstEpisode()"></div>
+      <div class="work-info">
+        <h3 id="workTitle">세계를 구하고, 버려졌다</h3>
+        <div class="meta" id="workMeta"></div>
+        <p class="summary" id="workSummary"></p>
+        <div class="stats" id="workStats"></div>
+        <button class="main-btn" id="workReadButton" onclick="openFirstEpisode()">첫 화 보기</button>
+      </div>
+    </div>
+  </section>
+  <section class="section" id="episodes">
+    <div class="section-head"><h2>회차 목록</h2><span id="episodeCountText">총 0화 공개</span></div>
+    <div class="episode-list" id="episodeList"></div>
+  </section>
+</main>
+
+<section class="reader" id="reader">
+  <div class="reader-top">
+    <div class="reader-title-mini">
+      <strong id="readerMiniTitle">1화 - 귀환</strong>
+      <span id="readerSeriesMini">세계를 구하고, 버려졌다</span>
+    </div>
+    <button class="close-btn" onclick="closeReader()">닫기</button>
+  </div>
+  <div class="reader-scroll" id="readerScroll">
+    <article class="novel-wrap">
+      <header class="novel-header">
+        <div class="series-name" id="readerSeriesName">세계를 구하고, 버려졌다</div>
+        <h1 id="readerTitle">1화 - 귀환</h1>
+        <div class="novel-sub" id="readerSub">강도윤 · 소환의 권능 · 귀환</div>
+      </header>
+      <div class="novel-body" id="novelBody"></div>
+      <div class="bottom-nav">
+        <button id="prevBtn" onclick="moveEpisode(-1)">&lt;- 이전화</button>
+        <button onclick="closeReader()">목록</button>
+        <button id="nextBtn" onclick="moveEpisode(1)">다음화 -&gt;</button>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="login-modal" id="loginModal">
+  <div class="login-panel">
+    <h2>chat웹 로그인</h2>
+    <p id="loginGuideText">닉네임과 비밀번호를 입력하세요. 일반 계정은 브라우저에 1개만 저장됩니다.</p>
+    <div class="login-field"><label for="nicknameInput">1. 닉네임 입력</label><input id="nicknameInput" type="text" placeholder="닉네임" autocomplete="username"></div>
+    <div class="login-field"><label for="passwordInput">2. 비밀번호 입력</label><input id="passwordInput" type="password" placeholder="비밀번호" autocomplete="current-password"></div>
+    <div class="login-actions">
+      <button class="cancel-login" onclick="closeLogin()">취소</button>
+      <button class="confirm-login" onclick="confirmLogin()">확인</button>
+    </div>
+    <div class="login-actions" id="deleteSavedAccountBox" style="display:none">
+      <button class="danger-login" onclick="deleteNormalAccount()">기존 계정 지우기</button>
+    </div>
+  </div>
+</section>
+
+<section class="login-modal" id="profileEditModal">
+  <div class="login-panel">
+    <h2>프로필 편집</h2>
+    <p>닉네임이나 비밀번호를 바꿔도 이용권, 코인, 타이머는 그대로 유지됩니다.</p>
+    <div class="profile-edit-tabs">
+      <button id="editNicknameTab" class="active" onclick="showProfileEditPanel('nickname')">닉네임 변경</button>
+      <button id="editPasswordTab" onclick="showProfileEditPanel('password')">비밀번호 변경</button>
+    </div>
+    <div class="edit-panel active" id="editNicknamePanel">
+      <div class="login-field"><label for="newNicknameInput">새 닉네임</label><input id="newNicknameInput" type="text" placeholder="새 닉네임"></div>
       <div class="login-actions">
-        <button class="cancel-login" onclick="closeLogin()">취소</button>
-        <button class="confirm-login" onclick="confirmLogin()">확인</button>
-      </div>
-      <div class="login-actions" id="deleteSavedAccountBox" style="display:none">
-        <button class="danger-login" onclick="deleteNormalAccount()">기존 계정 지우기</button>
+        <button class="cancel-login" onclick="closeProfileEditModal()">취소</button>
+        <button class="confirm-login" onclick="changeNickname()">닉네임 변경</button>
       </div>
     </div>
-  </section>
-
-  <section class="login-modal" id="profileEditModal">
-    <div class="login-panel">
-      <h2>프로필 편집</h2>
-      <p>닉네임이나 비밀번호를 바꿔도 이용권, 코인, 타이머는 그대로 유지됩니다.</p>
-      <div class="profile-edit-tabs">
-        <button id="editNicknameTab" class="active" onclick="showProfileEditPanel('nickname')">닉네임 변경</button>
-        <button id="editPasswordTab" onclick="showProfileEditPanel('password')">비밀번호 변경</button>
-      </div>
-      <div class="edit-panel active" id="editNicknamePanel">
-        <div class="login-field"><label for="newNicknameInput">새 닉네임</label><input id="newNicknameInput" type="text" placeholder="새 닉네임"></div>
-        <div class="login-actions">
-          <button class="cancel-login" onclick="closeProfileEditModal()">취소</button>
-          <button class="confirm-login" onclick="changeNickname()">닉네임 변경</button>
-        </div>
-      </div>
-      <div class="edit-panel" id="editPasswordPanel">
-        <div class="login-field"><label for="oldPasswordInput">현재 비밀번호</label><input id="oldPasswordInput" type="password" placeholder="현재 비밀번호"></div>
-        <div class="login-field"><label for="newPasswordInput">새 비밀번호</label><input id="newPasswordInput" type="password" placeholder="새 비밀번호"></div>
-        <div class="login-actions">
-          <button class="cancel-login" onclick="closeProfileEditModal()">취소</button>
-          <button class="confirm-login" onclick="changePassword()">비밀번호 변경</button>
-        </div>
-      </div>
-    </div>
-  </section>
-  <section class="login-modal" id="avatarModal">
-    <div class="login-panel">
-      <h2>표지 편집</h2>
-      <p id="avatarGuideText">프로필 표지를 꾸밀 수 있습니다. 일반 계정은 보라색을 제외한 색만 사용할 수 있습니다.</p>
-      <div class="avatar-preview-box">
-        <div class="profile-img" id="avatarPreview"></div>
-        <div class="avatar-preview-text">현재 선택한 표지 미리보기입니다.<br>사진을 고르면 자동으로 작게 압축해서 저장됩니다.</div>
-      </div>
-      <div class="avatar-option-title">색 선택</div>
-      <div class="avatar-color-grid" id="avatarColorGrid">
-        <button class="avatar-choice" data-color="red" onclick="selectAvatarColor('red')"><span class="avatar-color-dot avatar-red"></span>빨강</button>
-        <button class="avatar-choice" data-color="orange" onclick="selectAvatarColor('orange')"><span class="avatar-color-dot avatar-orange"></span>주황</button>
-        <button class="avatar-choice" data-color="yellow" onclick="selectAvatarColor('yellow')"><span class="avatar-color-dot avatar-yellow"></span>노랑</button>
-        <button class="avatar-choice" data-color="green" onclick="selectAvatarColor('green')"><span class="avatar-color-dot avatar-green"></span>초록</button>
-        <button class="avatar-choice" data-color="blue" onclick="selectAvatarColor('blue')"><span class="avatar-color-dot avatar-blue"></span>파랑</button>
-        <button class="avatar-choice" data-color="pink" onclick="selectAvatarColor('pink')"><span class="avatar-color-dot avatar-pink"></span>핑크</button>
-        <button class="avatar-choice" data-color="white" onclick="selectAvatarColor('white')"><span class="avatar-color-dot avatar-white"></span>흰색</button>
-      </div>
-      <div class="avatar-option-title">모양 선택</div>
-      <div class="avatar-shape-grid">
-        <button class="avatar-choice" data-shape="circle" onclick="selectAvatarShape('circle')">공</button>
-        <button class="avatar-choice" data-shape="square" onclick="selectAvatarShape('square')">네모</button>
-        <button class="avatar-choice" data-shape="triangle" onclick="selectAvatarShape('triangle')">세모</button>
-        <button class="avatar-choice" data-shape="star" onclick="selectAvatarShape('star')">별</button>
-      </div>
-      <label class="file-btn">
-        갤러리에서 사진 고르기
-        <input type="file" accept="image/*" onchange="handleAvatarFile(event)">
-      </label>
+    <div class="edit-panel" id="editPasswordPanel">
+      <div class="login-field"><label for="oldPasswordInput">현재 비밀번호</label><input id="oldPasswordInput" type="password" placeholder="현재 비밀번호"></div>
+      <div class="login-field"><label for="newPasswordInput">새 비밀번호</label><input id="newPasswordInput" type="password" placeholder="새 비밀번호"></div>
       <div class="login-actions">
-        <button class="cancel-login" onclick="closeAvatarModal()">취소</button>
-        <button class="danger-login" onclick="removeAvatarPhoto()">사진 제거</button>
-        <button class="confirm-login" onclick="saveAvatar()">저장</button>
+        <button class="cancel-login" onclick="closeProfileEditModal()">취소</button>
+        <button class="confirm-login" onclick="changePassword()">비밀번호 변경</button>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="login-modal" id="ticketModal">
-    <div class="login-panel">
-      <h2>내 이용권</h2>
-      <div class="ticket-box">
-        <strong>이용권</strong>
-        <p id="ticketStatusText">현재 이용권 수는 0개입니다.</p>
-        <p id="coinStatusText">현재 코인 수는 0개입니다.</p>
-      </div>
-      <div class="ticket-box">
-        <strong>코인 얻기</strong>
-        <p id="coinBankText">쌓인 코인: 0개 / 최대 10개</p>
-        <p id="coinTimerText">코인 생성 대기 중</p>
-        <button class="start-coin-btn" onclick="startCoinGenerator()">코인 얻기 시작</button>
-        <button class="collect-btn" onclick="collectCoins()">쌓인 코인 회수</button>
-      </div>
-      <div class="ticket-box">
-        <strong>코인상점</strong>
-        <p>코인 3개 = 이용권 1장</p>
-        <div class="ticket-shop">
-          <button onclick="buyTickets(1)">이용권 1장 구매 · 코인 3개</button>
-          <button onclick="buyTickets(2)">이용권 2장 구매 · 코인 6개</button>
-          <button onclick="buyTickets(3)">이용권 3장 구매 · 코인 9개</button>
-        </div>
-      </div>
-      <div class="login-actions">
-        <button class="cancel-login" onclick="closeTicketModal()">닫기</button>
-      </div>
+<section class="login-modal" id="avatarModal">
+  <div class="login-panel">
+    <h2>표지 편집</h2>
+    <p id="avatarGuideText">프로필 표지를 꾸밀 수 있습니다. 일반 계정은 보라색을 제외한 색만 사용할 수 있습니다.</p>
+    <div class="avatar-preview-box">
+      <div class="profile-img" id="avatarPreview"></div>
+      <div class="avatar-preview-text">현재 선택한 표지 미리보기입니다.<br>사진을 고르면 자동으로 작게 압축해서 저장됩니다.</div>
     </div>
-  </section>
+    <div class="avatar-color-grid" id="avatarColorGrid">
+      <button class="avatar-choice" data-color="red" onclick="selectAvatarColor('red')"><span class="avatar-color-dot avatar-red"></span>빨강</button>
+      <button class="avatar-choice" data-color="orange" onclick="selectAvatarColor('orange')"><span class="avatar-color-dot avatar-orange"></span>주황</button>
+      <button class="avatar-choice" data-color="yellow" onclick="selectAvatarColor('yellow')"><span class="avatar-color-dot avatar-yellow"></span>노랑</button>
+      <button class="avatar-choice" data-color="green" onclick="selectAvatarColor('green')"><span class="avatar-color-dot avatar-green"></span>초록</button>
+      <button class="avatar-choice" data-color="blue" onclick="selectAvatarColor('blue')"><span class="avatar-color-dot avatar-blue"></span>파랑</button>
+      <button class="avatar-choice" data-color="pink" onclick="selectAvatarColor('pink')"><span class="avatar-color-dot avatar-pink"></span>핑크</button>
+      <button class="avatar-choice" data-color="white" onclick="selectAvatarColor('white')"><span class="avatar-color-dot avatar-white"></span>흰색</button>
+    </div>
+    <div class="avatar-shape-grid">
+      <button class="avatar-choice" data-shape="circle" onclick="selectAvatarShape('circle')">공</button>
+      <button class="avatar-choice" data-shape="square" onclick="selectAvatarShape('square')">네모</button>
+      <button class="avatar-choice" data-shape="triangle" onclick="selectAvatarShape('triangle')">세모</button>
+      <button class="avatar-choice" data-shape="star" onclick="selectAvatarShape('star')">별</button>
+    </div>
+    <label class="file-btn">갤러리에서 사진 고르기<input type="file" accept="image/*" onchange="handleAvatarFile(event)"></label>
+    <div class="login-actions">
+      <button class="cancel-login" onclick="closeAvatarModal()">취소</button>
+      <button class="danger-login" onclick="removeAvatarPhoto()">사진 제거</button>
+      <button class="confirm-login" onclick="saveAvatar()">저장</button>
+    </div>
+  </div>
+</section>
 
-  <section class="login-modal" id="paidEpisodeModal">
-    <div class="login-panel">
-      <h2 id="paidEpisodeTitle">미리보기 열람</h2>
-      <p id="paidEpisodeMessage">이용권 3장이 소모됩니다. 보시겠습니까?</p>
-      <div class="ticket-box">
-        <strong>선택</strong>
-        <p>열람은 볼 때마다 이용권 3장이 필요합니다.</p>
-        <p>소장은 이용권 5장이 필요하고, 이후 계속 볼 수 있습니다.</p>
-      </div>
+<section class="login-modal" id="ticketModal">
+  <div class="login-panel">
+    <h2>내 이용권</h2>
+    <div class="ticket-box">
+      <strong>이용권</strong>
+      <p id="ticketStatusText">현재 이용권 수는 0개입니다.</p>
+      <p id="coinStatusText">현재 코인 수는 0개입니다.</p>
+    </div>
+    <div class="ticket-box">
+      <strong>코인 얻기</strong>
+      <p id="coinBankText">쌓인 코인: 0개 / 최대 10개</p>
+      <p id="coinTimerText">코인 생성 대기 중</p>
+      <button class="start-coin-btn" onclick="startCoinGenerator()">코인 얻기 시작</button>
+      <button class="collect-btn" onclick="collectCoins()">쌓인 코인 회수</button>
+    </div>
+    <div class="ticket-box">
+      <strong>코인상점</strong>
+      <p>코인 3개 = 이용권 1장</p>
       <div class="ticket-shop">
-        <button class="view-once-btn" onclick="confirmPaidView()">이용권 3장 쓰고 보기</button>
-        <button class="own-btn" onclick="confirmOwnEpisode()">이용권 5장으로 소장하기</button>
-      </div>
-      <div class="login-actions">
-        <button class="cancel-login" onclick="closePaidEpisodeModal()">아니오</button>
+        <button onclick="buyTickets(1)">이용권 1장 구매 · 코인 3개</button>
+        <button onclick="buyTickets(2)">이용권 2장 구매 · 코인 6개</button>
+        <button onclick="buyTickets(3)">이용권 3장 구매 · 코인 9개</button>
       </div>
     </div>
-  </section>
+    <div class="login-actions"><button class="cancel-login" onclick="closeTicketModal()">닫기</button></div>
+  </div>
+</section>
 
-  <section class="login-modal" id="needTicketModal">
-    <div class="login-panel">
-      <h2>보유 이용권 수가 부족합니다.</h2>
-      <p>미리보기 회차는 열람 3장, 소장 5장이 필요합니다.</p>
-      <button class="go-ticket-btn" onclick="goTicketFromNeed()">내 이용권 수 보기 -&gt;</button>
-      <div class="login-actions">
-        <button class="cancel-login" onclick="closeNeedTicketModal()">닫기</button>
-      </div>
+<section class="login-modal" id="paidEpisodeModal">
+  <div class="login-panel">
+    <h2 id="paidEpisodeTitle">미리보기 열람</h2>
+    <p id="paidEpisodeMessage">이용권 3장이 소모됩니다. 보시겠습니까?</p>
+    <div class="ticket-box">
+      <strong>선택</strong>
+      <p>열람은 볼 때마다 이용권 3장이 필요합니다.</p>
+      <p>소장은 이용권 5장이 필요하고, 이후 계속 볼 수 있습니다.</p>
     </div>
-  </section>
-
-  <section class="login-modal" id="freeTicketModal">
-    <div class="login-panel">
-      <h2>처음 오셨군요?</h2>
-      <p>
-        chat웹 첫 방문 보상으로 무료 이용권 3장을 받을 수 있습니다.<br>
-        이 보상은 같은 브라우저에서 한 번만 받을 수 있습니다.
-      </p>
-      <div class="ticket-box">
-        <strong>무료 이용권 받기!</strong>
-        <p>받는 즉시 이용권 3장이 지급됩니다.</p>
-      </div>
-      <button class="go-ticket-btn" onclick="claimFreeTickets()">무료 이용권 3장 받기</button>
-      <div class="login-actions">
-        <button class="cancel-login" onclick="closeFreeTicketModal()">나중에 받기</button>
-      </div>
+    <div class="ticket-shop">
+      <button class="view-once-btn" onclick="confirmPaidView()">이용권 3장 쓰고 보기</button>
+      <button class="own-btn" onclick="confirmOwnEpisode()">이용권 5장으로 소장하기</button>
     </div>
-  </section>
+    <div class="login-actions"><button class="cancel-login" onclick="closePaidEpisodeModal()">아니오</button></div>
+  </div>
+</section>
 
-  <div class="toast" id="toast">알림</div>
+<section class="login-modal" id="needTicketModal">
+  <div class="login-panel">
+    <h2>보유 이용권 수가 부족합니다.</h2>
+    <p>미리보기 회차는 열람 3장, 소장 5장이 필요합니다.</p>
+    <button class="go-ticket-btn" onclick="goTicketFromNeed()">내 이용권 수 보기 -&gt;</button>
+    <div class="login-actions"><button class="cancel-login" onclick="closeNeedTicketModal()">닫기</button></div>
+  </div>
+</section>
 
-  <script>
-    const pages=["homePage","weekdayPage","fantasyPage","actionPage","newPage","rankingPage","completePage","searchPage","profilePage","workDetailPage"];
-    const navItems=["navHome","navWeekday","navFantasy","navAction","navNew","navRanking","navComplete"];
+<section class="login-modal" id="freeTicketModal">
+  <div class="login-panel">
+    <h2>처음 오셨군요?</h2>
+    <p>chat웹 첫 방문 보상으로 무료 이용권 3장을 받을 수 있습니다.<br>이 보상은 같은 브라우저에서 한 번만 받을 수 있습니다.</p>
+    <div class="ticket-box"><strong>무료 이용권 받기!</strong><p>받는 즉시 이용권 3장이 지급됩니다.</p></div>
+    <button class="go-ticket-btn" onclick="claimFreeTickets()">무료 이용권 3장 받기</button>
+    <div class="login-actions"><button class="cancel-login" onclick="closeFreeTicketModal()">나중에 받기</button></div>
+  </div>
+</section>
 
-    const reader=document.getElementById("reader");
-    const readerScroll=document.getElementById("readerScroll");
-    const toast=document.getElementById("toast");
-    const loginModal=document.getElementById("loginModal");
-    const profileEditModal=document.getElementById("profileEditModal");
-    const avatarModal=document.getElementById("avatarModal");
-    const ticketModal=document.getElementById("ticketModal");
-    const needTicketModal=document.getElementById("needTicketModal");
-    const freeTicketModal=document.getElementById("freeTicketModal");
-    const paidEpisodeModal=document.getElementById("paidEpisodeModal");
-    const accountBtn=document.getElementById("accountBtn");
-    const searchInput=document.getElementById("searchInput");
+<div class="toast" id="toast">알림</div>
 
-    const readerMiniTitle=document.getElementById("readerMiniTitle");
-    const readerSeriesMini=document.getElementById("readerSeriesMini");
-    const readerSeriesName=document.getElementById("readerSeriesName");
-    const readerTitle=document.getElementById("readerTitle");
-    const readerSub=document.getElementById("readerSub");
-    const novelBody=document.getElementById("novelBody");
-    const prevBtn=document.getElementById("prevBtn");
-    const nextBtn=document.getElementById("nextBtn");
+<script>
+const pages=["homePage","weekdayPage","fantasyPage","actionPage","newPage","rankingPage","completePage","searchPage","profilePage","workDetailPage"];
+const navItems=["navHome","navWeekday","navFantasy","navAction","navNew","navRanking","navComplete"];
+const reader=document.getElementById("reader"),readerScroll=document.getElementById("readerScroll"),toast=document.getElementById("toast"),loginModal=document.getElementById("loginModal"),profileEditModal=document.getElementById("profileEditModal"),avatarModal=document.getElementById("avatarModal"),ticketModal=document.getElementById("ticketModal"),needTicketModal=document.getElementById("needTicketModal"),freeTicketModal=document.getElementById("freeTicketModal"),paidEpisodeModal=document.getElementById("paidEpisodeModal"),accountBtn=document.getElementById("accountBtn"),searchInput=document.getElementById("searchInput");
+const readerMiniTitle=document.getElementById("readerMiniTitle"),readerSeriesMini=document.getElementById("readerSeriesMini"),readerSeriesName=document.getElementById("readerSeriesName"),readerTitle=document.getElementById("readerTitle"),readerSub=document.getElementById("readerSub"),novelBody=document.getElementById("novelBody"),prevBtn=document.getElementById("prevBtn"),nextBtn=document.getElementById("nextBtn");
+let currentUser=null,currentWorkId="world",currentEpisode=1,pendingEpisodeNumber=null,pendingWorkId=null,avatarDraft={color:"green",shape:"circle",photo:""};
+const AUTHOR_NAME="고쓰비",AUTHOR_PASSWORD="2012424!",COIN_INTERVAL=2700000,COIN_BANK_MAX=10;
+const NORMAL_ACCOUNT_KEY="chatweb_single_normal_account",AUTHOR_ACCOUNT_KEY="chatweb_author_account",CURRENT_LOGIN_KEY="chatweb_current_login",FREE_TICKET_KEY="chatweb_free_ticket_claimed";
+const AVATAR_COLORS=["red","orange","yellow","green","blue","pink","white"],AVATAR_SHAPES=["circle","square","triangle","star"];
 
-    let currentUser=null;
-    let currentWorkId="world";
-    let currentEpisode=1;
-    let pendingEpisodeNumber=null;
-    let pendingWorkId=null;
-    let avatarDraft={color:"green",shape:"circle",photo:""};
-
-    const AUTHOR_NAME="고쓰비";
-    const AUTHOR_PASSWORD="2012424!";
-    const COIN_INTERVAL=2700000;
-    const COIN_BANK_MAX=10;
-
-    const NORMAL_ACCOUNT_KEY="chatweb_single_normal_account";
-    const AUTHOR_ACCOUNT_KEY="chatweb_author_account";
-    const CURRENT_LOGIN_KEY="chatweb_current_login";
-    const FREE_TICKET_KEY="chatweb_free_ticket_claimed";
-
-    const AVATAR_COLORS=["red","orange","yellow","green","blue","pink","white"];
-    const AVATAR_SHAPES=["circle","square","triangle","star"];
-
-    const works={
-      world:{
-        id:"world",
-        title:"세계를 구하고, 버려졌다",
-        author:"고쓰비",
-        firstEpisode:1,
-        type:"world",
-        heroTitle:"세계를 구하고,<br>버려졌다",
-        heroDesc:"마왕을 쓰러뜨리고 돌아온 소년. 하지만 그를 기다리던 것은 가족의 죽음, 사라진 자리, 그리고 아무도 받아주지 않는 세계였다.",
-        badge:"고쓰비 · 다크 판타지",
-        meta:["다크 판타지","귀환자","복수","각성자"],
-        summary:"2100년대, 각성자들은 자신의 권능과 연결된 세계로 보내진다. 소환의 권능을 얻은 강도윤은 마왕을 처치하고 지구로 돌아오지만, 그가 지킨 세계는 이미 그를 버린 뒤였다.",
-        stats:["★ 0","조회 0","관심 0","총 10화 공개"],
-        aliases:["세계를","세계를구하고","세계를구하고버려졌다","세계를구했더니","세계를구했더니버려졌다","버려졌다","강도윤","귀환","고쓰비","포위","분류되지않은힘","충전된하늘","남겨진것의형태","해가없는나라","끊어지지않는선","모여드는불씨","모여드는불씨2","모여드는불씨(2)","솔라리스","강세윤","한태민","한지훈","번개의권능","망치의권능","번개압력","번개분분","번개난벽","천마신공","염화의손","아스","천공의요새","이도현","HG","검술의권능","신화급각성자","캡슐"],
-        episodes:{
-          1:{title:"1화 - 귀환",sub:"강도윤 · 소환의 권능 · 귀환",desc:"세계를 구한 용사, 자신의 세계에서 버려지다.",date:"2026.04.30",raw:`“……이걸로, 끝이군.”
+const works={
+world:{
+id:"world",
+title:"세계를 구하고, 버려졌다",
+author:"고쓰비",
+firstEpisode:1,
+type:"world",
+heroTitle:"세계를 구하고,<br>버려졌다",
+heroDesc:"마왕을 쓰러뜨리고 돌아온 소년. 하지만 그를 기다리던 것은 가족의 죽음, 사라진 자리, 그리고 아무도 받아주지 않는 세계였다.",
+badge:"고쓰비 · 다크 판타지",
+meta:["다크 판타지","귀환자","복수","각성자"],
+summary:"2100년대, 각성자들은 자신의 권능과 연결된 세계로 보내진다. 소환의 권능을 얻은 강도윤은 마왕을 처치하고 지구로 돌아오지만, 그가 지킨 세계는 이미 그를 버린 뒤였다.",
+stats:["★ 0","조회 0","관심 0","총 11화 공개"],
+aliases:["세계를","세계를구하고","세계를구하고버려졌다","세계를구했더니","세계를구했더니버려졌다","버려졌다","강도윤","고쓰비","솔라리스","솔라리스국","이름을남기는방식","강세윤","한태민","한지훈","천마절단신공","검술의권능","무림의권능","절단의권능","신화급각성자"],
+episodes:{
+1:{title:"1화 - 귀환",sub:"강도윤 · 소환의 권능 · 귀환",desc:"세계를 구한 용사, 자신의 세계에서 버려지다.",date:"2026.04.30",raw:`“……이걸로, 끝이군.”
 
 검게 갈라진 대지 위에 서 있던 소년이, 아주 천천히 숨을 내쉬었다.
+
 피비린내가 가시지 않은 공기, 무너진 성채, 그리고 더 이상 움직이지 않는 거대한 존재.
 
 마왕.
@@ -745,6 +634,7 @@
 그 이름으로 불리던 존재는, 이제 그저 시체에 불과했다.
 
 소년—아직 고등학생 티를 완전히 벗지 못한 얼굴의 그는, 한 손을 들어 올렸다.
+
 허공에, 붉은빛의 문장이 조용히 떠올랐다.
 
 [마왕 처치 완료]
@@ -759,18 +649,21 @@
 “용사님!”
 
 뒤에서 달려오는 발걸음 소리.
+
 익숙한 목소리에, 그는 천천히 고개를 돌렸다.
 
-은빛 머리의 소녀가 숨을 헐떡이며 멈춰 섰다. 그 뒤로, 함께 싸워온 동료들이 하나둘 모습을 드러냈다.
+은빛 머리의 소녀가 숨을 헐떡이며 멈춰 섰다.
 
 “끝났… 네요.”
 
 검을 짚은 채 서 있던 남자가 낮게 웃었다.
+
 “진짜로, 해낸 거야.”
 
 소년은 아무 말 없이 그들을 바라봤다.
 
 짧지 않은 시간이었다.
+
 수없이 죽을 뻔했고, 몇 번이나 포기할 뻔했다.
 
 그래도 결국—
@@ -780,11 +673,13 @@
 “……이제, 돌아가시는 겁니까.”
 
 조용히 묻는 목소리.
+
 은빛 머리의 소녀였다.
 
 소년은 잠시 대답하지 않았다.
 
 그저 하늘을 올려다봤다.
+
 이 세계의 하늘은 끝까지 낯설었다.
 
 “…그래야지.”
@@ -792,6 +687,7 @@
 짧은 대답.
 
 그 말에, 소녀는 입술을 꽉 물었다.
+
 그리고—
 
 결국, 눈물이 흘러내렸다.
@@ -822,12 +718,12 @@
 
 “…잘가요.”
 
-그 말은 거의 들리지 않을 정도로 작았지만,
-분명히, 가슴 깊숙이 박혔다.
+그 말은 거의 들리지 않을 정도로 작았지만, 분명히, 가슴 깊숙이 박혔다.
 
 다른 동료들도 아무 말 없이 고개를 숙였다.
 
 붙잡지 않았다.
+
 잡을 수도 없다는 걸 알고 있었으니까.
 
 소년은 그들을 한 명씩 바라봤다.
@@ -889,6 +785,7 @@
 익숙한 길이었다.
 
 수없이 걸었던 길.
+
 학교 가던 길, 집에 가던 길.
 
 그런데—
@@ -902,7 +799,9 @@
 분명히 알고 있는 거리인데, 어딘가 달랐다.
 
 간판이 바뀌어 있었다.
+
 건물 색이 달랐다.
+
 지나가는 사람들의 옷차림도—
 
 묘하게 낯설었다.
@@ -1132,9 +1031,11 @@
 아무도 그를 받아주지 않았다.
 
 학교는 이미 제적 처리.
+
 나이는 애매해서 복학도 불가.
 
 친척도 그를 배척했다.
+
 기록은 끊겨 있고, 증명할 방법도 없다.
 
 집도 없고, 돈도 없고, 갈 곳도 없다.
@@ -1266,7 +1167,8 @@
 아주 조용하게 웃었다.
 
 “내가 버린다.”`},
-          2:{title:"2화 - 공모",sub:"백진우 · 유하린 · 제주도",desc:"버려진 자들이 만나고, 세계를 향한 전쟁이 시작된다.",date:"2026.04.30",raw:`쾅—
+
+2:{title:"2화 - 공모",sub:"백진우 · 유하린 · 제주도",desc:"버려진 자들이 만나고, 세계를 향한 전쟁이 시작된다.",date:"2026.04.30",raw:`쾅—
 
 빛이, 가로로 베어졌다.
 
@@ -1753,11 +1655,13 @@
 전쟁이—
 
 시작되려 하고 있었다.`},
-          3:{title:"3화 - 포위",sub:"아스 길드 · 포위 · 천공의 요새",desc:"제주도에서 포위된 세 사람, 그리고 아스 길드와의 첫 충돌.",date:"2026.04.30",raw:`“……정리 좀 해보자.”
+
+3:{title:"3화 - 포위",sub:"아스 길드 · 포위 · 천공의 요새",desc:"제주도에서 포위된 세 사람, 그리고 아스 길드와의 첫 충돌.",date:"2026.04.30",raw:`“……정리 좀 해보자.”
 
 작은 집 안, 기묘하게 조용한 공간이었다.
 
 밖에서는 이미 아수라장이 벌어졌지만—
+
 이 안만큼은, 마치 다른 세계처럼 고요했다.
 
 강도윤은 창가에서 시선을 떼며 입을 열었다.
@@ -2171,11 +2075,18 @@ B3탄이, 폭우처럼 쏟아졌다.
 요새가 완전히 모습을 드러냈다.
 
 세상이, 그 아래에 눌렸다.`},
-          4:{title:"4화 - 분류되지 않은 힘",sub:"소환 포인트 · 각성자 등급 · 이도현",desc:"소환 포인트, 권능의 한계, 그리고 국방부의 대응.",date:"2026.04.30",raw:`천공의 요새는 하늘 위에 떠 있었다.
 
-구름 아래로 펼쳐진 세상은 너무 멀어 보였고, 이 공간만이 유독 현실과 분리된 듯 고요했다. 방금 전까지 벌어졌던 전투의 흔적조차 이 안에서는 희미하게 가라앉아 있었다.
+4:{title:"4화 - 분류되지 않은 힘",sub:"소환 포인트 · 각성자 등급 · 이도현",desc:"소환 포인트, 권능의 한계, 그리고 국방부의 대응.",date:"2026.04.30",raw:`천공의 요새는 하늘 위에 떠 있었다.
 
-강도윤은 창가에 서서 아래를 내려다보고 있었다. 이 공간이 자신의 권능으로 만들어졌다는 사실은 분명했지만, 완전히 통제된 느낌은 아니었다. 마치 손끝에서 조금씩 미끄러지는 세계처럼.
+구름 아래로 펼쳐진 세상은 너무 멀어 보였고, 이 공간만이 유독 현실과 분리된 듯 고요했다.
+
+방금 전까지 벌어졌던 전투의 흔적조차 이 안에서는 희미하게 가라앉아 있었다.
+
+강도윤은 창가에 서서 아래를 내려다보고 있었다.
+
+이 공간이 자신의 권능으로 만들어졌다는 사실은 분명했지만, 완전히 통제된 느낌은 아니었다.
+
+마치 손끝에서 조금씩 미끄러지는 세계처럼.
 
 백진우가 바닥에 털썩 주저앉았다.
 
@@ -2257,7 +2168,9 @@ B3탄이, 폭우처럼 쏟아졌다.
 
 손끝에서 불꽃이 피어올랐다.
 
-그 불은 단순한 화염이 아니었다. 형태를 바꾸며 칼이 되었다가 바람처럼 퍼졌다가 다시 응축되었다.
+그 불은 단순한 화염이 아니었다.
+
+형태를 바꾸며 칼이 되었다가 바람처럼 퍼졌다가 다시 응축되었다.
 
 “불과 관련된 건 거의 다 가능해.”
 
@@ -2310,6 +2223,7 @@ B3탄이, 폭우처럼 쏟아졌다.
 긴 테이블 위로 자료들이 쌓여 있었다.
 
 인원은 10명 남짓.
+
 국방부 핵심 인사들과 각성자 분석관들이 함께 앉아 있었다.
 
 한 남자가 서류를 내려놓았다.
@@ -2411,9 +2325,13 @@ B3탄이, 폭우처럼 쏟아졌다.
 그리고 마지막으로, 진우가 낮게 말했다.
 
 “…우리는—`},
-          5:{title:"5화 - 충전된 하늘",sub:"소환 포인트 · 이도현 · 절단의 권능",desc:"회복된 소환 포인트와 다시 다가오는 지휘관급 각성자.",date:"2026.05.01",raw:`천공의 요새는 여전히 하늘 위에 떠 있었다.
+5:{title:"5화 - 충전된 하늘",sub:"소환 포인트 · 이도현 · 절단의 권능",desc:"회복된 소환 포인트와 다시 다가오는 지휘관급 각성자.",date:"2026.05.01",raw:`천공의 요새는 여전히 하늘 위에 떠 있었다.
 
-전투 이후의 공기는 조금씩 가라앉고 있었고, 내부는 이상할 정도로 안정되어 있었다. 도윤은 요새 중심부에 앉아 있었다. 그의 손끝에는 보이지 않는 흐름이 느리게 돌아가고 있었다.
+전투 이후의 공기는 조금씩 가라앉고 있었고, 내부는 이상할 정도로 안정되어 있었다.
+
+도윤은 요새 중심부에 앉아 있었다.
+
+그의 손끝에는 보이지 않는 흐름이 느리게 돌아가고 있었다.
 
 소환 포인트.
 
@@ -2674,7 +2592,8 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 그리고 요새만이—
 
 하늘 위에 남아 있었다`},
-          6:{title:"6화 - 남겨진 것의 형태",sub:"특수 캡슐 · 이도현 · HG",desc:"도윤은 특수 캡슐을 완성하고, 쓰러진 이도현을 새로운 전력으로 재구성한다.",date:"2026.05.01",raw:`천공의 요새 내부는 이전보다 더 안정적으로 정리되어 있었다.
+
+6:{title:"6화 - 남겨진 것의 형태",sub:"특수 캡슐 · 이도현 · HG",desc:"도윤은 특수 캡슐을 완성하고, 쓰러진 이도현을 새로운 전력으로 재구성한다.",date:"2026.05.01",raw:`천공의 요새 내부는 이전보다 더 안정적으로 정리되어 있었다.
 
 전투 이후 흩어졌던 구조들이 자동적으로 복구되고 있었고, 도윤은 요새 내부 깊숙한 곳으로 내려가고 있었다.
 
@@ -2889,7 +2808,8 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 잠깐 멈췄다가.
 
 “아무래도 도움이 필요할 것 같다.”`},
-          7:{title:"7화 - 해가 없는 나라",sub:"솔라리스 · 군단 체계 · 강세윤",desc:"도윤은 솔라리스라는 이름의 나라와 군단 체계를 세우기 시작한다.",date:"2026.05.01",raw:`천공의 요새 중앙 회의실.
+
+7:{title:"7화 - 해가 없는 나라",sub:"솔라리스 · 군단 체계 · 강세윤",desc:"도윤은 솔라리스라는 이름의 나라와 군단 체계를 세우기 시작한다.",date:"2026.05.01",raw:`천공의 요새 중앙 회의실.
 
 네 사람이 한 자리에 모여 있었다.
 
@@ -3150,7 +3070,7 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 그리고—
 
 보이지 않는 전쟁이, 천천히 움직이기 시작했다.`},
-          8:{title:"8화 - 끊어지지 않는 선",sub:"군단 강화 · 캡슐 · 신화급 각성자",desc:"도윤은 각 군단을 강화하고, 캡슐을 이용한 새로운 생존 구조를 완성한다.",date:"2026.05.01",preview:true,cost:3,ownCost:5,raw:`10일.
+8:{title:"8화 - 끊어지지 않는 선",sub:"군단 강화 · 캡슐 · 신화급 각성자",desc:"도윤은 각 군단을 강화하고, 캡슐을 이용한 새로운 생존 구조를 완성한다.",date:"2026.05.01",raw:`10일.
 
 짧다면 짧고, 길다면 긴 시간이었다.
 
@@ -3460,7 +3380,8 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 [한국의 2,3번째 신화급 각성자는 어디에 갔나?]
 
 도윤의 손가락이 멈췄다.`},
-          9:{title:"9화 - 모여드는 불씨",sub:"강세윤 · 한태민 · 한지훈",desc:"강세윤이 토벌 인원을 모집하고, 제주도의 군단 기지에는 새로운 접근 신호가 잡힌다.",date:"2026.05.01",preview:true,cost:3,ownCost:5,raw:`서울.
+
+9:{title:"9화 - 모여드는 불씨",sub:"강세윤 · 한태민 · 한지훈",desc:"강세윤이 토벌 인원을 모집하고, 제주도의 군단 기지에는 새로운 접근 신호가 잡힌다.",date:"2026.05.01",preview:true,cost:3,ownCost:5,raw:`서울.
 
 광화문 광장.
 
@@ -3646,7 +3567,8 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 서로 다른 방향에서—
 
 무언가가 움직이고 있었다.`},
-          10:{title:"10화 - 모여드는 불씨 (2)",sub:"강세윤 · 한태민 · 한지훈 · 신화급",desc:"강세윤과 HG, 한태민과 한지훈이 솔라리스 군단 주둔지에 도착하고 전투가 시작된다.",date:"2026.05.02",preview:true,cost:3,ownCost:5,raw:`제주도.
+
+10:{title:"10화 - 모여드는 불씨 (2)",sub:"강세윤 · 한태민 · 한지훈 · 신화급",desc:"강세윤과 HG, 한태민과 한지훈이 솔라리스 군단 주둔지에 도착하고 전투가 시작된다.",date:"2026.05.02",preview:true,cost:3,ownCost:5,raw:`제주도.
 
 솔라리스.
 
@@ -3994,26 +3916,244 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 
 진우와 유하린이 동시에 말한다.
 
-“이제 시작이다.”`}
-        }
-      },
-      kill:{
-        id:"kill",
-        title:"킬 게이지 시스템",
-        author:"고쓰비",
-        firstEpisode:0,
-        type:"kill",
-        heroTitle:"킬 게이지<br>시스템",
-        heroDesc:"모든 인간의 시야에 시스템이 나타난 날. 사람들은 죽음이 곧 힘으로 이어지는 세계에서 살아남기 위해 움직이기 시작한다.",
-        badge:"고쓰비 · 시스템 판타지",
-        meta:["시스템","성장","차수 배틀","액션"],
-        summary:"킬 게이지가 활성화된 세계. 죽음 이후 남겨진 자들은 조금씩 강해지고, 살아남은 자들은 자신만의 차수와 힘을 각성한다.",
-        stats:["★ 0","조회 0","관심 0","총 2화 공개"],
-        aliases:["킬게이지","킬게이지시스템","킬 게이지 시스템","김서현","서현","차수","초강권","초강갑주","혈각","철쇄보","고쓰비","프롤로그","각성의시작"],
-        episodes:{
-          0:{title:"0화 - 프롤로그",sub:"세계의 변화 · 킬 게이지 시스템",desc:"모든 인간의 시야에 킬 게이지 시스템이 나타난 날, 세계는 조용히 무너지기 시작한다.",date:"2026.05.02",raw:`0. 세계의 변화
+“이제 시작이다.”`},
 
-그날은 특별한 날처럼 보이지 않았다.
+11:{title:"11화 - 이름을 남기는 방식",sub:"솔라리스국 · 강세윤 · 특수 캡슐",desc:"솔라리스는 적을 모두 죽이는 대신 이름을 세계에 남기는 방식을 선택한다.",date:"2026.05.02",preview:true,cost:3,ownCost:5,raw:`제3군단 전장.
+
+공기는 이미 한 번 뒤틀린 상태였다.
+
+진우의 무림 권능이 공간을 짓누르고 있었고, 강세윤의 검술은 그 압력 속에서도 버티고 있었다.
+
+하지만—
+
+한쪽이 더 많았다.
+
+이도현이 옆에서 짧게 말했다.
+
+“끝내야겠다.”
+
+진우가 고개를 끄덕였다.
+
+그리고 동시에—
+
+움직였다.
+
+「무림의 권능」 X 「절단의 권능」 「천마절단신공」
+
+공간이 찢어졌다.
+
+검술의 궤적이 따라가기도 전에, 이미 결과가 먼저 도착했다.
+
+강세윤의 검이 멈췄다.
+
+그리고—
+
+몸이 갈라졌다.
+
+“…….”
+
+말이 나오지 않았다.
+
+전투는 끝났다.
+
+
+염화 군단 주둔지.
+
+유하린은 숨을 고르고 있었다.
+
+두 명은 이미 제압된 상태였다.
+
+한태민.
+
+한지훈.
+
+둘 다 움직이지 못했다.
+
+유하린의 손에 불꽃이 다시 모였다.
+
+“끝내자.”
+
+그 순간—
+
+통신 장비가 울렸다.
+
+지직.
+
+도윤이었다.
+
+“그만둬.”
+
+짧았다.
+
+유하린이 멈췄다.
+
+“…왜.”
+
+도윤의 목소리가 이어졌다.
+
+“죽이지 마.”
+
+“둘은 살려.”
+
+잠깐의 침묵.
+
+그리고—
+
+“우리 나라 위상 보여줘야지.”
+
+유하린의 눈이 가늘어졌다.
+
+
+잠시 후.
+
+전장.
+
+도윤이 직접 나와 있었다.
+
+그는 쓰러진 두 사람 앞에 섰다.
+
+한태민.
+
+한지훈.
+
+도윤은 둘을 내려다보며 말했다.
+
+“돌아가.”
+
+“그리고 전해.”
+
+두 사람은 숨을 몰아쉬었다.
+
+도윤이 짧게 말했다.
+
+“우리는 솔라리스국이다.”
+
+“전 세계에 알려.”
+
+잠깐 정적.
+
+그리고—
+
+두 사람은 강제로라도 일어났다.
+
+「소환의 권능」 「게이트」
+
+게이트가 생성됐다.
+
+두 사람은 전장에서 빠져나갔다.
+
+
+같은 시각.
+
+비밀실험실.
+
+도윤은 이미 움직이고 있었다.
+
+그리고—
+
+검술의 권능이었던 존재.
+
+그것이 담겼다.
+
+「소환의 권능」 「특수 캡슐」
+
+빛이 닫히며 하나의 존재가 봉인되었다.
+
+도윤이 낮게 말했다.
+
+“새 식구군.”
+
+
+국방부.
+
+지하 회의실.
+
+두 사람이 바닥에 무릎을 꿇고 있었다.
+
+한태민.
+
+한지훈.
+
+“실패했습니다.”
+
+국방부 장관의 눈이 흔들렸다.
+
+“검술의 권능은?”
+
+짧은 침묵.
+
+“신호가 끊긴 것으로 보아… 죽은 것으로 판단됩니다.”
+
+“…뭐라고? 죽었다고?”
+
+장관의 목소리가 올라갔다.
+
+“그리고…”
+
+“그들은 우리를 살려 보내는 조건으로 하나를 요구했습니다.”
+
+“세계에 그 이름을 퍼뜨리라고.”
+
+“그곳의 이름은…”
+
+잠깐 멈췄다.
+
+“…솔라리스입니다.”
+
+회의실이 얼어붙었다.
+
+누군가 중얼거렸다.
+
+“전설급조차… 못 이긴다고?”
+
+“그럼 이건 뭐지…”
+
+장관이 이를 악물었다.
+
+“UN… 지원 요청을 해야 하나…”
+
+짧은 침묵.
+
+“……죄송합니다.”
+
+
+천공의 요새.
+
+지하 비밀실험실.
+
+도윤은 캡슐 앞에 서 있었다.
+
+그 안에는—
+
+검술의 권능.
+
+조용히 봉인되고 있었다.
+
+도윤은 아무 말 없이 손을 내렸다.
+
+빛이 닫혔다.
+
+그리고—
+
+새로운 군단이 완성됐다.`}
+}
+},
+
+kill:{
+id:"kill",
+title:"킬 게이지 시스템",
+author:"고쓰비",
+firstEpisode:0,
+type:"kill",
+heroTitle:"킬 게이지<br>시스템",
+heroDesc:"모든 인간의 시야에 시스템이 나타난 날. 사람들은 죽음이 곧 힘으로 이어지는 세계에서 살아남기 위해 움직이기 시작한다.",
+badge:"고쓰비 · 시스템 판타지",
+meta:["시스템","성장","차수 배틀","액션"],
+summary:"킬 게이지가 활성화된 세계. 죽음 이후 남겨진 자들은 조금씩 강해지고, 살아남은 자들은 자신만의 차수와 힘을 각성한다.",
+stats:["★ 0","조회 0","관심 0","총 3화 공개"],
+aliases:["킬게이지","킬게이지시스템","킬 게이지 시스템","김서현","서현","차수","초강권","초강갑주","혈각","철쇄보","태윤","유나","밤과조직","고쓰비","프롤로그","각성의시작"],
+episodes:{
+0:{title:"0화 - 프롤로그",sub:"세계의 변화 · 킬 게이지 시스템",desc:"모든 인간의 시야에 킬 게이지 시스템이 나타난 날, 세계는 조용히 무너지기 시작한다.",date:"2026.05.02",raw:`그날은 특별한 날처럼 보이지 않았다.
 
 하늘은 평소처럼 흐렸고, 사람들은 각자의 하루를 살고 있었다.
 
@@ -4036,9 +4176,8 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 그리고 살아남은 사람은 느꼈다.
 
 자신이 조금씩 강해지고 있다는 것을.`},
-          1:{title:"1화 - 각성의 시작",sub:"김서현 · 비각성 · 초강권",desc:"비 오는 골목에서 쓰러진 김서현은 생존 임계치에 도달하며 첫 각성을 맞이한다.",date:"2026.05.02",raw:`1화 — “각성의 시작”  1. 김서현 — 비각성
 
-서울 외곽 골목.
+1:{title:"1화 - 각성의 시작",sub:"김서현 · 비각성 · 초강권",desc:"비 오는 골목에서 쓰러진 김서현은 생존 임계치에 도달하며 첫 각성을 맞이한다.",date:"2026.05.02",raw:`서울 외곽 골목.
 
 비가 내리고 있었다.
 
@@ -4078,8 +4217,6 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 그리고 주먹이 날아왔다.
 
 
-2. 비각성의 끝
-
 충격은 생각보다 컸다.
 
 서현은 그대로 바닥에 쓰러졌다.
@@ -4100,8 +4237,6 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 
 세상이 잠깐 멈춘 것처럼 느껴졌다.
 
-
-3. 각성
 
 서현의 시야 한가운데에 문장이 떠올랐다.
 
@@ -4127,8 +4262,6 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 
 자신의 몸이 이전과 다르다는 걸 본능적으로 알 수 있었다.
 
-
-4. 첫 전투
 
 서현은 다시 일어섰다.
 
@@ -4167,8 +4300,6 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 그리고 골목은 순식간에 조용해졌다.
 
 
-5. 세계의 규칙
-
 서현은 자신의 손을 바라봤다.
 
 아직 상황을 완전히 이해하지 못했다.
@@ -4184,8 +4315,6 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 
 멀리서 또 다른 존재가 나타났다.
 
-
-6. 첫 “조직”
 
 한 남자가 골목 끝에 서 있었다.
 
@@ -4215,8 +4344,6 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 
 이 사람은 아까와는 다르다.
 
-
-7. 차수의 차이
 
 남자는 천천히 팔을 들어 올렸다.
 
@@ -4250,8 +4377,6 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 
 그리고 다시 일어섰다.
 
-
-8. 동료
 
 그때였다.
 
@@ -4290,8 +4415,6 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 남자가 처음으로 뒤로 밀렸다.
 
 
-9. 협력
-
 서현은 잠시 멈췄다가 앞으로 나섰다.
 
 말은 없었다.
@@ -4315,8 +4438,6 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 
 남자가 쓰러졌다.
 
-
-10. 전투 이후
 
 잠시 침묵이 흘렀다.
 
@@ -4359,8 +4480,6 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 “간부 몇 명이 와도 못 잡아.”
 
 
-11. 끝과 시작
-
 서현은 잠시 골목 끝을 바라봤다.
 
 아직 아무것도 시작되지 않았다는 걸 느꼈다.
@@ -4374,87 +4493,1135 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
 
 여자는 짧게 웃었다.
 
-“이제 시작이네.”`}
-        }
-      }
+“이제 시작이네.”`},
+
+2:{title:"2화 - 밤과 조직",sub:"서현 · 유나 · 태윤",desc:"서현과 유나는 폐건물에서 잠시 숨을 고르지만, 밤의 조직은 계속해서 움직인다.",date:"2026.05.02",raw:`비는 그쳤지만 바닥은 아직 젖어 있었다.
+
+서현과 유나는 건물 안으로 들어와 있었다.
+
+작은 폐건물.
+
+조명이 거의 없는 공간.
+
+
+서현은 벽에 기대 앉아 있었다.
+
+아직 말이 없었다.
+
+유나는 물병을 던졌다.
+
+
+“마셔.”
+
+
+서현은 받았다.
+
+“고맙습니다.”
+
+
+유나는 잠깐 그를 바라봤다.
+
+“말은 하네.”
+
+
+유나는 바닥에 앉으며 말했다.
+
+“이 시스템 생긴 뒤로 세상이 두 개로 나뉘었어.”
+
+서현은 물을 마시며 듣고 있었다.
+
+
+“죽이는 쪽.”
+
+“그리고 죽는 쪽.”
+
+
+서현이 물었다.
+
+“…구역은요.”
+
+
+유나가 대답했다.
+
+“구역은 의미 없어졌어.”
+
+“강한 놈이 그날의 규칙을 정해.”
+
+
+잠깐 침묵.
+
+
+유나가 덧붙였다.
+
+“그리고 강한 놈일수록 차수를 많이 가지고 있어.”
+
+
+서현이 중얼거렸다.
+
+“…차수.”
+
+
+유나가 고개를 끄덕였다.
+
+“응. 하나만 가진 놈은 그냥 시작점.”
+
+“두 개부터가 사람 취급이다.”
+
+
+밖에서 소리가 났다.
+
+
+“여기 맞지?”
+
+“어제 여기서 우리 사람 죽었다고.”
+
+
+문이 열린다.
+
+
+3명.
+
+
+서현이 천천히 일어났다.
+
+유나는 한숨을 쉬었다.
+
+
+“쉬게 안 두네.”
+
+
+첫 번째가 들어온다.
+
+
+“(1차 - 골절강타)”
+
+
+퍽!
+
+벽이 울린다.
+
+
+서현이 밀린다.
+
+
+“…다 다르군요.”
+
+
+유나가 말했다.
+
+“그래서 힘든 거야.”
+
+
+두 번째.
+
+
+“(1차 - 시야왜곡)”
+
+
+서현 시야가 흔들린다.
+
+
+“……!”
+
+
+세 번째가 들어온다.
+
+
+“(1차 - 돌진각)”
+
+
+퍽!
+
+
+서현이 쓰러진다.
+
+
+유나가 들어온다.
+
+
+“지금은 내가 막는다.”
+
+
+“(1차 - 철쇄보)”
+
+
+공간이 울린다.
+
+쇠사슬 같은 충격이 퍼진다.
+
+
+한 명이 벽에 부딪힌다.
+
+
+유나가 말했다.
+
+“서현, 일어나.”
+
+
+서현이 천천히 일어난다.
+
+숨이 거칠다.
+
+
+“(1차 - 초강권)”
+
+
+퍽.
+
+
+첫 번째가 쓰러진다.
+
+
+유나가 말했다.
+
+“지금.”
+
+
+“(1차 - 철쇄보)”
+
+
+동시에 타격.
+
+
+마지막 따까리가 쓰러진다.
+
+
+조용해진다.
+
+
+유나가 말했다.
+
+“이 정도면 오늘은 끝이다.”
+
+
+서현이 물었다.
+
+“…계속 이렇게 오는 겁니까.”
+
+
+유나가 대답했다.
+
+“응. 밤에는 특히 많아.”
+
+
+건물 안.
+
+조용한 공간.
+
+
+서현은 벽에 기대 있었다.
+
+
+“…당신은 왜 저를 도와줍니까.”
+
+
+유나는 잠깐 생각했다.
+
+
+“그냥.”
+
+
+“혼자 죽는 꼴 보기 싫어서.”
+
+
+서현은 조용히 말했다.
+
+“…이유는 충분하네요.”
+
+
+다음 날 새벽.
+
+
+문이 열린다.
+
+
+한 남자.
+
+가벼운 발걸음.
+
+
+“여기냐?”
+
+
+유나가 고개를 든다.
+
+
+“왔네.”
+
+
+서현이 물었다.
+
+“…누구죠.”
+
+
+유나가 대답했다.
+
+“내 친구.”
+
+
+남자가 웃는다.
+
+
+“나는 태윤.”
+
+
+태윤은 팔을 가볍게 돌렸다.
+
+
+“요즘 재밌는 애들 많다더라.”
+
+
+서현이 물었다.
+
+“…차수는?”
+
+
+유나가 대신 답한다.
+
+
+“두 개.”
+
+
+서현이 잠깐 멈춘다.
+
+
+“두 개…”
+
+
+태윤이 웃는다.
+
+
+“뭐 그렇게 놀라냐.”
+
+
+“(1차 - 중력압)”
+
+
+공기가 눌린다.
+
+
+퍽!
+
+
+벽이 찌그러진다.
+
+
+유나가 말했다.
+
+“봐.”
+
+“이게 두 개 가진 놈이다.”
+
+
+태윤이 말했다.
+
+“이 정도면 따까리 5명은 그냥 정리하지.”
+
+
+서현이 물었다.
+
+“…차이가 큽니까.”
+
+
+유나가 대답했다.
+
+“응.”
+
+“하나는 시작.”
+
+“둘은 싸움.”
+
+
+문 밖.
+
+
+3명이 등장한다.
+
+
+“또 여기냐.”
+
+
+태윤이 앞으로 나간다.
+
+
+“(1차 - 중력압)”
+
+
+퍽!
+
+
+첫 번째는 즉시 쓰러진다.
+
+
+두 번째도 무릎을 꿇는다.
+
+
+세 번째가 달려오지만—
+
+
+“(1차 - 중력압)”
+
+
+완전히 눌린다.
+
+
+서현은 그 장면을 본다.
+
+
+“…저게 2차입니까.”
+
+
+태윤이 대답했다.
+
+“아니.”
+
+“2차는 아직 안 썼다.”
+
+
+유나가 웃는다.
+
+
+“역시 너라니까.”
+
+
+태윤이 돌아온다.
+
+
+“여긴 이제 좀 정리된 구역이다.”
+
+
+“근데 위는 아직 안 건드렸지?”
+
+
+유나가 답했다.
+
+“응.”
+
+
+서현이 물었다.
+
+“…위?”
+
+
+유나가 말했다.
+
+“정예.”
+
+“간부.”
+
+“그리고 보스.”
+
+
+태윤이 문을 본다.
+
+
+“이제 슬슬 들어갈 때 됐다.”
+
+
+서현은 조용히 일어난다.
+
+
+“…가죠.”
+
+
+유나가 말했다.
+
+“좋아.”`}
+}
+}
+};
+
+function escapeHtml(str){
+  return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+}
+
+function rawToHtml(raw){
+  return String(raw||"").trim().split(/\n\s*\n/g).map(block=>block.trim()).filter(Boolean).map(block=>{
+    let text=escapeHtml(block).replace(/\n/g,"<br>");
+    text=text.replace(/「([^」]+)」/g,'<span class="skill">「$1」</span>');
+    text=text.replace(/(\(?[0-9]+차\s*(?:개방\s*)?[-–—]\s*[^)<br\]]+\)?)/g,'<span class="rank-skill">$1</span>');
+    if(block.trim().includes("[한국의 2,3번째 신화급 각성자는 어디에 갔나?]"))return`<div class="blue-system">${text}</div>`;
+    if(/^\[[\s\S]*\]$/.test(block.trim()))return`<div class="system">${text}</div>`;
+    if(block.trim()==="—")return`<div class="scene">—</div>`;
+    if(["마왕.","세계를 구했더니 버려졌다.","소환 포인트."].includes(block.trim()))return`<p class="quote-strong">${text}</p>`;
+    return`<p>${text}</p>`;
+  }).join("\n");
+}
+
+function normalizeText(text){return String(text||"").replace(/\s+/g,"").toLowerCase()}
+
+function ensureAccountShape(user){
+  if(!user)return;
+  if(!Array.isArray(user.recentWorks))user.recentWorks=[];
+  if(!Array.isArray(user.watchingWorks))user.watchingWorks=[];
+  if(!Array.isArray(user.readEpisodes))user.readEpisodes=[];
+  if(!Array.isArray(user.ownedEpisodes))user.ownedEpisodes=[];
+  if(typeof user.tickets!=="number")user.tickets=0;
+  if(typeof user.coins!=="number")user.coins=0;
+  if(typeof user.coinBank!=="number")user.coinBank=0;
+  if(typeof user.coinStartedAt!=="number")user.coinStartedAt=0;
+  if(!user.kind)user.kind="normal";
+  if(typeof user.isAuthor!=="boolean")user.isAuthor=false;
+  if(!user.avatar)user.avatar={color:user.isAuthor?"purple":"green",shape:"circle",photo:""};
+  if(user.isAuthor){
+    user.avatar.color="purple";
+    user.avatar.shape="circle";
+    user.avatar.photo="";
+  }else{
+    if(!AVATAR_COLORS.includes(user.avatar.color))user.avatar.color="green";
+    if(!AVATAR_SHAPES.includes(user.avatar.shape))user.avatar.shape="circle";
+    if(typeof user.avatar.photo!=="string")user.avatar.photo="";
+  }
+}
+
+function getNormalAccount(){
+  const raw=localStorage.getItem(NORMAL_ACCOUNT_KEY);
+  return raw?JSON.parse(raw):null;
+}
+
+function saveNormalAccount(user){
+  ensureAccountShape(user);
+  user.kind="normal";
+  user.isAuthor=false;
+  localStorage.setItem(NORMAL_ACCOUNT_KEY,JSON.stringify(user));
+}
+
+function getAuthorAccount(){
+  const raw=localStorage.getItem(AUTHOR_ACCOUNT_KEY);
+  if(raw){
+    const user=JSON.parse(raw);
+    ensureAccountShape(user);
+    user.nickname=AUTHOR_NAME;
+    user.password=AUTHOR_PASSWORD;
+    user.kind="author";
+    user.isAuthor=true;
+    user.avatar={color:"purple",shape:"circle",photo:""};
+    localStorage.setItem(AUTHOR_ACCOUNT_KEY,JSON.stringify(user));
+    return user;
+  }
+  const user={nickname:AUTHOR_NAME,password:AUTHOR_PASSWORD,kind:"author",isAuthor:true,createdAt:new Date().toISOString(),recentWorks:[],watchingWorks:[],readEpisodes:[],ownedEpisodes:[],tickets:0,coins:0,coinBank:0,coinStartedAt:0,avatar:{color:"purple",shape:"circle",photo:""}};
+  localStorage.setItem(AUTHOR_ACCOUNT_KEY,JSON.stringify(user));
+  return user;
+}
+
+function saveAuthorAccount(user){
+  ensureAccountShape(user);
+  user.nickname=AUTHOR_NAME;
+  user.password=AUTHOR_PASSWORD;
+  user.kind="author";
+  user.isAuthor=true;
+  user.avatar={color:"purple",shape:"circle",photo:""};
+  localStorage.setItem(AUTHOR_ACCOUNT_KEY,JSON.stringify(user));
+}
+
+function getUserData(){
+  if(!currentUser)return null;
+  if(currentUser.kind==="author")return getAuthorAccount();
+  return getNormalAccount();
+}
+
+function saveUserData(user){
+  if(!currentUser||!user)return;
+  if(currentUser.kind==="author")saveAuthorAccount(user);
+  else saveNormalAccount(user);
+}
+
+function saveCurrentLogin(user){
+  if(!user){localStorage.removeItem(CURRENT_LOGIN_KEY);return}
+  localStorage.setItem(CURRENT_LOGIN_KEY,JSON.stringify({kind:user.kind,nickname:user.nickname}));
+}
+function applyAvatarToElement(el,avatar){
+  if(!el)return;
+  el.className="profile-img";
+  el.style.backgroundImage="";
+  const a=avatar||{color:"green",shape:"circle",photo:""};
+
+  if(a.photo){
+    el.classList.add("avatar-photo");
+    el.style.setProperty("background-image",`url("${a.photo}")`,"important");
+    return;
+  }
+
+  el.classList.add("avatar-"+a.color);
+  if(a.shape==="square")el.classList.add("avatar-square");
+  else if(a.shape==="triangle")el.classList.add("avatar-triangle");
+  else if(a.shape==="star")el.classList.add("avatar-star");
+}
+
+function updateAvatarChoices(){
+  document.querySelectorAll("#avatarColorGrid .avatar-choice").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.color===avatarDraft.color);
+  });
+  document.querySelectorAll(".avatar-shape-grid .avatar-choice").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.shape===avatarDraft.shape);
+  });
+}
+
+function refreshAvatarPreview(){
+  applyAvatarToElement(document.getElementById("avatarPreview"),avatarDraft);
+  updateAvatarChoices();
+}
+
+function openAvatarModal(){
+  if(!currentUser){openLogin();return}
+  const user=getUserData();
+  ensureAccountShape(user);
+
+  if(currentUser.isAuthor){
+    avatarDraft={color:"purple",shape:"circle",photo:""};
+    document.getElementById("avatarGuideText").textContent="작가 계정은 보라색 표지로 고정됩니다.";
+    document.getElementById("avatarColorGrid").style.display="none";
+  }else{
+    avatarDraft={...user.avatar};
+    document.getElementById("avatarGuideText").textContent="프로필 표지를 꾸밀 수 있습니다. 일반 계정은 보라색을 제외한 색만 사용할 수 있습니다.";
+    document.getElementById("avatarColorGrid").style.display="grid";
+  }
+
+  refreshAvatarPreview();
+  avatarModal.classList.add("open");
+}
+
+function closeAvatarModal(){
+  avatarModal.classList.remove("open");
+}
+
+function selectAvatarColor(color){
+  if(currentUser&&currentUser.isAuthor){
+    showToast("작가 계정은 보라색으로 고정됩니다.");
+    return;
+  }
+  if(!AVATAR_COLORS.includes(color))return;
+  avatarDraft.color=color;
+  avatarDraft.photo="";
+  refreshAvatarPreview();
+}
+
+function selectAvatarShape(shape){
+  if(!AVATAR_SHAPES.includes(shape))return;
+  avatarDraft.shape=shape;
+  avatarDraft.photo="";
+  refreshAvatarPreview();
+}
+
+function handleAvatarFile(event){
+  if(currentUser&&currentUser.isAuthor){
+    showToast("작가 계정은 표지를 변경할 수 없습니다.");
+    event.target.value="";
+    return;
+  }
+
+  const file=event.target.files&&event.target.files[0];
+  if(!file)return;
+
+  if(!file.type.startsWith("image/")){
+    showToast("이미지 파일만 선택할 수 있습니다.");
+    event.target.value="";
+    return;
+  }
+
+  const fileReader=new FileReader();
+  fileReader.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement("canvas");
+      const size=240;
+      canvas.width=size;
+      canvas.height=size;
+      const ctx=canvas.getContext("2d");
+      const minSide=Math.min(img.width,img.height);
+      const sx=(img.width-minSide)/2;
+      const sy=(img.height-minSide)/2;
+      ctx.drawImage(img,sx,sy,minSide,minSide,0,0,size,size);
+      avatarDraft.photo=canvas.toDataURL("image/jpeg",0.82);
+      refreshAvatarPreview();
+      showToast("사진이 선택되었습니다. 저장을 눌러 적용하세요.");
     };
+    img.onerror=()=>{
+      avatarDraft.photo=String(fileReader.result||"");
+      refreshAvatarPreview();
+      showToast("사진이 선택되었습니다. 저장을 눌러 적용하세요.");
+    };
+    img.src=String(fileReader.result||"");
+  };
+  fileReader.readAsDataURL(file);
+  event.target.value="";
+}
 
-    function escapeHtml(str){
-      return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
-    }
+function removeAvatarPhoto(){
+  if(currentUser&&currentUser.isAuthor){
+    showToast("작가 계정은 보라색으로 고정됩니다.");
+    return;
+  }
+  avatarDraft.photo="";
+  refreshAvatarPreview();
+  showToast("사진을 제거했습니다.");
+}
 
-    function rawToHtml(raw){
-      return String(raw||"").trim().split(/\n\s*\n/g).map(block=>block.trim()).filter(Boolean).map(block=>{
-        let text=escapeHtml(block).replace(/\n/g,"<br>");
-        text=text.replace(/「([^」]+)」/g,'<span class="skill">「$1」</span>');
-        text=text.replace(/(\(?[0-9]+차\s*(?:개방\s*)?[-–—]\s*[^)<br\]]+\)?)/g,'<span class="rank-skill">$1</span>');
+function saveAvatar(){
+  if(!currentUser)return;
+  const user=getUserData();
+  ensureAccountShape(user);
 
-        if(block.trim().includes("[한국의 2,3번째 신화급 각성자는 어디에 갔나?]"))return`<div class="blue-system">${text}</div>`;
-        if(/^\[[\s\S]*\]$/.test(block.trim()))return`<div class="system">${text}</div>`;
-        if(block.trim()==="—")return`<div class="scene">—</div>`;
-        if(["마왕.","세계를 구했더니 버려졌다.","빛의 검 액스칼리버","“내가 버린다.”","소환 포인트."].includes(block.trim()))return`<p class="quote-strong">${text}</p>`;
-        return`<p>${text}</p>`;
-      }).join("\n");
-    }
+  if(user.isAuthor){
+    user.avatar={color:"purple",shape:"circle",photo:""};
+    saveUserData(user);
+    closeAvatarModal();
+    updateProfileAvatar();
+    showToast("작가 계정은 보라색 표지로 고정됩니다.");
+    return;
+  }
 
-    function normalizeText(text){return String(text||"").replace(/\s+/g,"").toLowerCase()}
+  if(!AVATAR_COLORS.includes(avatarDraft.color))avatarDraft.color="green";
+  if(!AVATAR_SHAPES.includes(avatarDraft.shape))avatarDraft.shape="circle";
+  user.avatar={...avatarDraft};
+  saveUserData(user);
+  closeAvatarModal();
+  updateProfileAvatar();
+  showToast("표지가 저장되었습니다.");
+}
 
-    function ensureAccountShape(user){
-      if(!user)return;
-      if(!Array.isArray(user.recentWorks))user.recentWorks=[];
-      if(!Array.isArray(user.watchingWorks))user.watchingWorks=[];
-      if(!Array.isArray(user.readEpisodes))user.readEpisodes=[];
-      if(!Array.isArray(user.ownedEpisodes))user.ownedEpisodes=[];
-      if(typeof user.tickets!=="number")user.tickets=0;
-      if(typeof user.coins!=="number")user.coins=0;
-      if(typeof user.coinBank!=="number")user.coinBank=0;
-      if(typeof user.coinStartedAt!=="number")user.coinStartedAt=0;
-      if(!user.kind)user.kind="normal";
-      if(typeof user.isAuthor!=="boolean")user.isAuthor=false;
-      if(!user.avatar)user.avatar={color:user.isAuthor?"purple":"green",shape:"circle",photo:""};
+function updateProfileAvatar(){
+  const user=getUserData();
+  if(!user)return;
+  ensureAccountShape(user);
+  applyAvatarToElement(document.getElementById("profileAvatar"),user.avatar);
+}
 
-      if(user.isAuthor){
-        user.avatar.color="purple";
-        user.avatar.shape="circle";
-        user.avatar.photo="";
+function prefillLogin(){
+  const normal=getNormalAccount();
+  const nicknameInput=document.getElementById("nicknameInput");
+  const passwordInput=document.getElementById("passwordInput");
+  const deleteBox=document.getElementById("deleteSavedAccountBox");
+  const guide=document.getElementById("loginGuideText");
+
+  if(normal){
+    nicknameInput.value=normal.nickname||"";
+    passwordInput.value=normal.password||"";
+    deleteBox.style.display="flex";
+    guide.textContent="저장된 일반 계정이 있습니다. 그대로 로그인하거나 기존 계정을 지운 뒤 새로 만들 수 있습니다.";
+  }else{
+    nicknameInput.value="";
+    passwordInput.value="";
+    deleteBox.style.display="none";
+    guide.textContent="닉네임과 비밀번호를 입력하세요. 일반 계정은 브라우저에 1개만 저장됩니다.";
+  }
+}
+
+function deleteNormalAccount(){
+  localStorage.removeItem(NORMAL_ACCOUNT_KEY);
+  const login=JSON.parse(localStorage.getItem(CURRENT_LOGIN_KEY)||"null");
+  if(login&&login.kind==="normal")localStorage.removeItem(CURRENT_LOGIN_KEY);
+  prefillLogin();
+  showToast("기존 일반 계정을 지웠습니다.");
+}
+
+function updateCoinBank(){
+  const user=getUserData();
+  if(!user)return;
+  ensureAccountShape(user);
+
+  if(user.coinStartedAt&&user.coinBank<COIN_BANK_MAX){
+    const now=Date.now();
+    const elapsed=now-user.coinStartedAt;
+    const gained=Math.floor(elapsed/COIN_INTERVAL);
+
+    if(gained>0){
+      const add=Math.min(gained,COIN_BANK_MAX-user.coinBank);
+      user.coinBank+=add;
+      if(user.coinBank>=COIN_BANK_MAX){
+        user.coinStartedAt=0;
       }else{
-        if(!AVATAR_COLORS.includes(user.avatar.color))user.avatar.color="green";
-        if(!AVATAR_SHAPES.includes(user.avatar.shape))user.avatar.shape="circle";
-        if(typeof user.avatar.photo!=="string")user.avatar.photo="";
+        user.coinStartedAt+=gained*COIN_INTERVAL;
       }
+      saveUserData(user);
     }
+  }
+}
 
-    function getNormalAccount(){
-      const raw=localStorage.getItem(NORMAL_ACCOUNT_KEY);
-      return raw?JSON.parse(raw):null;
-    }
+function updateProfileCounts(){
+  if(!currentUser)return;
+  updateCoinBank();
+  const user=getUserData();
+  if(!user)return;
+  ensureAccountShape(user);
 
-    function saveNormalAccount(user){
-      ensureAccountShape(user);
-      user.kind="normal";
-      user.isAuthor=false;
-      localStorage.setItem(NORMAL_ACCOUNT_KEY,JSON.stringify(user));
-    }
+  const ticketEl=document.getElementById("profileTicketCount");
+  const coinEl=document.getElementById("profileCoinCount");
+  if(ticketEl)ticketEl.textContent=`보유 이용권 ${user.tickets}장`;
+  if(coinEl)coinEl.textContent=`보유 코인 ${user.coins}개`;
 
-    function getAuthorAccount(){
-      const raw=localStorage.getItem(AUTHOR_ACCOUNT_KEY);
-      if(raw){
-        const user=JSON.parse(raw);
-        ensureAccountShape(user);
-        user.nickname=AUTHOR_NAME;
-        user.password=AUTHOR_PASSWORD;
-        user.kind="author";
-        user.isAuthor=true;
-        user.avatar={color:"purple",shape:"circle",photo:""};
-        localStorage.setItem(AUTHOR_ACCOUNT_KEY,JSON.stringify(user));
-        return user;
+  updateEpisodeBadges();
+}
+
+function updateEpisodeBadges(){
+  if(!currentUser)return;
+  const user=getUserData();
+  if(!user)return;
+  ensureAccountShape(user);
+
+  Object.entries(works).forEach(([workId,work])=>{
+    Object.entries(work.episodes).forEach(([num,ep])=>{
+      const badge=document.getElementById(`episodeBadge-${workId}-${num}`);
+      if(!badge||!ep.preview)return;
+
+      if(currentUser.isAuthor||user.ownedEpisodes.includes(`${workId}-${num}`)){
+        badge.textContent="소장됨";
+        badge.classList.remove("preview");
+        badge.classList.add("owned");
+      }else{
+        badge.textContent="이용권";
+        badge.classList.add("preview");
+        badge.classList.remove("owned");
       }
+    });
+  });
+}
 
-      const user={
-        nickname:AUTHOR_NAME,
-        password:AUTHOR_PASSWORD,
-        kind:"author",
-        isAuthor:true,
+function setActiveNav(navId){
+  navItems.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.classList.toggle("active",id===navId);
+  });
+}
+
+function showPage(pageId,navId){
+  if(!currentUser)return;
+  pages.forEach(id=>{
+    const page=document.getElementById(id);
+    if(page)page.classList.toggle("active",id===pageId);
+  });
+  setActiveNav(navId||"");
+  if(pageId==="workDetailPage")updateReadEpisodeStyles();
+  updateProfileCounts();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function openTabPage(pageId,navId){
+  if(!currentUser){openLogin();return}
+  showPage(pageId,navId);
+}
+
+function showWeekday(day){
+  const map={
+    mon:["weekdayBtnMon","weekdayPanelMon"],
+    tue:["weekdayBtnTue","weekdayPanelTue"],
+    wed:["weekdayBtnWed","weekdayPanelWed"],
+    thu:["weekdayBtnThu","weekdayPanelThu"],
+    fri:["weekdayBtnFri","weekdayPanelFri"],
+    sat:["weekdayBtnSat","weekdayPanelSat"],
+    sun:["weekdayBtnSun","weekdayPanelSun"],
+    daily:["weekdayBtnDaily","weekdayPanelDaily"]
+  };
+
+  Object.values(map).forEach(([btnId,panelId])=>{
+    const btn=document.getElementById(btnId);
+    const panel=document.getElementById(panelId);
+    if(btn)btn.classList.remove("active");
+    if(panel)panel.classList.remove("active");
+  });
+
+  const target=map[day];
+  if(!target)return;
+
+  document.getElementById(target[0]).classList.add("active");
+  document.getElementById(target[1]).classList.add("active");
+}
+
+function updateAccountButton(){
+  if(!currentUser){
+    document.body.classList.remove("logged-in");
+    accountBtn.textContent="로그인";
+    accountBtn.classList.remove("logged","author");
+    return;
+  }
+
+  document.body.classList.add("logged-in");
+  accountBtn.textContent=currentUser.nickname;
+  accountBtn.classList.add("logged");
+  if(currentUser.isAuthor)accountBtn.classList.add("author");
+  else accountBtn.classList.remove("author");
+}
+
+function openLogin(){
+  prefillLogin();
+  loginModal.classList.add("open");
+  setTimeout(()=>{
+    const input=document.getElementById("nicknameInput");
+    if(input)input.focus();
+  },50);
+}
+
+function closeLogin(){
+  loginModal.classList.remove("open");
+}
+
+function openProfileEditModal(){
+  if(!currentUser){openLogin();return}
+  const user=getUserData();
+  ensureAccountShape(user);
+  document.getElementById("newNicknameInput").value=user.nickname||"";
+  document.getElementById("oldPasswordInput").value="";
+  document.getElementById("newPasswordInput").value="";
+  showProfileEditPanel("nickname");
+  profileEditModal.classList.add("open");
+}
+
+function closeProfileEditModal(){
+  profileEditModal.classList.remove("open");
+  document.getElementById("newNicknameInput").value="";
+  document.getElementById("oldPasswordInput").value="";
+  document.getElementById("newPasswordInput").value="";
+}
+
+function showProfileEditPanel(type){
+  const nickTab=document.getElementById("editNicknameTab");
+  const passTab=document.getElementById("editPasswordTab");
+  const nickPanel=document.getElementById("editNicknamePanel");
+  const passPanel=document.getElementById("editPasswordPanel");
+
+  nickTab.classList.toggle("active",type==="nickname");
+  passTab.classList.toggle("active",type==="password");
+  nickPanel.classList.toggle("active",type==="nickname");
+  passPanel.classList.toggle("active",type==="password");
+}
+
+function changeNickname(){
+  if(!currentUser)return;
+  const user=getUserData();
+  ensureAccountShape(user);
+
+  if(user.isAuthor){
+    showToast("작가 계정은 닉네임을 변경할 수 없습니다.");
+    return;
+  }
+
+  const newNickname=document.getElementById("newNicknameInput").value.trim();
+  if(!newNickname){showToast("새 닉네임을 입력하세요.");return}
+  if(newNickname===AUTHOR_NAME){showToast("이 닉네임은 사용할 수 없습니다.");return}
+
+  user.nickname=newNickname;
+  saveNormalAccount(user);
+  currentUser={nickname:user.nickname,kind:"normal",isAuthor:false};
+  saveCurrentLogin(currentUser);
+  updateAccountButton();
+  renderHome();
+  openProfile();
+  closeProfileEditModal();
+  showToast("닉네임이 변경되었습니다.");
+}
+
+function changePassword(){
+  if(!currentUser)return;
+  const user=getUserData();
+  ensureAccountShape(user);
+  const oldPw=document.getElementById("oldPasswordInput").value.trim();
+  const newPw=document.getElementById("newPasswordInput").value.trim();
+
+  if(!oldPw){showToast("현재 비밀번호를 입력하세요.");return}
+  if(!newPw){showToast("새 비밀번호를 입력하세요.");return}
+
+  if(user.isAuthor){
+    if(oldPw!==AUTHOR_PASSWORD){showToast("현재 비밀번호가 다릅니다.");return}
+    showToast("작가 계정 비밀번호는 고정입니다.");
+    return;
+  }
+
+  if(user.password!==oldPw){showToast("현재 비밀번호가 다릅니다.");return}
+
+  user.password=newPw;
+  saveNormalAccount(user);
+  closeProfileEditModal();
+  showToast("비밀번호가 변경되었습니다.");
+}
+
+function openTicketModal(){
+  if(!currentUser){openLogin();return}
+  updateTicketModal();
+  ticketModal.classList.add("open");
+}
+
+function closeTicketModal(){
+  ticketModal.classList.remove("open");
+}
+
+function closeNeedTicketModal(){
+  needTicketModal.classList.remove("open");
+}
+
+function goTicketFromNeed(){
+  closeNeedTicketModal();
+  closePaidEpisodeModal();
+  openTicketModal();
+}
+
+function closeFreeTicketModal(){
+  freeTicketModal.classList.remove("open");
+}
+
+function closePaidEpisodeModal(){
+  paidEpisodeModal.classList.remove("open");
+  pendingEpisodeNumber=null;
+  pendingWorkId=null;
+}
+
+function maybeShowFreeTicketModal(){
+  if(!currentUser||currentUser.isAuthor)return;
+  const already=localStorage.getItem(FREE_TICKET_KEY);
+  if(!already)setTimeout(()=>freeTicketModal.classList.add("open"),500);
+}
+
+function claimFreeTickets(){
+  if(!currentUser){
+    closeFreeTicketModal();
+    openLogin();
+    return;
+  }
+
+  if(localStorage.getItem(FREE_TICKET_KEY)){
+    showToast("이미 이 브라우저에서 무료 이용권을 받았습니다.");
+    closeFreeTicketModal();
+    return;
+  }
+
+  const user=getUserData();
+  ensureAccountShape(user);
+  user.tickets+=3;
+  saveUserData(user);
+  localStorage.setItem(FREE_TICKET_KEY,"1");
+  closeFreeTicketModal();
+  updateProfileCounts();
+  showToast("무료 이용권 3장을 받았습니다.");
+}
+
+function formatTime(ms){
+  const total=Math.max(0,Math.ceil(ms/1000));
+  const m=Math.floor(total/60);
+  const s=total%60;
+  return `${m}분 ${String(s).padStart(2,"0")}초`;
+}
+
+function updateTicketModal(){
+  if(!currentUser)return;
+  updateCoinBank();
+  const user=getUserData();
+  if(!user)return;
+  ensureAccountShape(user);
+
+  document.getElementById("ticketStatusText").textContent=`현재 ${currentUser.nickname}님의 이용권 수는 ${user.tickets}개입니다.`;
+  document.getElementById("coinStatusText").textContent=`현재 ${currentUser.nickname}님의 코인수는 ${user.coins}개입니다.`;
+  document.getElementById("coinBankText").textContent=`쌓인 코인: ${user.coinBank}개 / 최대 ${COIN_BANK_MAX}개`;
+
+  let timerText="코인 생성 대기 중";
+  if(user.coinBank>=COIN_BANK_MAX){
+    timerText=`코인이 ${COIN_BANK_MAX}개까지 쌓였습니다. 회수해야 다시 쌓입니다.`;
+  }else if(user.coinStartedAt){
+    const next=user.coinStartedAt+COIN_INTERVAL-Date.now();
+    timerText=`다음 코인까지 ${formatTime(next)}`;
+  }else{
+    timerText="코인 얻기를 누르면 45분마다 코인이 쌓입니다.";
+  }
+
+  document.getElementById("coinTimerText").textContent=timerText;
+  updateProfileCounts();
+}
+
+function startCoinGenerator(){
+  if(!currentUser)return;
+  const user=getUserData();
+  ensureAccountShape(user);
+  updateCoinBank();
+
+  if(user.coinBank>=COIN_BANK_MAX){
+    showToast(`코인이 이미 ${COIN_BANK_MAX}개까지 쌓였습니다. 먼저 회수하세요.`);
+    updateTicketModal();
+    return;
+  }
+
+  if(!user.coinStartedAt){
+    user.coinStartedAt=Date.now();
+    saveUserData(user);
+    showToast("코인 생성이 시작되었습니다.");
+  }else{
+    showToast("이미 코인이 생성되고 있습니다.");
+  }
+
+  updateTicketModal();
+}
+
+function collectCoins(){
+  if(!currentUser)return;
+  updateCoinBank();
+  const user=getUserData();
+  ensureAccountShape(user);
+
+  if(user.coinBank<=0){
+    showToast("회수할 코인이 없습니다.");
+    return;
+  }
+
+  user.coins+=user.coinBank;
+  const got=user.coinBank;
+  user.coinBank=0;
+  if(!user.coinStartedAt)user.coinStartedAt=Date.now();
+  saveUserData(user);
+  showToast(`코인 ${got}개를 회수했습니다.`);
+  updateTicketModal();
+}
+
+function buyTickets(count){
+  if(!currentUser)return;
+  const user=getUserData();
+  ensureAccountShape(user);
+  const price=count*3;
+
+  if(user.coins<price){
+    showToast(`코인이 부족합니다. 이용권 ${count}장 구매에는 코인 ${price}개가 필요합니다.`);
+    return;
+  }
+
+  user.coins-=price;
+  user.tickets+=count;
+  saveUserData(user);
+  showToast(`코인 ${price}개로 이용권 ${count}장을 구매했습니다.`);
+  updateTicketModal();
+}
+
+function confirmLogin(){
+  const nicknameInput=document.getElementById("nicknameInput");
+  const passwordInput=document.getElementById("passwordInput");
+  const nickname=nicknameInput.value.trim();
+  const password=passwordInput.value.trim();
+
+  if(!nickname){showToast("닉네임을 입력하세요.");return}
+  if(!password){showToast("비밀번호를 입력하세요.");return}
+
+  if(nickname===AUTHOR_NAME){
+    if(password!==AUTHOR_PASSWORD){
+      showToast("고쓰비 계정의 비밀번호가 다릅니다.");
+      return;
+    }
+
+    const user=getAuthorAccount();
+    currentUser={nickname:user.nickname,kind:"author",isAuthor:true};
+    saveCurrentLogin(currentUser);
+    closeLogin();
+    updateAccountButton();
+    renderHome();
+    showPage("homePage","navHome");
+    showToast("작가 계정으로 로그인되었습니다.");
+    return;
+  }
+
+  const saved=getNormalAccount();
+
+  if(saved){
+    if(saved.nickname!==nickname){
+      localStorage.removeItem(NORMAL_ACCOUNT_KEY);
+      const newUser={
+        nickname,
+        password,
+        kind:"normal",
+        isAuthor:false,
         createdAt:new Date().toISOString(),
         recentWorks:[],
         watchingWorks:[],
@@ -4464,1097 +5631,509 @@ B계열 탄환이 아닌, 더 상위 단계의 탄이 쏟아졌다.
         coins:0,
         coinBank:0,
         coinStartedAt:0,
-        avatar:{color:"purple",shape:"circle",photo:""}
+        avatar:{color:"green",shape:"circle",photo:""}
       };
-      localStorage.setItem(AUTHOR_ACCOUNT_KEY,JSON.stringify(user));
-      return user;
-    }
-
-    function saveAuthorAccount(user){
-      ensureAccountShape(user);
-      user.nickname=AUTHOR_NAME;
-      user.password=AUTHOR_PASSWORD;
-      user.kind="author";
-      user.isAuthor=true;
-      user.avatar={color:"purple",shape:"circle",photo:""};
-      localStorage.setItem(AUTHOR_ACCOUNT_KEY,JSON.stringify(user));
-    }
-
-    function getUserData(){
-      if(!currentUser)return null;
-      if(currentUser.kind==="author")return getAuthorAccount();
-      return getNormalAccount();
-    }
-
-    function saveUserData(user){
-      if(!currentUser||!user)return;
-      if(currentUser.kind==="author")saveAuthorAccount(user);
-      else saveNormalAccount(user);
-    }
-
-    function saveCurrentLogin(user){
-      if(!user){
-        localStorage.removeItem(CURRENT_LOGIN_KEY);
-        return;
-      }
-      localStorage.setItem(CURRENT_LOGIN_KEY,JSON.stringify({kind:user.kind,nickname:user.nickname}));
-    }
-
-    function applyAvatarToElement(el, avatar){
-      if(!el)return;
-      el.className="profile-img";
-      el.style.backgroundImage="";
-      el.style.backgroundSize="";
-      el.style.backgroundPosition="";
-      el.style.backgroundRepeat="";
-
-      const safeAvatar=avatar||{color:"green",shape:"circle",photo:""};
-
-      if(safeAvatar.photo){
-        el.classList.add("avatar-photo");
-        el.style.setProperty("background-image",`url("${safeAvatar.photo}")`,"important");
-        el.style.setProperty("background-size","cover","important");
-        el.style.setProperty("background-position","center","important");
-        el.style.setProperty("background-repeat","no-repeat","important");
-        return;
-      }
-
-      el.classList.add("avatar-"+safeAvatar.color);
-      if(safeAvatar.shape==="square")el.classList.add("avatar-square");
-      else if(safeAvatar.shape==="triangle")el.classList.add("avatar-triangle");
-      else if(safeAvatar.shape==="star")el.classList.add("avatar-star");
-    }
-
-    function updateAvatarChoices(){
-      document.querySelectorAll("#avatarColorGrid .avatar-choice").forEach(btn=>{
-        btn.classList.toggle("active",btn.dataset.color===avatarDraft.color);
-      });
-      document.querySelectorAll(".avatar-shape-grid .avatar-choice").forEach(btn=>{
-        btn.classList.toggle("active",btn.dataset.shape===avatarDraft.shape);
-      });
-    }
-
-    function refreshAvatarPreview(){
-      applyAvatarToElement(document.getElementById("avatarPreview"),avatarDraft);
-      updateAvatarChoices();
-    }
-
-    function openAvatarModal(){
-      if(!currentUser){openLogin();return}
-      const user=getUserData();
-      ensureAccountShape(user);
-
-      if(currentUser.isAuthor){
-        avatarDraft={color:"purple",shape:"circle",photo:""};
-        document.getElementById("avatarGuideText").textContent="작가 계정은 보라색 표지로 고정됩니다.";
-        document.getElementById("avatarColorGrid").style.display="none";
-      }else{
-        avatarDraft={...user.avatar};
-        document.getElementById("avatarGuideText").textContent="프로필 표지를 꾸밀 수 있습니다. 일반 계정은 보라색을 제외한 색만 사용할 수 있습니다.";
-        document.getElementById("avatarColorGrid").style.display="grid";
-      }
-
-      refreshAvatarPreview();
-      avatarModal.classList.add("open");
-    }
-
-    function closeAvatarModal(){avatarModal.classList.remove("open")}
-
-    function selectAvatarColor(color){
-      if(currentUser&&currentUser.isAuthor){
-        showToast("작가 계정은 보라색으로 고정됩니다.");
-        return;
-      }
-      if(!AVATAR_COLORS.includes(color))return;
-      avatarDraft.color=color;
-      avatarDraft.photo="";
-      refreshAvatarPreview();
-    }
-
-    function selectAvatarShape(shape){
-      if(!AVATAR_SHAPES.includes(shape))return;
-      avatarDraft.shape=shape;
-      avatarDraft.photo="";
-      refreshAvatarPreview();
-    }
-
-    function handleAvatarFile(event){
-      if(currentUser&&currentUser.isAuthor){
-        showToast("작가 계정은 표지를 변경할 수 없습니다.");
-        event.target.value="";
-        return;
-      }
-
-      const file=event.target.files&&event.target.files[0];
-      if(!file)return;
-
-      if(!file.type.startsWith("image/")){
-        showToast("이미지 파일만 선택할 수 있습니다.");
-        event.target.value="";
-        return;
-      }
-
-      const fileReader=new FileReader();
-      fileReader.onload=()=>{
-        const img=new Image();
-        img.onload=()=>{
-          const canvas=document.createElement("canvas");
-          const size=240;
-          canvas.width=size;
-          canvas.height=size;
-          const ctx=canvas.getContext("2d");
-          const minSide=Math.min(img.width,img.height);
-          const sx=(img.width-minSide)/2;
-          const sy=(img.height-minSide)/2;
-          ctx.drawImage(img,sx,sy,minSide,minSide,0,0,size,size);
-          avatarDraft.photo=canvas.toDataURL("image/jpeg",0.82);
-          refreshAvatarPreview();
-          showToast("사진이 선택되었습니다. 저장을 눌러 적용하세요.");
-        };
-        img.onerror=()=>{
-          avatarDraft.photo=String(fileReader.result||"");
-          refreshAvatarPreview();
-          showToast("사진이 선택되었습니다. 저장을 눌러 적용하세요.");
-        };
-        img.src=String(fileReader.result||"");
-      };
-      fileReader.readAsDataURL(file);
-      event.target.value="";
-    }
-
-    function removeAvatarPhoto(){
-      if(currentUser&&currentUser.isAuthor){
-        showToast("작가 계정은 보라색으로 고정됩니다.");
-        return;
-      }
-      avatarDraft.photo="";
-      refreshAvatarPreview();
-      showToast("사진을 제거했습니다.");
-    }
-
-    function saveAvatar(){
-      if(!currentUser)return;
-      const user=getUserData();
-      ensureAccountShape(user);
-
-      if(user.isAuthor){
-        user.avatar={color:"purple",shape:"circle",photo:""};
-        saveUserData(user);
-        closeAvatarModal();
-        updateProfileAvatar();
-        showToast("작가 계정은 보라색 표지로 고정됩니다.");
-        return;
-      }
-
-      if(!AVATAR_COLORS.includes(avatarDraft.color))avatarDraft.color="green";
-      if(!AVATAR_SHAPES.includes(avatarDraft.shape))avatarDraft.shape="circle";
-      user.avatar={...avatarDraft};
-      saveUserData(user);
-      closeAvatarModal();
-      updateProfileAvatar();
-      showToast("표지가 저장되었습니다.");
-    }
-
-    function updateProfileAvatar(){
-      const user=getUserData();
-      if(!user)return;
-      ensureAccountShape(user);
-      applyAvatarToElement(document.getElementById("profileAvatar"),user.avatar);
-    }
-
-    function prefillLogin(){
-      const normal=getNormalAccount();
-      const nicknameInput=document.getElementById("nicknameInput");
-      const passwordInput=document.getElementById("passwordInput");
-      const deleteBox=document.getElementById("deleteSavedAccountBox");
-      const guide=document.getElementById("loginGuideText");
-
-      if(normal){
-        nicknameInput.value=normal.nickname||"";
-        passwordInput.value=normal.password||"";
-        deleteBox.style.display="flex";
-        guide.textContent="저장된 일반 계정이 있습니다. 그대로 로그인하거나 기존 계정을 지운 뒤 새로 만들 수 있습니다.";
-      }else{
-        nicknameInput.value="";
-        passwordInput.value="";
-        deleteBox.style.display="none";
-        guide.textContent="닉네임과 비밀번호를 입력하세요. 일반 계정은 브라우저에 1개만 저장됩니다.";
-      }
-    }
-
-    function deleteNormalAccount(){
-      localStorage.removeItem(NORMAL_ACCOUNT_KEY);
-      const login=JSON.parse(localStorage.getItem(CURRENT_LOGIN_KEY)||"null");
-      if(login&&login.kind==="normal")localStorage.removeItem(CURRENT_LOGIN_KEY);
-      prefillLogin();
-      showToast("기존 일반 계정을 지웠습니다.");
-    }
-
-    function updateCoinBank(){
-      const user=getUserData();if(!user)return;
-      ensureAccountShape(user);
-
-      if(user.coinStartedAt&&user.coinBank<COIN_BANK_MAX){
-        const now=Date.now();
-        const elapsed=now-user.coinStartedAt;
-        const gained=Math.floor(elapsed/COIN_INTERVAL);
-
-        if(gained>0){
-          const add=Math.min(gained,COIN_BANK_MAX-user.coinBank);
-          user.coinBank+=add;
-          if(user.coinBank>=COIN_BANK_MAX)user.coinStartedAt=0;
-          else user.coinStartedAt+=gained*COIN_INTERVAL;
-          saveUserData(user);
-        }
-      }
-    }
-
-    function updateProfileCounts(){
-      if(!currentUser)return;
-      updateCoinBank();
-      const user=getUserData();if(!user)return;
-      ensureAccountShape(user);
-      const ticketEl=document.getElementById("profileTicketCount");
-      const coinEl=document.getElementById("profileCoinCount");
-      if(ticketEl)ticketEl.textContent=`보유 이용권 ${user.tickets}장`;
-      if(coinEl)coinEl.textContent=`보유 코인 ${user.coins}개`;
-      updateEpisodeBadges();
-    }
-
-    function updateEpisodeBadges(){
-      if(!currentUser)return;
-      const user=getUserData();if(!user)return;
-      ensureAccountShape(user);
-
-      Object.entries(works).forEach(([workId,work])=>{
-        Object.entries(work.episodes).forEach(([num,ep])=>{
-          const badge=document.getElementById(`episodeBadge-${workId}-${num}`);
-          if(!badge||!ep.preview)return;
-
-          if(currentUser.isAuthor||user.ownedEpisodes.includes(`${workId}-${num}`)){
-            badge.textContent="소장됨";
-            badge.classList.remove("preview");
-            badge.classList.add("owned");
-          }else{
-            badge.textContent="이용권";
-            badge.classList.add("preview");
-            badge.classList.remove("owned");
-          }
-        });
-      });
-    }
-
-    function setActiveNav(navId){
-      navItems.forEach(id=>{
-        const el=document.getElementById(id);
-        if(el)el.classList.toggle("active",id===navId);
-      });
-    }
-
-    function showPage(pageId, navId){
-      if(!currentUser)return;
-      pages.forEach(id=>{
-        const page=document.getElementById(id);
-        if(page)page.classList.toggle("active",id===pageId);
-      });
-      setActiveNav(navId||"");
-      if(pageId==="workDetailPage")updateReadEpisodeStyles();
-      updateProfileCounts();
-      window.scrollTo({top:0,behavior:"smooth"});
-    }
-
-    function openTabPage(pageId, navId){
-      if(!currentUser){openLogin();return}
-      showPage(pageId,navId);
-    }
-
-    function showWeekday(day){
-      const map={
-        mon:["weekdayBtnMon","weekdayPanelMon"],
-        tue:["weekdayBtnTue","weekdayPanelTue"],
-        wed:["weekdayBtnWed","weekdayPanelWed"],
-        thu:["weekdayBtnThu","weekdayPanelThu"],
-        fri:["weekdayBtnFri","weekdayPanelFri"],
-        sat:["weekdayBtnSat","weekdayPanelSat"],
-        sun:["weekdayBtnSun","weekdayPanelSun"],
-        daily:["weekdayBtnDaily","weekdayPanelDaily"]
-      };
-
-      Object.values(map).forEach(([btnId,panelId])=>{
-        const btn=document.getElementById(btnId);
-        const panel=document.getElementById(panelId);
-        if(btn)btn.classList.remove("active");
-        if(panel)panel.classList.remove("active");
-      });
-
-      const target=map[day];
-      if(!target)return;
-
-      document.getElementById(target[0]).classList.add("active");
-      document.getElementById(target[1]).classList.add("active");
-    }
-
-    function updateAccountButton(){
-      if(!currentUser){
-        document.body.classList.remove("logged-in");
-        accountBtn.textContent="로그인";
-        accountBtn.classList.remove("logged","author");
-        return;
-      }
-
-      document.body.classList.add("logged-in");
-      accountBtn.textContent=currentUser.nickname;
-      accountBtn.classList.add("logged");
-      if(currentUser.isAuthor)accountBtn.classList.add("author");
-      else accountBtn.classList.remove("author");
-    }
-
-    function openLogin(){
-      prefillLogin();
-      loginModal.classList.add("open");
-      setTimeout(()=>{const input=document.getElementById("nicknameInput");if(input)input.focus()},50);
-    }
-
-    function closeLogin(){loginModal.classList.remove("open")}
-
-    function openProfileEditModal(){
-      if(!currentUser){openLogin();return}
-      const user=getUserData();
-      ensureAccountShape(user);
-      document.getElementById("newNicknameInput").value=user.nickname||"";
-      document.getElementById("oldPasswordInput").value="";
-      document.getElementById("newPasswordInput").value="";
-      showProfileEditPanel("nickname");
-      profileEditModal.classList.add("open");
-    }
-
-    function closeProfileEditModal(){
-      profileEditModal.classList.remove("open");
-      document.getElementById("newNicknameInput").value="";
-      document.getElementById("oldPasswordInput").value="";
-      document.getElementById("newPasswordInput").value="";
-    }
-
-    function showProfileEditPanel(type){
-      const nickTab=document.getElementById("editNicknameTab");
-      const passTab=document.getElementById("editPasswordTab");
-      const nickPanel=document.getElementById("editNicknamePanel");
-      const passPanel=document.getElementById("editPasswordPanel");
-      nickTab.classList.toggle("active",type==="nickname");
-      passTab.classList.toggle("active",type==="password");
-      nickPanel.classList.toggle("active",type==="nickname");
-      passPanel.classList.toggle("active",type==="password");
-    }
-
-    function changeNickname(){
-      if(!currentUser)return;
-      const user=getUserData();
-      ensureAccountShape(user);
-
-      if(user.isAuthor){
-        showToast("작가 계정은 닉네임을 변경할 수 없습니다.");
-        return;
-      }
-
-      const newNickname=document.getElementById("newNicknameInput").value.trim();
-      if(!newNickname){showToast("새 닉네임을 입력하세요.");return}
-      if(newNickname===AUTHOR_NAME){showToast("이 닉네임은 사용할 수 없습니다.");return}
-
-      user.nickname=newNickname;
-      saveNormalAccount(user);
-      currentUser={nickname:user.nickname,kind:"normal",isAuthor:false};
+      saveNormalAccount(newUser);
+      currentUser={nickname:newUser.nickname,kind:"normal",isAuthor:false};
       saveCurrentLogin(currentUser);
-      updateAccountButton();
-      renderHome();
-      openProfile();
-      closeProfileEditModal();
-      showToast("닉네임이 변경되었습니다.");
-    }
-
-    function changePassword(){
-      if(!currentUser)return;
-      const user=getUserData();
-      ensureAccountShape(user);
-      const oldPw=document.getElementById("oldPasswordInput").value.trim();
-      const newPw=document.getElementById("newPasswordInput").value.trim();
-      if(!oldPw){showToast("현재 비밀번호를 입력하세요.");return}
-      if(!newPw){showToast("새 비밀번호를 입력하세요.");return}
-
-      if(user.isAuthor){
-        if(oldPw!==AUTHOR_PASSWORD){showToast("현재 비밀번호가 다릅니다.");return}
-        showToast("작가 계정 비밀번호는 고정입니다.");
-        return;
-      }
-
-      if(user.password!==oldPw){showToast("현재 비밀번호가 다릅니다.");return}
-      user.password=newPw;
-      saveNormalAccount(user);
-      closeProfileEditModal();
-      showToast("비밀번호가 변경되었습니다.");
-    }
-
-    function openTicketModal(){
-      if(!currentUser){openLogin();return}
-      updateTicketModal();
-      ticketModal.classList.add("open");
-    }
-
-    function closeTicketModal(){ticketModal.classList.remove("open")}
-    function closeNeedTicketModal(){needTicketModal.classList.remove("open")}
-    function goTicketFromNeed(){closeNeedTicketModal();closePaidEpisodeModal();openTicketModal()}
-    function closeFreeTicketModal(){freeTicketModal.classList.remove("open")}
-    function closePaidEpisodeModal(){paidEpisodeModal.classList.remove("open");pendingEpisodeNumber=null;pendingWorkId=null}
-
-    function maybeShowFreeTicketModal(){
-      if(!currentUser||currentUser.isAuthor)return;
-      const already=localStorage.getItem(FREE_TICKET_KEY);
-      if(!already)setTimeout(()=>freeTicketModal.classList.add("open"),500);
-    }
-
-    function claimFreeTickets(){
-      if(!currentUser){closeFreeTicketModal();openLogin();return}
-      if(localStorage.getItem(FREE_TICKET_KEY)){
-        showToast("이미 이 브라우저에서 무료 이용권을 받았습니다.");
-        closeFreeTicketModal();
-        return;
-      }
-      const user=getUserData();
-      ensureAccountShape(user);
-      user.tickets+=3;
-      saveUserData(user);
-      localStorage.setItem(FREE_TICKET_KEY,"1");
-      closeFreeTicketModal();
-      updateProfileCounts();
-      showToast("무료 이용권 3장을 받았습니다.");
-    }
-
-    function formatTime(ms){
-      const total=Math.max(0,Math.ceil(ms/1000));
-      const m=Math.floor(total/60);
-      const s=total%60;
-      return `${m}분 ${String(s).padStart(2,"0")}초`;
-    }
-
-    function updateTicketModal(){
-      if(!currentUser)return;
-      updateCoinBank();
-      const user=getUserData();
-      if(!user)return;
-      ensureAccountShape(user);
-      document.getElementById("ticketStatusText").textContent=`현재 ${currentUser.nickname}님의 이용권 수는 ${user.tickets}개입니다.`;
-      document.getElementById("coinStatusText").textContent=`현재 ${currentUser.nickname}님의 코인수는 ${user.coins}개입니다.`;
-      document.getElementById("coinBankText").textContent=`쌓인 코인: ${user.coinBank}개 / 최대 ${COIN_BANK_MAX}개`;
-
-      let timerText="코인 생성 대기 중";
-      if(user.coinBank>=COIN_BANK_MAX)timerText=`코인이 ${COIN_BANK_MAX}개까지 쌓였습니다. 회수해야 다시 쌓입니다.`;
-      else if(user.coinStartedAt){
-        const next=user.coinStartedAt+COIN_INTERVAL-Date.now();
-        timerText=`다음 코인까지 ${formatTime(next)}`;
-      }else{
-        timerText="코인 얻기를 누르면 45분마다 코인이 쌓입니다.";
-      }
-
-      document.getElementById("coinTimerText").textContent=timerText;
-      updateProfileCounts();
-    }
-
-    function startCoinGenerator(){
-      if(!currentUser)return;
-      const user=getUserData();
-      ensureAccountShape(user);
-      updateCoinBank();
-
-      if(user.coinBank>=COIN_BANK_MAX){
-        showToast(`코인이 이미 ${COIN_BANK_MAX}개까지 쌓였습니다. 먼저 회수하세요.`);
-        updateTicketModal();
-        return;
-      }
-
-      if(!user.coinStartedAt){
-        user.coinStartedAt=Date.now();
-        saveUserData(user);
-        showToast("코인 생성이 시작되었습니다.");
-      }else{
-        showToast("이미 코인이 생성되고 있습니다.");
-      }
-      updateTicketModal();
-    }
-
-    function collectCoins(){
-      if(!currentUser)return;
-      updateCoinBank();
-      const user=getUserData();
-      ensureAccountShape(user);
-
-      if(user.coinBank<=0){
-        showToast("회수할 코인이 없습니다.");
-        return;
-      }
-
-      user.coins+=user.coinBank;
-      const got=user.coinBank;
-      user.coinBank=0;
-      if(!user.coinStartedAt)user.coinStartedAt=Date.now();
-      saveUserData(user);
-      showToast(`코인 ${got}개를 회수했습니다.`);
-      updateTicketModal();
-    }
-
-    function buyTickets(count){
-      if(!currentUser)return;
-      const user=getUserData();
-      ensureAccountShape(user);
-      const price=count*3;
-
-      if(user.coins<price){
-        showToast(`코인이 부족합니다. 이용권 ${count}장 구매에는 코인 ${price}개가 필요합니다.`);
-        return;
-      }
-
-      user.coins-=price;
-      user.tickets+=count;
-      saveUserData(user);
-      showToast(`코인 ${price}개로 이용권 ${count}장을 구매했습니다.`);
-      updateTicketModal();
-    }
-
-    function confirmLogin(){
-      const nicknameInput=document.getElementById("nicknameInput");
-      const passwordInput=document.getElementById("passwordInput");
-      const nickname=nicknameInput.value.trim();
-      const password=passwordInput.value.trim();
-
-      if(!nickname){showToast("닉네임을 입력하세요.");return}
-      if(!password){showToast("비밀번호를 입력하세요.");return}
-
-      if(nickname===AUTHOR_NAME){
-        if(password!==AUTHOR_PASSWORD){
-          showToast("고쓰비 계정의 비밀번호가 다릅니다.");
-          return;
-        }
-        const user=getAuthorAccount();
-        currentUser={nickname:user.nickname,kind:"author",isAuthor:true};
-        saveCurrentLogin(currentUser);
-        closeLogin();
-        updateAccountButton();
-        renderHome();
-        showPage("homePage","navHome");
-        showToast("작가 계정으로 로그인되었습니다.");
-        return;
-      }
-
-      const saved=getNormalAccount();
-
-      if(saved){
-        if(saved.nickname!==nickname){
-          localStorage.removeItem(NORMAL_ACCOUNT_KEY);
-          const newUser={
-            nickname,
-            password,
-            kind:"normal",
-            isAuthor:false,
-            createdAt:new Date().toISOString(),
-            recentWorks:[],
-            watchingWorks:[],
-            readEpisodes:[],
-            ownedEpisodes:[],
-            tickets:0,
-            coins:0,
-            coinBank:0,
-            coinStartedAt:0,
-            avatar:{color:"green",shape:"circle",photo:""}
-          };
-          saveNormalAccount(newUser);
-          currentUser={nickname:newUser.nickname,kind:"normal",isAuthor:false};
-          saveCurrentLogin(currentUser);
-          closeLogin();
-          updateAccountButton();
-          renderHome();
-          showPage("homePage","navHome");
-          maybeShowFreeTicketModal();
-          showToast("기존 일반 계정을 지우고 새 계정으로 시작했습니다.");
-          return;
-        }
-
-        if(saved.password!==password){
-          showToast("비밀번호가 다릅니다.");
-          return;
-        }
-
-        currentUser={nickname:saved.nickname,kind:"normal",isAuthor:false};
-        saveCurrentLogin(currentUser);
-      }else{
-        const newUser={
-          nickname,
-          password,
-          kind:"normal",
-          isAuthor:false,
-          createdAt:new Date().toISOString(),
-          recentWorks:[],
-          watchingWorks:[],
-          readEpisodes:[],
-          ownedEpisodes:[],
-          tickets:0,
-          coins:0,
-          coinBank:0,
-          coinStartedAt:0,
-          avatar:{color:"green",shape:"circle",photo:""}
-        };
-        saveNormalAccount(newUser);
-        currentUser={nickname:newUser.nickname,kind:"normal",isAuthor:false};
-        saveCurrentLogin(currentUser);
-      }
-
-      nicknameInput.value="";
-      passwordInput.value="";
       closeLogin();
       updateAccountButton();
       renderHome();
       showPage("homePage","navHome");
       maybeShowFreeTicketModal();
-      showToast("로그인되었습니다.");
+      showToast("기존 일반 계정을 지우고 새 계정으로 시작했습니다.");
+      return;
     }
 
-    function restoreLogin(){
-      const raw=localStorage.getItem(CURRENT_LOGIN_KEY);
-      if(!raw)return false;
-      const login=JSON.parse(raw);
-
-      if(login.kind==="author"){
-        const user=getAuthorAccount();
-        currentUser={nickname:user.nickname,kind:"author",isAuthor:true};
-      }else{
-        const user=getNormalAccount();
-        if(!user)return false;
-        ensureAccountShape(user);
-        saveNormalAccount(user);
-        currentUser={nickname:user.nickname,kind:"normal",isAuthor:false};
-      }
-
-      updateAccountButton();
-      renderHome();
-      showPage("homePage","navHome");
-      return true;
+    if(saved.password!==password){
+      showToast("비밀번호가 다릅니다.");
+      return;
     }
 
-    function logout(){
-      currentUser=null;
-      saveCurrentLogin(null);
-      reader.classList.remove("open");
-      document.body.style.overflow="";
-      updateAccountButton();
-      pages.forEach(id=>{
-        const page=document.getElementById(id);
-        if(page)page.classList.remove("active");
-      });
-      setActiveNav("navHome");
-      searchInput.value="";
-      showToast("로그아웃되었습니다.");
-    }
+    currentUser={nickname:saved.nickname,kind:"normal",isAuthor:false};
+    saveCurrentLogin(currentUser);
+  }else{
+    const newUser={
+      nickname,
+      password,
+      kind:"normal",
+      isAuthor:false,
+      createdAt:new Date().toISOString(),
+      recentWorks:[],
+      watchingWorks:[],
+      readEpisodes:[],
+      ownedEpisodes:[],
+      tickets:0,
+      coins:0,
+      coinBank:0,
+      coinStartedAt:0,
+      avatar:{color:"green",shape:"circle",photo:""}
+    };
+    saveNormalAccount(newUser);
+    currentUser={nickname:newUser.nickname,kind:"normal",isAuthor:false};
+    saveCurrentLogin(currentUser);
+  }
 
-    function handleAccountButton(){
-      if(!currentUser)openLogin();
-      else openProfile();
-    }
+  nicknameInput.value="";
+  passwordInput.value="";
+  closeLogin();
+  updateAccountButton();
+  renderHome();
+  showPage("homePage","navHome");
+  maybeShowFreeTicketModal();
+  showToast("로그인되었습니다.");
+}
 
-    function goHome(){
-      if(!currentUser){openLogin();return}
-      searchInput.value="";
-      renderHome();
-      showPage("homePage","navHome");
-    }
+function restoreLogin(){
+  const raw=localStorage.getItem(CURRENT_LOGIN_KEY);
+  if(!raw)return false;
+  const login=JSON.parse(raw);
 
-    function cleanWorkIds(arr){
-      return (arr||[]).filter(id=>works[id]);
-    }
+  if(login.kind==="author"){
+    const user=getAuthorAccount();
+    currentUser={nickname:user.nickname,kind:"author",isAuthor:true};
+  }else{
+    const user=getNormalAccount();
+    if(!user)return false;
+    ensureAccountShape(user);
+    saveNormalAccount(user);
+    currentUser={nickname:user.nickname,kind:"normal",isAuthor:false};
+  }
 
-    function renderHome(){
-      const user=getUserData();
-      ensureAccountShape(user);
-      user.recentWorks=cleanWorkIds(user.recentWorks);
-      user.watchingWorks=cleanWorkIds(user.watchingWorks);
-      saveUserData(user);
+  updateAccountButton();
+  renderHome();
+  showPage("homePage","navHome");
+  return true;
+}
 
-      document.getElementById("homeGreeting").textContent=currentUser.nickname+"님의 홈";
-      const recentWorksBox=document.getElementById("recentWorksBox");
-      const recentWorks=user.recentWorks||[];
-      document.getElementById("recentCountText").textContent=recentWorks.length+"개";
+function logout(){
+  currentUser=null;
+  saveCurrentLogin(null);
+  reader.classList.remove("open");
+  document.body.style.overflow="";
+  updateAccountButton();
+  pages.forEach(id=>{
+    const page=document.getElementById(id);
+    if(page)page.classList.remove("active");
+  });
+  setActiveNav("navHome");
+  searchInput.value="";
+  showToast("로그아웃되었습니다.");
+}
 
-      if(recentWorks.length){
-        recentWorksBox.innerHTML=recentWorks.map(id=>workRowHtml(id,"이어보기")).join("");
-      }else{
-        recentWorksBox.innerHTML=`<div class="empty-box">아직 최근 본 작품이 없습니다.</div>`;
-      }
+function handleAccountButton(){
+  if(!currentUser)openLogin();
+  else openProfile();
+}
 
-      updateProfileCounts();
-      updateProfileAvatar();
-    }
+function goHome(){
+  if(!currentUser){openLogin();return}
+  searchInput.value="";
+  renderHome();
+  showPage("homePage","navHome");
+}
 
-    function workRowHtml(id,badgeText="바"){
-      const work=works[id];
-      if(!work)return "";
-      const coverClass=id==="kill"?"mini-cover kill":"mini-cover";
-      return `
-        <div class="work-row" onclick="openWorkDetail('${id}')">
-          <div class="${coverClass}"></div>
-          <div class="work-row-info">
-            <h3>${work.title}</h3>
-            <p>작가 ${work.author} · ${work.summary}</p>
-          </div>
-          <div class="work-row-badge">${badgeText}</div>
+function cleanWorkIds(arr){
+  return (arr||[]).filter(id=>works[id]);
+}
+
+function renderHome(){
+  const user=getUserData();
+  ensureAccountShape(user);
+  user.recentWorks=cleanWorkIds(user.recentWorks);
+  user.watchingWorks=cleanWorkIds(user.watchingWorks);
+  saveUserData(user);
+
+  document.getElementById("homeGreeting").textContent=currentUser.nickname+"님의 홈";
+  const recentWorksBox=document.getElementById("recentWorksBox");
+  const recentWorks=user.recentWorks||[];
+  document.getElementById("recentCountText").textContent=recentWorks.length+"개";
+
+  if(recentWorks.length){
+    recentWorksBox.innerHTML=recentWorks.map(id=>workRowHtml(id,"이어보기")).join("");
+  }else{
+    recentWorksBox.innerHTML=`<div class="empty-box">아직 최근 본 작품이 없습니다.</div>`;
+  }
+
+  updateProfileCounts();
+  updateProfileAvatar();
+}
+
+function workRowHtml(id,badgeText="바"){
+  const work=works[id];
+  if(!work)return "";
+  const coverClass=id==="kill"?"mini-cover kill":"mini-cover";
+
+  return `
+    <div class="work-row" onclick="openWorkDetail('${id}')">
+      <div class="${coverClass}"></div>
+      <div class="work-row-info">
+        <h3>${work.title}</h3>
+        <p>작가 ${work.author} · ${work.summary}</p>
+      </div>
+      <div class="work-row-badge">${badgeText}</div>
+    </div>
+  `;
+}
+
+function openProfile(){
+  if(!currentUser){openLogin();return}
+  updateCoinBank();
+  const user=getUserData();
+  ensureAccountShape(user);
+
+  document.getElementById("profileNickname").textContent=currentUser.nickname;
+  const profileRole=document.getElementById("profileRole");
+  profileRole.textContent=currentUser.isAuthor?"작가 계정":"일반 계정";
+  profileRole.classList.toggle("author",currentUser.isAuthor);
+  document.getElementById("authorWorksSection").style.display=currentUser.isAuthor?"block":"none";
+
+  const watchingWorksBox=document.getElementById("watchingWorksBox");
+  user.watchingWorks=cleanWorkIds(user.watchingWorks);
+  saveUserData(user);
+  const watching=user.watchingWorks||[];
+
+  if(watching.length){
+    watchingWorksBox.innerHTML=watching.map(id=>workRowHtml(id,"보기")).join("");
+  }else{
+    watchingWorksBox.innerHTML=`<div class="empty-box">${currentUser.nickname}님은 아직 본 작품이 없습니다.</div>`;
+  }
+
+  updateProfileCounts();
+  updateProfileAvatar();
+  showPage("profilePage","");
+}
+
+function openWorkDetail(id="world"){
+  if(!currentUser){openLogin();return}
+  currentWorkId=id;
+  const work=works[id];
+
+  const hero=document.getElementById("workHero");
+  const badge=document.getElementById("workBadge");
+  const cover=document.getElementById("workCover");
+  const readBtn=document.getElementById("workReadButton");
+  const firstBtn=document.getElementById("firstReadBtn");
+
+  hero.className="hero";
+  badge.className="badge";
+  cover.className="cover";
+  readBtn.className="main-btn";
+  firstBtn.className="main-btn";
+
+  if(id==="kill"){
+    hero.classList.add("kill-hero");
+    badge.classList.add("red");
+    cover.classList.add("kill-cover");
+    readBtn.classList.add("red");
+    firstBtn.classList.add("red");
+  }
+
+  badge.textContent=work.badge;
+  document.getElementById("workHeroTitle").innerHTML=work.heroTitle;
+  document.getElementById("workHeroDesc").textContent=work.heroDesc;
+  document.getElementById("workInfoAuthor").textContent=`작가 · ${work.author}`;
+  document.getElementById("workTitle").textContent=work.title;
+  document.getElementById("workSummary").textContent=work.summary;
+  document.getElementById("workMeta").innerHTML=work.meta.map(m=>`<span class="chip">${m}</span>`).join("");
+  document.getElementById("workStats").innerHTML=work.stats.map(s=>`<span>${s}</span>`).join("");
+  document.getElementById("episodeCountText").textContent=`총 ${Object.keys(work.episodes).length}화 공개`;
+
+  renderEpisodeList(id);
+  showPage("workDetailPage","");
+}
+
+function renderEpisodeList(id){
+  const work=works[id];
+  const list=document.getElementById("episodeList");
+
+  list.innerHTML=Object.entries(work.episodes).map(([num,ep])=>{
+    const thumbClass=id==="kill"?"thumb kill":"thumb";
+    const badge=ep.preview
+      ? `<div class="work-row-badge preview" id="episodeBadge-${id}-${num}">이용권</div>`
+      : `<div class="ep-date">${ep.date}</div>`;
+
+    return `
+      <div class="episode" data-work="${id}" data-episode="${num}" onclick="openReader(${Number(num)},'${id}')">
+        <div class="${thumbClass}" data-ep="${num}화"></div>
+        <div>
+          <div class="ep-title">${ep.title}</div>
+          <div class="ep-desc">${ep.desc}</div>
         </div>
-      `;
-    }
+        ${badge}
+      </div>
+    `;
+  }).join("");
 
-    function openProfile(){
-      if(!currentUser){openLogin();return}
-      updateCoinBank();
-      const user=getUserData();
-      ensureAccountShape(user);
+  updateReadEpisodeStyles();
+  updateEpisodeBadges();
+}
 
-      document.getElementById("profileNickname").textContent=currentUser.nickname;
-      const profileRole=document.getElementById("profileRole");
-      profileRole.textContent=currentUser.isAuthor?"작가 계정":"일반 계정";
-      profileRole.classList.toggle("author",currentUser.isAuthor);
-      document.getElementById("authorWorksSection").style.display=currentUser.isAuthor?"block":"none";
+function openFirstEpisode(){
+  const work=works[currentWorkId];
+  openReader(work.firstEpisode,currentWorkId);
+}
 
-      const watchingWorksBox=document.getElementById("watchingWorksBox");
-      user.watchingWorks=cleanWorkIds(user.watchingWorks);
-      saveUserData(user);
-      const watching=user.watchingWorks||[];
+function hasReadPreviousPaidRequired(workId,num){
+  if(workId!=="world")return true;
+  if(num<9)return true;
+  if(currentUser&&currentUser.isAuthor)return true;
 
-      if(watching.length){
-        watchingWorksBox.innerHTML=watching.map(id=>workRowHtml(id,"보기")).join("");
-      }else{
-        watchingWorksBox.innerHTML=`<div class="empty-box">${currentUser.nickname}님은 아직 본 작품이 없습니다.</div>`;
-      }
+  const user=getUserData();
+  ensureAccountShape(user);
+  return user.readEpisodes.includes(`world-${num-1}`);
+}
 
-      updateProfileCounts();
-      updateProfileAvatar();
-      showPage("profilePage","");
-    }
+function requestPaidEpisode(workId,num){
+  pendingWorkId=workId;
+  pendingEpisodeNumber=num;
+  const ep=works[workId].episodes[num];
+  document.getElementById("paidEpisodeTitle").textContent=ep.title;
+  document.getElementById("paidEpisodeMessage").textContent=`이용권 ${ep.cost}장이 소모됩니다. 보시겠습니까?`;
+  paidEpisodeModal.classList.add("open");
+}
 
-    function openWorkDetail(id="world"){
-      if(!currentUser){openLogin();return}
-      currentWorkId=id;
-      const work=works[id];
+function confirmPaidView(){
+  if(pendingEpisodeNumber===null||!pendingWorkId)return;
+  const num=pendingEpisodeNumber;
+  const workId=pendingWorkId;
+  const ep=works[workId].episodes[num];
+  const user=getUserData();
+  ensureAccountShape(user);
 
-      const hero=document.getElementById("workHero");
-      const badge=document.getElementById("workBadge");
-      const cover=document.getElementById("workCover");
-      const readBtn=document.getElementById("workReadButton");
-      const firstBtn=document.getElementById("firstReadBtn");
+  if(user.tickets<(ep.cost||3)){
+    closePaidEpisodeModal();
+    needTicketModal.classList.add("open");
+    return;
+  }
 
-      hero.className="hero";
-      badge.className="badge";
-      cover.className="cover";
-      readBtn.className="main-btn";
-      firstBtn.className="main-btn";
+  user.tickets-=ep.cost||3;
+  saveUserData(user);
+  closePaidEpisodeModal();
+  updateProfileCounts();
+  showToast(`이용권 ${ep.cost||3}장을 사용했습니다.`);
+  actuallyOpenReader(num,workId);
+}
 
-      if(id==="kill"){
-        hero.classList.add("kill-hero");
-        badge.classList.add("red");
-        cover.classList.add("kill-cover");
-        readBtn.classList.add("red");
-        firstBtn.classList.add("red");
-      }
+function confirmOwnEpisode(){
+  if(pendingEpisodeNumber===null||!pendingWorkId)return;
+  const num=pendingEpisodeNumber;
+  const workId=pendingWorkId;
+  const ep=works[workId].episodes[num];
+  const key=`${workId}-${num}`;
+  const user=getUserData();
+  ensureAccountShape(user);
+  const ownCost=ep.ownCost||5;
 
-      badge.textContent=work.badge;
-      document.getElementById("workHeroTitle").innerHTML=work.heroTitle;
-      document.getElementById("workHeroDesc").textContent=work.heroDesc;
-      document.getElementById("workInfoAuthor").textContent=`작가 · ${work.author}`;
-      document.getElementById("workTitle").textContent=work.title;
-      document.getElementById("workSummary").textContent=work.summary;
-      document.getElementById("workMeta").innerHTML=work.meta.map(m=>`<span class="chip">${m}</span>`).join("");
-      document.getElementById("workStats").innerHTML=work.stats.map(s=>`<span>${s}</span>`).join("");
-      document.getElementById("episodeCountText").textContent=`총 ${Object.keys(work.episodes).length}화 공개`;
+  if(user.ownedEpisodes.includes(key)){
+    closePaidEpisodeModal();
+    actuallyOpenReader(num,workId);
+    return;
+  }
 
-      renderEpisodeList(id);
-      showPage("workDetailPage","");
-    }
+  if(user.tickets<ownCost){
+    closePaidEpisodeModal();
+    needTicketModal.classList.add("open");
+    return;
+  }
 
-    function renderEpisodeList(id){
-      const work=works[id];
-      const list=document.getElementById("episodeList");
-      list.innerHTML=Object.entries(work.episodes).map(([num,ep])=>{
-        const thumbClass=id==="kill"?"thumb kill":"thumb";
-        const badge=ep.preview
-          ? `<div class="work-row-badge preview" id="episodeBadge-${id}-${num}">이용권</div>`
-          : `<div class="ep-date">${ep.date}</div>`;
+  user.tickets-=ownCost;
+  user.ownedEpisodes.push(key);
+  saveUserData(user);
+  closePaidEpisodeModal();
+  updateProfileCounts();
+  showToast(`이용권 ${ownCost}장으로 ${ep.title}을 소장했습니다.`);
+  actuallyOpenReader(num,workId);
+}
 
-        return `
-          <div class="episode" data-work="${id}" data-episode="${num}" onclick="openReader(${Number(num)},'${id}')">
-            <div class="${thumbClass}" data-ep="${num}화"></div>
-            <div>
-              <div class="ep-title">${ep.title}</div>
-              <div class="ep-desc">${ep.desc}</div>
-            </div>
-            ${badge}
-          </div>
-        `;
-      }).join("");
+function checkEpisodeAccess(workId,num){
+  const ep=works[workId].episodes[num];
+  if(!ep)return false;
+  if(currentUser&&currentUser.isAuthor)return true;
 
-      updateReadEpisodeStyles();
-      updateEpisodeBadges();
-    }
+  if(!hasReadPreviousPaidRequired(workId,num)){
+    showToast(`${num-1}화를 먼저 읽어야 볼 수 있습니다.`);
+    return false;
+  }
 
-    function openFirstEpisode(){
-      const work=works[currentWorkId];
-      openReader(work.firstEpisode,currentWorkId);
-    }
+  if(!ep.preview)return true;
 
-    function hasReadPreviousPaidRequired(workId,num){
-      if(workId!=="world")return true;
-      if(num<8)return true;
-      if(currentUser&&currentUser.isAuthor)return true;
-      const user=getUserData();
-      ensureAccountShape(user);
-      return user.readEpisodes.includes(`world-${num-1}`);
-    }
+  const user=getUserData();
+  ensureAccountShape(user);
+  if(user.ownedEpisodes.includes(`${workId}-${num}`))return true;
 
-    function requestPaidEpisode(workId,num){
-      pendingWorkId=workId;
-      pendingEpisodeNumber=num;
-      const ep=works[workId].episodes[num];
-      document.getElementById("paidEpisodeTitle").textContent=ep.title;
-      document.getElementById("paidEpisodeMessage").textContent=`이용권 ${ep.cost}장이 소모됩니다. 보시겠습니까?`;
-      paidEpisodeModal.classList.add("open");
-    }
+  requestPaidEpisode(workId,num);
+  return false;
+}
 
-    function confirmPaidView(){
-      if(pendingEpisodeNumber===null||!pendingWorkId)return;
-      const num=pendingEpisodeNumber;
-      const ep=works[pendingWorkId].episodes[num];
-      const user=getUserData();
-      ensureAccountShape(user);
+function addViewedWork(workId,episodeNumber){
+  const user=getUserData();
+  ensureAccountShape(user);
 
-      if(user.tickets<(ep.cost||3)){
-        closePaidEpisodeModal();
-        needTicketModal.classList.add("open");
-        return;
-      }
+  user.recentWorks=cleanWorkIds(user.recentWorks);
+  user.watchingWorks=cleanWorkIds(user.watchingWorks);
+  user.recentWorks=user.recentWorks.filter(id=>id!==workId);
+  user.recentWorks.unshift(workId);
 
-      user.tickets-=ep.cost||3;
-      saveUserData(user);
-      const workId=pendingWorkId;
-      closePaidEpisodeModal();
-      updateProfileCounts();
-      showToast(`이용권 ${ep.cost||3}장을 사용했습니다.`);
-      actuallyOpenReader(num,workId);
-    }
+  if(!user.watchingWorks.includes(workId))user.watchingWorks.push(workId);
 
-    function confirmOwnEpisode(){
-      if(pendingEpisodeNumber===null||!pendingWorkId)return;
-      const num=pendingEpisodeNumber;
-      const workId=pendingWorkId;
-      const ep=works[workId].episodes[num];
-      const key=`${workId}-${num}`;
-      const user=getUserData();
-      ensureAccountShape(user);
-      const ownCost=ep.ownCost||5;
+  const key=`${workId}-${episodeNumber}`;
+  if(!user.readEpisodes.includes(key))user.readEpisodes.push(key);
 
-      if(user.ownedEpisodes.includes(key)){
-        closePaidEpisodeModal();
-        actuallyOpenReader(num,workId);
-        return;
-      }
+  saveUserData(user);
+}
 
-      if(user.tickets<ownCost){
-        closePaidEpisodeModal();
-        needTicketModal.classList.add("open");
-        return;
-      }
+function updateReadEpisodeStyles(){
+  if(!currentUser)return;
+  const user=getUserData();
+  ensureAccountShape(user);
+  const readEpisodes=user.readEpisodes||[];
 
-      user.tickets-=ownCost;
-      user.ownedEpisodes.push(key);
-      saveUserData(user);
-      closePaidEpisodeModal();
-      updateProfileCounts();
-      showToast(`이용권 ${ownCost}장으로 ${ep.title}을 소장했습니다.`);
-      actuallyOpenReader(num,workId);
-    }
+  document.querySelectorAll(".episode[data-work][data-episode]").forEach(el=>{
+    const workId=el.dataset.work;
+    const num=Number(el.dataset.episode);
+    el.classList.toggle("read",readEpisodes.includes(`${workId}-${num}`));
+  });
 
-    function checkEpisodeAccess(workId,num){
-      const ep=works[workId].episodes[num];
-      if(!ep)return false;
-      if(currentUser&&currentUser.isAuthor)return true;
+  updateEpisodeBadges();
+}
 
-      if(!hasReadPreviousPaidRequired(workId,num)){
-        showToast(`${num-1}화를 먼저 읽어야 볼 수 있습니다.`);
-        return false;
-      }
+function searchWorks(){
+  if(!currentUser){openLogin();return}
+  const rawQuery=searchInput.value.trim();
+  const query=normalizeText(rawQuery);
 
-      if(!ep.preview)return true;
+  const results=Object.values(works).filter(work=>{
+    const title=normalizeText(work.title);
+    const author=normalizeText(work.author);
+    const aliases=work.aliases.map(normalizeText);
+    return query&&(
+      title.includes(query)||
+      author.includes(query)||
+      aliases.some(alias=>alias.includes(query)||query.includes(alias))
+    );
+  });
 
-      const user=getUserData();
-      ensureAccountShape(user);
-      if(user.ownedEpisodes.includes(`${workId}-${num}`))return true;
+  document.getElementById("searchTitle").textContent=rawQuery?`"${rawQuery}" 검색 결과`:"검색 결과";
+  document.getElementById("searchFoundSection").style.display=results.length?"block":"none";
+  document.getElementById("searchEmptyPage").style.display=results.length?"none":"flex";
+  document.getElementById("searchResultsBox").innerHTML=results.map(work=>workRowHtml(work.id,"바")).join("");
+  showPage("searchPage","");
+}
 
-      requestPaidEpisode(workId,num);
-      return false;
-    }
+function handleSearchKey(event){
+  if(event.key==="Enter")searchWorks();
+}
 
-    function addViewedWork(workId,episodeNumber){
-      const user=getUserData();
-      ensureAccountShape(user);
-      user.recentWorks=cleanWorkIds(user.recentWorks);
-      user.watchingWorks=cleanWorkIds(user.watchingWorks);
-      user.recentWorks=user.recentWorks.filter(id=>id!==workId);
-      user.recentWorks.unshift(workId);
-      if(!user.watchingWorks.includes(workId))user.watchingWorks.push(workId);
-      const key=`${workId}-${episodeNumber}`;
-      if(!user.readEpisodes.includes(key))user.readEpisodes.push(key);
-      saveUserData(user);
-    }
+function openReader(episodeNumber,workId=currentWorkId){
+  if(!currentUser){openLogin();return}
+  if(!works[workId]||!works[workId].episodes[episodeNumber]){
+    showToast("아직 공개되지 않은 회차입니다.");
+    return;
+  }
+  if(!checkEpisodeAccess(workId,episodeNumber))return;
+  actuallyOpenReader(episodeNumber,workId);
+}
 
-    function updateReadEpisodeStyles(){
-      if(!currentUser)return;
-      const user=getUserData();
-      ensureAccountShape(user);
-      const readEpisodes=user.readEpisodes||[];
+function actuallyOpenReader(episodeNumber,workId=currentWorkId){
+  addViewedWork(workId,episodeNumber);
+  currentWorkId=workId;
+  currentEpisode=episodeNumber;
 
-      document.querySelectorAll(".episode[data-work][data-episode]").forEach(el=>{
-        const workId=el.dataset.work;
-        const num=Number(el.dataset.episode);
-        el.classList.toggle("read",readEpisodes.includes(`${workId}-${num}`));
-      });
+  const work=works[workId];
+  const ep=work.episodes[episodeNumber];
 
-      updateEpisodeBadges();
-    }
+  readerMiniTitle.textContent=ep.title;
+  readerSeriesMini.textContent=work.title;
+  readerSeriesName.textContent=work.title;
+  readerSeriesName.classList.toggle("kill-name",workId==="kill");
+  readerTitle.textContent=ep.title;
+  readerSub.textContent=ep.sub;
+  novelBody.innerHTML=rawToHtml(ep.raw);
 
-    function searchWorks(){
-      if(!currentUser){openLogin();return}
-      const rawQuery=searchInput.value.trim();
-      const query=normalizeText(rawQuery);
+  prevBtn.disabled=!work.episodes[currentEpisode-1];
+  nextBtn.disabled=!work.episodes[currentEpisode+1];
 
-      const results=Object.values(works).filter(work=>{
-        const title=normalizeText(work.title);
-        const author=normalizeText(work.author);
-        const aliases=work.aliases.map(normalizeText);
-        return query&&(
-          title.includes(query)||
-          author.includes(query)||
-          aliases.some(alias=>alias.includes(query)||query.includes(alias))
-        );
-      });
+  reader.classList.add("open");
+  document.body.style.overflow="hidden";
+  readerScroll.scrollTo({top:0,behavior:"instant"});
+  updateReadEpisodeStyles();
+}
 
-      document.getElementById("searchTitle").textContent=rawQuery?`"${rawQuery}" 검색 결과`:"검색 결과";
-      document.getElementById("searchFoundSection").style.display=results.length?"block":"none";
-      document.getElementById("searchEmptyPage").style.display=results.length?"none":"flex";
-      document.getElementById("searchResultsBox").innerHTML=results.map(work=>workRowHtml(work.id,"바")).join("");
-      showPage("searchPage","");
-    }
+function closeReader(){
+  reader.classList.remove("open");
+  document.body.style.overflow="";
+  openWorkDetail(currentWorkId);
+}
 
-    function handleSearchKey(event){
-      if(event.key==="Enter")searchWorks();
-    }
+function moveEpisode(direction){
+  const work=works[currentWorkId];
+  const target=currentEpisode+direction;
 
-    function openReader(episodeNumber,workId=currentWorkId){
-      if(!currentUser){openLogin();return}
-      if(!works[workId]||!works[workId].episodes[episodeNumber]){
-        showToast("아직 공개되지 않은 회차입니다.");
-        return;
-      }
-      if(!checkEpisodeAccess(workId,episodeNumber))return;
-      actuallyOpenReader(episodeNumber,workId);
-    }
+  if(!work.episodes[target]){
+    showToast("아직 공개되지 않은 회차입니다.");
+    return;
+  }
 
-    function actuallyOpenReader(episodeNumber,workId=currentWorkId){
-      addViewedWork(workId,episodeNumber);
-      currentWorkId=workId;
-      currentEpisode=episodeNumber;
-      const work=works[workId];
-      const ep=work.episodes[episodeNumber];
+  openReader(target,currentWorkId);
+}
 
-      readerMiniTitle.textContent=ep.title;
-      readerSeriesMini.textContent=work.title;
-      readerSeriesName.textContent=work.title;
-      readerSeriesName.classList.toggle("kill-name",workId==="kill");
-      readerTitle.textContent=ep.title;
-      readerSub.textContent=ep.sub;
-      novelBody.innerHTML=rawToHtml(ep.raw);
+function scrollToEpisodes(){
+  if(!currentUser)return;
+  document.getElementById("episodes").scrollIntoView({behavior:"smooth",block:"start"});
+}
 
-      prevBtn.disabled=!work.episodes[currentEpisode-1];
-      nextBtn.disabled=!work.episodes[currentEpisode+1];
+function showToast(message){
+  toast.textContent=message;
+  toast.style.display="block";
+  clearTimeout(window.toastTimer);
+  window.toastTimer=setTimeout(()=>{toast.style.display="none"},1800);
+}
 
-      reader.classList.add("open");
-      document.body.style.overflow="hidden";
-      readerScroll.scrollTo({top:0,behavior:"instant"});
-      updateReadEpisodeStyles();
-    }
+function initLoggedOut(){
+  currentUser=null;
+  updateAccountButton();
+  pages.forEach(id=>{
+    const page=document.getElementById(id);
+    if(page)page.classList.remove("active");
+  });
+  document.body.classList.remove("logged-in");
+  setActiveNav("navHome");
+  searchInput.value="";
+}
 
-    function closeReader(){
-      reader.classList.remove("open");
-      document.body.style.overflow="";
-      openWorkDetail(currentWorkId);
-    }
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){
+    if(reader.classList.contains("open"))closeReader();
+    if(loginModal.classList.contains("open"))closeLogin();
+    if(profileEditModal.classList.contains("open"))closeProfileEditModal();
+    if(avatarModal.classList.contains("open"))closeAvatarModal();
+    if(ticketModal.classList.contains("open"))closeTicketModal();
+    if(needTicketModal.classList.contains("open"))closeNeedTicketModal();
+    if(freeTicketModal.classList.contains("open"))closeFreeTicketModal();
+    if(paidEpisodeModal.classList.contains("open"))closePaidEpisodeModal();
+  }
+});
 
-    function moveEpisode(direction){
-      const work=works[currentWorkId];
-      const target=currentEpisode+direction;
-      if(!work.episodes[target]){
-        showToast("아직 공개되지 않은 회차입니다.");
-        return;
-      }
-      openReader(target,currentWorkId);
-    }
+loginModal.addEventListener("click",e=>{if(e.target===loginModal)closeLogin()});
+profileEditModal.addEventListener("click",e=>{if(e.target===profileEditModal)closeProfileEditModal()});
+avatarModal.addEventListener("click",e=>{if(e.target===avatarModal)closeAvatarModal()});
+ticketModal.addEventListener("click",e=>{if(e.target===ticketModal)closeTicketModal()});
+needTicketModal.addEventListener("click",e=>{if(e.target===needTicketModal)closeNeedTicketModal()});
+freeTicketModal.addEventListener("click",e=>{if(e.target===freeTicketModal)closeFreeTicketModal()});
+paidEpisodeModal.addEventListener("click",e=>{if(e.target===paidEpisodeModal)closePaidEpisodeModal()});
 
-    function scrollToEpisodes(){
-      if(!currentUser)return;
-      document.getElementById("episodes").scrollIntoView({behavior:"smooth",block:"start"});
-    }
+setInterval(()=>{
+  if(currentUser){
+    updateCoinBank();
+    updateTicketModal();
+    updateProfileCounts();
+  }
+},1000);
 
-    function showToast(message){
-      toast.textContent=message;
-      toast.style.display="block";
-      clearTimeout(window.toastTimer);
-      window.toastTimer=setTimeout(()=>{toast.style.display="none"},1800);
-    }
-
-    function initLoggedOut(){
-      currentUser=null;
-      updateAccountButton();
-      pages.forEach(id=>{
-        const page=document.getElementById(id);
-        if(page)page.classList.remove("active");
-      });
-      document.body.classList.remove("logged-in");
-      setActiveNav("navHome");
-      searchInput.value="";
-    }
-
-    document.addEventListener("keydown",e=>{
-      if(e.key==="Escape"){
-        if(reader.classList.contains("open"))closeReader();
-        if(loginModal.classList.contains("open"))closeLogin();
-        if(profileEditModal.classList.contains("open"))closeProfileEditModal();
-        if(avatarModal.classList.contains("open"))closeAvatarModal();
-        if(ticketModal.classList.contains("open"))closeTicketModal();
-        if(needTicketModal.classList.contains("open"))closeNeedTicketModal();
-        if(freeTicketModal.classList.contains("open"))closeFreeTicketModal();
-        if(paidEpisodeModal.classList.contains("open"))closePaidEpisodeModal();
-      }
-    });
-
-    loginModal.addEventListener("click",e=>{if(e.target===loginModal)closeLogin()});
-    profileEditModal.addEventListener("click",e=>{if(e.target===profileEditModal)closeProfileEditModal()});
-    avatarModal.addEventListener("click",e=>{if(e.target===avatarModal)closeAvatarModal()});
-    ticketModal.addEventListener("click",e=>{if(e.target===ticketModal)closeTicketModal()});
-    needTicketModal.addEventListener("click",e=>{if(e.target===needTicketModal)closeNeedTicketModal()});
-    freeTicketModal.addEventListener("click",e=>{if(e.target===freeTicketModal)closeFreeTicketModal()});
-    paidEpisodeModal.addEventListener("click",e=>{if(e.target===paidEpisodeModal)closePaidEpisodeModal()});
-
-    setInterval(()=>{
-      if(currentUser){
-        updateCoinBank();
-        updateTicketModal();
-        updateProfileCounts();
-      }
-    },1000);
-
-    if(!restoreLogin()){
-      initLoggedOut();
-    }
-  </script>
+if(!restoreLogin()){
+  initLoggedOut();
+}
+</script>
 </body>
 </html>
